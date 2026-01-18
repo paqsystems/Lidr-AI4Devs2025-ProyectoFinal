@@ -154,3 +154,61 @@ Proporcionar al asistente de IA el menú de procesos con las pantallas de datos 
 
 ### Motivo del ajuste
 Asegurar que las especificaciones de pantallas sean coherentes con el resto de la documentación del proyecto, que sigan las convenciones establecidas (test IDs, accesibilidad, formato de respuesta API) y que proporcionen suficiente detalle técnico para la implementación del frontend sin ambigüedades.
+
+## Entrega 4 – Generación y validación de historias de usuario y tickets técnicos
+
+### Objetivo
+Definir el conjunto completo de historias de usuario (User Stories) y tickets técnicos del MVP, cubriendo:
+- Todos los roles del sistema (Cliente, Empleado, Empleado Supervisor)
+- Funcionalidades del lado del usuario y del lado de la empresa/aplicación
+- Clasificación de alcance MUST-HAVE vs SHOULD-HAVE
+- Trazabilidad entre funcionalidades, backend, frontend, testing e infraestructura
+
+### Uso de IA
+Se utilizó IA (Cursor / ChatGPT) para:
+- Generar un catálogo exhaustivo de historias de usuario organizadas por épicas
+- Clasificar cada historia como MUST-HAVE o SHOULD-HAVE
+- Definir criterios de aceptación detallados
+- Incorporar reglas de negocio explícitas
+- Derivar tickets técnicos alineados con las historias (backend, frontend, tests, CI/CD, documentación)
+
+### Prompt / Instrucción dada a la IA
+Se solicitó explícitamente:
+- Generar el archivo `docs/historias-y-tickets.md`
+- Considerar tres roles: Cliente, Empleado y Empleado Supervisor
+- Incluir historias del lado del usuario y del lado de la aplicación cuando corresponda
+- Aplicar reglas de negocio específicas (tipos de tarea genéricos / por defecto, asociaciones cliente–tipo de tarea, validaciones de duración, etc.)
+- Clasificar cada historia como MUST-HAVE o SHOULD-HAVE
+- Generar una tabla resumen y tickets técnicos derivados
+
+### Resultado generado por la IA
+La IA generó:
+- Un documento estructurado por épicas
+- 55 historias de usuario con criterios de aceptación detallados
+- Tabla resumen de historias
+- 33 tickets técnicos derivados, cubriendo:
+  - Base de datos
+  - Backend (API, validaciones, reglas de negocio)
+  - Frontend (componentes, UX)
+  - Testing (unitarios, integración y E2E)
+  - CI/CD, logging y documentación
+
+### Revisión y control humano
+El resultado fue revisado manualmente para:
+- Verificar consistencia funcional y técnica
+- Validar alineación con el alcance real del MVP
+- Confirmar que las reglas de negocio definidas previamente estuvieran correctamente reflejadas
+- Ajustar criterios de prioridad (MUST vs SHOULD)
+- Evaluar exhaustividad sin sobredimensionar el MVP
+
+No se detectaron inconsistencias críticas.  
+Se validó que el documento es apto como:
+- Base de implementación
+- Checklist de validación del MVP
+- Insumo para documentación final del proyecto
+
+### Decisión final
+El documento `docs/historias-y-tickets.md` se adopta como:
+- Fuente única de verdad funcional del MVP
+- Referencia para validar la completitud del desarrollo
+- Insumo directo para el README final del proyecto
