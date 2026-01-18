@@ -141,3 +141,7 @@ Formato:
 Acción:
 - Genera el contenido completo del archivo docs/historias-y-tickets.md con todo lo anterior.
 
+## Prompt 7 - Verificar si existen tareas pendientes para la Entrega-1
+
+Verificar si se cumple con todo lo que requiere la “entrega-1” en .cursor/consignas.md
+

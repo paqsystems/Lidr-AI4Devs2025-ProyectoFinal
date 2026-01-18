@@ -33,3 +33,4 @@ wheels/
 *.swo
 *~
 
+mcp/toolbox-db/toolbox.exe
