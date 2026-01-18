@@ -65,3 +65,79 @@ necesito que agregues en un archivo de contexto macro esta consigna : "en toda l
 a) con respecto a toda la definición del contexto de front-end, te pido verifiques, hayas considerado que la programación se estructure separando el css del html y del js.
 b) te pido también verificarr y corregir si es necesaria la documentación, para considerar que todos los controles usen la propiedad "data-testid", para utilizar en el testing TDD con playwright, como así también contemplar siempre la accesibilidad, también para optimizaciones de testing
 c) te modifiqué el archivo 03-i18n-and-testid.mdc en función a algo que ya había analizado y definido por chatgpt en forma más profunda. te pido que lo revises, lo traduzcas al español, y amplíes todo lo que consideres necesario para optimizar tu contexto, respetando la consigna acá definida
+
+## Prompt 6 - Generar historias de usuario
+
+Necesito que generes y escribas (o sobreescribas) el archivo: docs/historias-y-tickets.md
+
+Objetivo:
+- Crear un catálogo lo más completo posible de historias de usuario para el MVP web de consultoría/empresa de servicios:
+  - Registro de tareas por empleado (con cliente, tipo de tarea, duración, fecha/hora, descripción, etc.)
+  - Informes y tableros básicos
+  - Gestión de clientes y tipos de tarea
+  - Control y supervisión (aprobaciones/validaciones cuando corresponda)
+- Debes clasificar CADA historia como MUST-HAVE o SHOULD-HAVE (para este entregable del master).
+- Considera 3 tipos de usuario (roles):
+  1) Cliente
+  2) Empleado
+  3) Empleado Supervisor
+
+Contexto funcional mínimo (no lo ignores):
+- “Tipo de tarea” (antes llamado “Proyecto”) tiene:
+  - booleano “por defecto”
+  - booleano “genérico”
+  - Solo puede existir un tipo de tarea “por defecto” (validar/asegurar regla).
+  - Los tipos “genéricos” aplican a cualquier cliente.
+  - Los tipos NO genéricos deben asociarse a clientes para aparecer como opción al cargar una tarea.
+- Cliente tiene atributo “Tipo de Cliente” (para informes y segmentación).
+
+Requisitos del documento (estructura obligatoria):
+1) Introducción breve (qué cubre el documento).
+2) Supuestos / definiciones (roles, entidades principales: tarea, cliente, tipo de tarea, usuario, etc.).
+3) Secciones por “épicas” (ejemplos: Autenticación/Acceso, Gestión de Clientes, Gestión de Tipos de Tarea, Registro de Tareas, Supervisión/Aprobación, Informes, Auditoría/Historial, Notificaciones, Administración/Configuración, Seguridad/Permisos, Integraciones/Exportación, etc.). Puedes crear más épicas si hace falta.
+4) Dentro de cada épica:
+   - Lista numerada de historias en formato:
+     - ID: HU-XXX
+     - Título
+     - Rol (Cliente / Empleado / Supervisor)
+     - Clasificación: MUST-HAVE o SHOULD-HAVE
+     - Historia: “Como <rol> quiero <objetivo> para <beneficio>”
+     - Criterios de aceptación (Gherkin o bullets claros)
+     - Notas de reglas de negocio / validaciones (si aplica)
+     - Dependencias (si aplica)
+5) Al final:
+   - Una tabla resumen (HU-XXX | Épica | Rol | MUST/SHOULD | Breve descripción)
+   - Un apartado “Tickets técnicos derivados” (ID: TK-XXX) para los MUST-HAVE como mínimo:
+     - migraciones/modelos
+     - endpoints/API
+     - componentes UI
+     - tests (unit/integration/e2e)
+     - CI/CD y secretos básicos
+     - logging y auditoría básica
+     - seed/demo data
+     Cada ticket técnico debe referenciar las HU relacionadas.
+
+Alcance de “todas las historias posibles”:
+- Quiero exhaustividad razonable para un MVP: incluye altas/bajas/modificaciones, búsquedas, filtros, listados, validaciones, permisos por rol, estados de tareas si aplica, supervisión (revisión/observación/aprobación), y reportes.
+- Incluye historias “del lado empresa/app” cuando no sean del usuario final (ej.: “Como administrador/sistema quiero…”), pero mantén el mapeo al rol más cercano (Supervisor o Empleado Supervisor), o crea el rol “Sistema/Administración” SOLO si es imprescindible y explícitalo en supuestos.
+- Incluye historias relacionadas con:
+  - trazabilidad/auditoría mínima de cambios
+  - exportación básica (CSV/Excel) si corresponde
+  - manejo de errores y mensajes claros
+  - accesibilidad básica y UX mínima
+  - seguridad básica (sesiones, roles)
+  - multi-tenant NO (asumir una sola empresa) salvo que se derive del contexto; si lo incluyes que sea SHOULD.
+
+Prioridad (MUST vs SHOULD):
+- MUST-HAVE debe cubrir el flujo E2E prioritario: registrar una tarea, asociarla a cliente y tipo de tarea, y visualizar al menos un reporte básico; además de autenticación y permisos mínimos.
+- SHOULD-HAVE incluye mejoras, automatizaciones, notificaciones, más reportes, importación, integraciones, etc.
+
+Formato:
+- Todo debe estar en español.
+- Usa Markdown limpio con encabezados y listas.
+- No dejes placeholders tipo “TBD”.
+- Si inventas supuestos para completar huecos, decláralos claramente en “Supuestos”.
+
+Acción:
+- Genera el contenido completo del archivo docs/historias-y-tickets.md con todo lo anterior.
+
