@@ -167,7 +167,9 @@ git branch -m entrega-1 feature-entrega1-[TUS_INICIALES]
    **Nota:** Reemplazar `[TUS_INICIALES]` con tus iniciales reales (ej: `JLPT`, `ABC`, etc.)
 
 2. ⚠️ **Pull Request** - Requiere acción manual:
-   - Crear PR de `feature-entrega1-[INICIALES]` hacia `main`
+   - **Base:** `main` ✅ (rama principal confirmada)
+   - **Compare:** `feature-entrega1-PAQ` ✅
+   - Crear PR en: https://github.com/paqsystems/Lidr-AI4Devs2025-ProyectoFinal/pull/new/feature-entrega1-PAQ
    - Usar descripción sugerida en `docs/VERIFICACION-ENTREGA-1.md`
    - Incluir URL del PR en formulario: https://lidr.typeform.com/proyectoai4devs
 
@@ -203,10 +205,11 @@ git branch -m entrega-1 feature-entrega1-[TUS_INICIALES]
    ```
 
 4. **Crear Pull Request:**
-   - Título: `docs: Entrega 1 - Documentación Técnica Completa`
-   - Descripción: Ver `docs/VERIFICACION-ENTREGA-1.md` sección "Descripción Sugerida para PR"
-   - Base: `main` (o `master`)
-   - Compare: `feature-entrega1-[TUS_INICIALES]`
+   - **Base (target):** `main` ✅ (rama principal confirmada)
+   - **Compare (source):** `feature-entrega1-PAQ` ✅
+   - **Título:** `docs: Entrega 1 - Documentación Técnica Completa`
+   - **Descripción:** Ver `docs/VERIFICACION-ENTREGA-1.md` sección "Descripción Sugerida para PR"
+   - **URL sugerida por GitHub:** https://github.com/paqsystems/Lidr-AI4Devs2025-ProyectoFinal/pull/new/feature-entrega1-PAQ
 
 5. **Completar formulario:**
    - URL: https://lidr.typeform.com/proyectoai4devs
