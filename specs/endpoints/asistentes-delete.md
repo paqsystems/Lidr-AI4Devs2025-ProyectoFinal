@@ -1,0 +1,60 @@
+# Endpoint: Eliminar Asistente/Empleado
+
+## Información General
+
+- **Método:** `DELETE`
+- **Ruta:** `/api/v1/asistentes/{id}`
+- **Autenticación:** Requerida (Bearer Token)
+- **Versión:** v1
+
+---
+
+## Descripción
+
+Elimina un asistente. No se puede eliminar si tiene tareas asociadas.
+
+---
+
+## Response
+
+### Success (200 OK)
+
+```json
+{
+  "error": 0,
+  "respuesta": "Asistente eliminado correctamente",
+  "resultado": null
+}
+```
+
+---
+
+## Errores
+
+### 422 Unprocessable Entity
+
+```json
+{
+  "error": 2113,
+  "respuesta": "No se puede eliminar un asistente que tiene tareas asociadas",
+  "resultado": null
+}
+```
+
+**Códigos de error posibles:**
+- `2113`: No se puede eliminar un asistente con tareas asociadas
+
+---
+
+## Validaciones
+
+### A Nivel de Negocio
+
+1. **Integridad referencial:**
+   - Verificar que no tenga tareas asociadas en `PQ_PARTES_registro_tarea`
+   - Si tiene tareas, retornar error 2113
+
+---
+
+**Última actualización:** 2025-01-20
+
