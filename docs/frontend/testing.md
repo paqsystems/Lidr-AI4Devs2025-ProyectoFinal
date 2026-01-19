@@ -120,9 +120,11 @@ describe('TaskEntryForm Integration', () => {
 
 **Cobertura Objetivo:** Flujo E2E principal
 
-**Herramientas:**
-- **Playwright** (recomendado y obligatorio para TDD)
-- **Cypress** (alternativa, no recomendada para TDD)
+**Herramienta instalada y configurada:**
+- ✅ **Playwright** (instalado, versión 1.57.0, obligatorio para TDD)
+- Configuración: `frontend/playwright.config.ts`
+- Tests: `frontend/tests/e2e/`
+- Reglas: `.cursor/rules/06-playwright-testing-rules.md`
 
 **Estrategia TDD:**
 1. **Red:** Escribir test primero usando `data-testid` planificados

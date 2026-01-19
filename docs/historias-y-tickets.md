@@ -1990,16 +1990,25 @@ Este documento cubre las siguientes áreas funcionales:
 
 **HU Relacionadas:** HU-001, HU-028, HU-033, HU-044, HU-046, HU-051 (flujo E2E prioritario)
 
+**Estado:** ✅ **Playwright instalado y configurado**
+
 **Descripción:**
 - Test E2E con Playwright del flujo: Login → Carga de tarea → Visualización de lista.
 - Validación de autenticación, creación de tarea, y listado.
 - Uso de data-testid para selectores.
 - Validación de mensajes de error y éxito.
 
-**Entregables:**
-- Tests Playwright en `tests/e2e/`.
-- Configuración de Playwright.
-- Documentación de ejecución.
+**Entregables completados:**
+- ✅ Playwright instalado en `frontend/` (versión 1.57.0)
+- ✅ Configuración de Playwright en `frontend/playwright.config.ts`
+- ✅ Estructura de tests en `frontend/tests/e2e/`
+- ✅ Test de ejemplo en `frontend/tests/e2e/example.spec.ts`
+- ✅ Documentación en `frontend/tests/e2e/README.md`
+- ✅ Reglas de testing en `.cursor/rules/06-playwright-testing-rules.md`
+- ✅ Scripts npm configurados (`test:e2e`, `test:e2e:ui`, `test:e2e:headed`)
+
+**Pendiente:**
+- ⏳ Implementar tests reales del flujo E2E principal según `specs/flows/e2e-core-flow.md`
 
 ---
 
