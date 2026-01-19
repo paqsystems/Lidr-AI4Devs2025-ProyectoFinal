@@ -1,6 +1,6 @@
 # Manual del Programador
 
-**Versión:** 1.0  
+**Versión:** 1.2  
 **Última actualización:** 2025-01-20
 
 ---
@@ -123,6 +123,11 @@ Lee estos archivos en orden para entender el proyecto:
    - Estructura básica
    - Checklist de validación del MVP
 
+3. **`docs/README.md`** ⭐ **NUEVO**
+   - Guía de navegación de la documentación
+   - Estructura de carpetas de documentación
+   - Referencias rápidas a documentos clave
+
 ### Fase 2: Diseño Funcional (30 minutos)
 
 3. **`docs/producto.md`**
@@ -160,26 +165,36 @@ Lee estos archivos en orden para entender el proyecto:
 
 ### Fase 4: Diseño Técnico - Backend (30 minutos)
 
-9. **`docs/backend/PLAYBOOK_BACKEND_LARAVEL.md`**
-   - Guía de desarrollo backend
-   - Convenciones Laravel
-   - Estructura de código
+9. **`backend/README.md`** ⭐ **NUEVO**
+   - Estructura del backend
+   - Modelos implementados
+   - Convenciones y referencias
 
-10. **`docs/api/CONTRATO_BASE.md`**
+10. **`docs/backend/PLAYBOOK_BACKEND_LARAVEL.md`**
+    - Guía de desarrollo backend
+    - Convenciones Laravel
+    - Estructura de código
+
+11. **`docs/api/CONTRATO_BASE.md`**
     - Formato estándar de respuestas API
     - Manejo de errores
     - Convenciones de endpoints
 
-11. **`specs/contracts/response-envelope.md`**
+12. **`specs/contracts/response-envelope.md`**
     - Formato de respuesta estándar
     - Códigos de error
 
-12. **`specs/models/`** (todos los archivos)
+13. **`specs/models/`** (todos los archivos)
     - Especificaciones de modelos backend
     - Relaciones Eloquent
     - Validaciones
 
-13. **`specs/endpoints/`** (revisar según necesidad)
+14. **`specs/endpoints/README.md`** ⭐ **NUEVO**
+    - Guía de navegación de especificaciones de endpoints
+    - Organización por funcionalidad
+    - Formato de especificaciones
+
+15. **`specs/endpoints/`** (revisar según necesidad)
     - Especificaciones detalladas de cada endpoint
     - Request/Response
     - Validaciones
@@ -220,14 +235,21 @@ Lee estos archivos en orden para entender el proyecto:
     - Especificaciones de tests
     - Casos de prueba documentados
 
-### Fase 7: Reglas y Convenciones (15 minutos)
+### Fase 7.5: Navegación de Especificaciones (10 minutos) ⭐ **NUEVO**
 
-21. **`.cursor/consignas.md`**
+21. **`specs/README.md`** ⭐ **NUEVO**
+    - Guía completa de especificaciones técnicas
+    - Organización por tipo de artefacto
+    - Referencias rápidas a todas las especificaciones
+
+### Fase 8: Reglas y Convenciones (15 minutos)
+
+22. **`.cursor/consignas.md`**
     - Reglas del proyecto
     - Entregables obligatorios
     - Principios de desarrollo
 
-22. **`docs/reglas-negocio.md`**
+23. **`docs/reglas-negocio.md`**
     - Reglas de negocio adicionales
     - Validaciones
 
@@ -238,6 +260,7 @@ Lee estos archivos en orden para entender el proyecto:
 ```
 Lidr-AI4Devs2025-ProyectoFinal/
 ├── backend/                    # Backend Laravel
+│   ├── README.md              # ⭐ Guía del backend
 │   ├── app/
 │   │   ├── Models/            # Modelos Eloquent
 │   │   ├── Http/
@@ -262,6 +285,7 @@ Lidr-AI4Devs2025-ProyectoFinal/
 │   └── tests/                 # Tests frontend
 │
 ├── docs/                       # Documentación del proyecto
+│   ├── README.md              # ⭐ Guía de navegación de documentación
 │   ├── producto.md            # Definición del producto
 │   ├── historias-y-tickets.md # Historias de usuario (CENTRAL)
 │   ├── arquitectura.md        # Arquitectura del sistema
@@ -273,7 +297,9 @@ Lidr-AI4Devs2025-ProyectoFinal/
 │   └── ...
 │
 ├── specs/                      # Especificaciones técnicas
+│   ├── README.md              # ⭐ Guía de navegación de especificaciones
 │   ├── endpoints/             # Especificaciones de endpoints API
+│   │   └── README.md          # ⭐ Guía de endpoints
 │   ├── models/                # Especificaciones de modelos
 │   ├── rules/                 # Reglas de negocio y validación
 │   ├── flows/                 # Flujos E2E
@@ -367,21 +393,42 @@ Lidr-AI4Devs2025-ProyectoFinal/
    npm run dev
    ```
 
+4. **Instalar Playwright (Tests E2E)**
+   ```bash
+   cd frontend
+   npx playwright install        # Instalar navegadores
+   npx playwright --version      # Verificar instalación
+   ```
+
 ### 2. Leer la Documentación
 
 Sigue la **Ruta de Lectura** descrita arriba. No saltes pasos.
 
+**💡 Tip:** Empieza leyendo los README.md de las carpetas principales para tener una visión general:
+- `docs/README.md` - Guía de navegación de documentación
+- `specs/README.md` - Guía de navegación de especificaciones
+- `backend/README.md` - Guía del backend
+
 ### 3. Entender el Flujo E2E
 
 Lee y ejecuta el flujo E2E principal:
-- `specs/flows/e2e-core-flow.md`
-- Ejecuta los tests E2E para ver el flujo en acción
+- `specs/flows/e2e-core-flow.md` - Flujo documentado paso a paso
+- Ejecuta los tests E2E para ver el flujo en acción:
+  ```bash
+  cd frontend
+  npm run test:e2e          # Ejecutar todos los tests
+  npm run test:e2e:ui      # Con UI interactiva (recomendado para aprender)
+  ```
+- Revisa `frontend/tests/e2e/README.md` para convenciones de testing
+- Revisa `.cursor/rules/06-playwright-testing-rules.md` para reglas obligatorias
 
 ### 4. Identificar tu Tarea
 
 - Revisa `docs/historias-y-tickets.md` para entender qué debes implementar
 - Identifica el ticket técnico correspondiente (TK-XXX)
-- Revisa las especificaciones en `specs/endpoints/` o `specs/models/` según corresponda
+- **Para endpoints:** Revisa `specs/endpoints/README.md` primero, luego la especificación específica
+- **Para modelos:** Revisa `specs/models/` según corresponda
+- **Para backend:** Consulta `backend/README.md` para ver qué modelos están implementados
 
 ### 5. Desarrollo
 
@@ -393,7 +440,7 @@ Lee y ejecuta el flujo E2E principal:
 3. **Escribir tests:**
    - Unitarios para lógica crítica
    - Integración para API
-   - E2E si es parte del flujo principal
+   - E2E si es parte del flujo principal (usar Playwright, ver `.cursor/rules/06-playwright-testing-rules.md`)
 4. **Actualizar documentación** si es necesario
 5. **Commit y Push:**
    ```bash
@@ -411,7 +458,8 @@ Lee y ejecuta el flujo E2E principal:
 - [ ] Código sigue convenciones del proyecto
 - [ ] UI Layer wrappers usados correctamente (frontend)
 - [ ] i18n implementado (frontend)
-- [ ] Test IDs agregados (frontend)
+- [ ] Test IDs agregados (frontend) - Ver `.cursor/rules/03-i18n-and-testid.mdc`
+- [ ] Tests E2E escritos si es parte del flujo principal - Ver `.cursor/rules/06-playwright-testing-rules.md`
 - [ ] Formato de respuesta API correcto (backend)
 
 ---
@@ -422,6 +470,10 @@ Lee y ejecuta el flujo E2E principal:
 
 | Documento | Ubicación | Propósito |
 |-----------|-----------|-----------|
+| **📚 Guía de Documentación** | `docs/README.md` | ⭐ Navegación de toda la documentación |
+| **📚 Guía de Especificaciones** | `specs/README.md` | ⭐ Navegación de especificaciones técnicas |
+| **📚 Guía del Backend** | `backend/README.md` | ⭐ Estructura y convenciones del backend |
+| **📚 Guía de Endpoints** | `specs/endpoints/README.md` | ⭐ Navegación de especificaciones de API |
 | **Historias de Usuario** | `docs/historias-y-tickets.md` | Funcionalidades y tickets técnicos |
 | **Flujo E2E** | `specs/flows/e2e-core-flow.md` | Flujo principal paso a paso |
 | **Modelo de Datos** | `docs/modelo-datos.md` | Entidades y relaciones |
@@ -434,7 +486,8 @@ Lee y ejecuta el flujo E2E principal:
 
 ### Especificaciones Técnicas
 
-- **Endpoints API:** `specs/endpoints/`
+- **📚 Guía general:** `specs/README.md` - ⭐ Empieza aquí para entender la organización
+- **Endpoints API:** `specs/endpoints/` (ver `specs/endpoints/README.md` para guía)
 - **Modelos Backend:** `specs/models/`
 - **Reglas de Negocio:** `specs/rules/`
 - **Tests:** `specs/tests/`
@@ -465,7 +518,7 @@ En `docs/historias-y-tickets.md`, cada historia está clasificada. El MVP se con
 
 ### ¿Dónde están las especificaciones de los endpoints?
 
-En `specs/endpoints/`. Cada endpoint tiene su archivo con request, response, validaciones y ejemplos.
+En `specs/endpoints/`. **Empieza por `specs/endpoints/README.md`** para ver la organización completa. Cada endpoint tiene su archivo con request, response, validaciones y ejemplos.
 
 ### ¿Cómo debo estructurar los componentes del frontend?
 
@@ -487,7 +540,15 @@ En `specs/rules/business-rules.md` y `docs/reglas-negocio.md`.
 
 Ver `docs/testing.md` para instrucciones detalladas. En general:
 - Backend: `php artisan test`
-- Frontend: `npm test` o `npm run test:e2e`
+- Frontend unitarios: `npm test` o `npm run test:watch`
+- Frontend E2E (Playwright): 
+  ```bash
+  cd frontend
+  npm run test:e2e          # Todos los tests
+  npm run test:e2e:ui      # Con UI interactiva
+  npm run test:e2e:headed  # Ver navegador
+  ```
+- Ver `frontend/tests/e2e/README.md` para más detalles
 
 ---
 
@@ -496,7 +557,17 @@ Ver `docs/testing.md` para instrucciones detalladas. En general:
 Este documento se actualiza de forma específica cuando se indique. Las actualizaciones se registran en la sección de versión al inicio del documento.
 
 **Última actualización:** 2025-01-20  
-**Versión:** 1.0
+**Versión:** 1.2
+
+**Cambios en v1.1:**
+- Agregadas instrucciones de instalación de Playwright
+- Actualizada sección de testing con comandos E2E
+- Referencias a reglas de Playwright en `.cursor/rules/06-playwright-testing-rules.md`
+
+**Cambios en v1.2:**
+- Agregadas referencias a README.md de carpetas principales (docs/, specs/, backend/, specs/endpoints/)
+- Nueva fase en Ruta de Lectura para navegación de especificaciones
+- Actualizada sección de Referencias Importantes con guías de navegación
 
 ---
 

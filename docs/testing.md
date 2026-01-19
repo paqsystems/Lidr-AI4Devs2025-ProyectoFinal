@@ -38,8 +38,19 @@ de negocio básica sea confiable, sin sobre–dimensionar la estrategia de testi
 **Flujo cubierto:**
 Login → Registro de tarea → Visualización de tareas.
 
-**Herramienta sugerida:**
-- Playwright o Cypress (una sola herramienta).
+**Herramienta instalada y configurada:**
+- ✅ **Playwright** (instalado y configurado en `frontend/`)
+- Configuración: `frontend/playwright.config.ts`
+- Tests ubicados en: `frontend/tests/e2e/`
+- Documentación: `docs/frontend/testing.md` y `.cursor/rules/06-playwright-testing-rules.md`
+
+**Ejecutar tests E2E:**
+```bash
+cd frontend
+npm run test:e2e          # Todos los tests
+npm run test:e2e:ui      # Con UI interactiva
+npm run test:e2e:headed # Ver navegador
+```
 
 ---
 
@@ -63,8 +74,11 @@ integration/
 ### Frontend
 frontend/
 tests/
-unit/
-e2e/
+  unit/
+  e2e/              # Tests E2E con Playwright (✅ configurado)
+    example.spec.ts  # Test de ejemplo
+    README.md        # Documentación de tests E2E
+playwright.config.ts  # Configuración de Playwright
 
 ---
 

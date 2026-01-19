@@ -266,6 +266,36 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 
 Cada ticket técnico referencia las historias de usuario relacionadas y está clasificado según su prioridad (MUST-HAVE o SHOULD-HAVE).
 
+### Testing
+
+**Estrategia de Testing:**
+- Tests unitarios: Lógica de negocio y componentes
+- Tests de integración: API + Base de datos
+- Tests E2E: Flujo principal completo con **Playwright**
+
+**Playwright (E2E):**
+- ✅ Instalado y configurado en `frontend/`
+- Configuración: `frontend/playwright.config.ts`
+- Tests ubicados en: `frontend/tests/e2e/`
+- Documentación: `docs/frontend/testing.md`
+
+**Instalación de Playwright:**
+```bash
+cd frontend
+npm install
+npx playwright install
+```
+
+**Ejecutar tests E2E:**
+```bash
+cd frontend
+npm run test:e2e          # Todos los tests
+npm run test:e2e:ui      # Con UI interactiva
+npm run test:e2e:headed # Ver navegador
+```
+
+**Documentación completa:** Ver `docs/testing.md` y `docs/frontend/testing.md`
+
 ### Pull Requests
 
 Los cambios de la **Entrega 1 - Documentación Técnica** se encuentran en la rama  `feature-entrega1-[INICIALES]`.
@@ -282,6 +312,7 @@ Los cambios de la **Entrega 1 - Documentación Técnica** se encuentran en la ra
 - Reglas de negocio y validaciones
 - Especificaciones de modelos backend
 - Documentación de estructura de frontend
+- Configuración de Playwright para tests E2E
 
 ---
 
