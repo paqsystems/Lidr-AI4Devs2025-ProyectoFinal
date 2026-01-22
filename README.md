@@ -351,3 +351,24 @@ Los cambios de la **Entrega 1 - Documentación Técnica** se encuentran en la ra
 - **Reglas para el agente IA:** `AGENTS.md`
 - **Registro de uso de IA:** `docs/ia-log.md`
 - **Prompts utilizados:** `prompts.md`
+
+## Mi comportamiento con la IA
+
+La operatoria básica fue : 
+- hice megaprompts en ChatGpt para que me fabrique prompts apropiados para cursor.
+- coloqué los requisitos del proyecto final en Cursor (.cursor/consignas.md)
+- Realice las solicitudes a Cursor de generación de archivos de contextos y especificaciones.
+- Revisé lo generado, e interactué con ChatGpt para entre ambos hacer las correcciones necesarias.
+- Solicite mejoras y correcciones a Cursor.
+- Hice una nueva revisión.
+- Pedi que verifique el cumplimiento de los requisitos para cumplir la primer entrega.
+- le solicité completar la documentación faltante.
+- pedí revisar, explorar instrucciones duplicadas y ordenar toda la documentación.
+- realicé el primer PR
+- pedí generar un documento MANUAL-PROGRAMADOR.md para ver si un tercero puede seguir el proyecto sin explicación humana
+
+Cómo me sentí con el proceso : 
+- me sentí muy cómodo.
+- como soy más analista de sistemas que programador, creo entender bien la diferencia de funciones entre la IA y yo, y poder hacer las ordenes, seguimientos y controles como si la IA fuese un programador humano.
+- Sólo siento que me sobrepasa la cantidad de información que genera. Debo contemplar reservar una importante suma de tiempo para poder controlar y revisar todo lo que genera.
+- Por normativa propia y ampliado ahora por el punto anterior, procuro realizar pasos pequeños cada vez, para poder hacer un mejor seguimiento y evitar "alucinaciones" de la IA
