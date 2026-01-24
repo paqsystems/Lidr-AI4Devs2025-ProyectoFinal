@@ -16,15 +16,18 @@ Este documento mapea cada endpoint de la API a sus operaciones correspondientes 
 
 ### Nomenclatura de Tablas
 
-Todas las tablas físicas utilizan el prefijo obligatorio: `PQ_PARTES_`
+**Excepción:** La tabla `USERS` (sin prefijo PQ_PARTES_) es la única tabla que NO utiliza el prefijo. Es la tabla central de autenticación.
+
+Todas las demás tablas físicas utilizan el prefijo obligatorio: `PQ_PARTES_`
 
 **Mapeo lógico → físico:**
-- `Usuario` → `PQ_PARTES_usuario`
-- `Cliente` → `PQ_PARTES_cliente`
-- `TipoCliente` → `PQ_PARTES_tipo_cliente`
-- `TipoTarea` → `PQ_PARTES_tipo_tarea`
-- `RegistroTarea` → `PQ_PARTES_registro_tarea`
-- `ClienteTipoTarea` → `PQ_PARTES_cliente_tipo_tarea`
+- `User` → `USERS` (sin prefijo)
+- `Usuario` → `PQ_PARTES_USUARIOS`
+- `Cliente` → `PQ_PARTES_CLIENTES`
+- `TipoCliente` → `PQ_PARTES_TIPO_CLIENTE`
+- `TipoTarea` → `PQ_PARTES_TIPO_TAREA`
+- `RegistroTarea` → `PQ_PARTES_REGISTRO_TAREA`
+- `ClienteTipoTarea` → `PQ_PARTES_CLIENTE_TIPO_TAREA`
 
 ### Operaciones ORM
 
@@ -38,46 +41,93 @@ Todas las tablas físicas utilizan el prefijo obligatorio: `PQ_PARTES_`
 
 ### POST /api/v1/auth/login
 
-**Descripción:** Autentica un usuario y genera un token de acceso.
+**Descripción:** Autentica un usuario contra la tabla `USERS` y genera un token de acceso. Después del login exitoso, determina si es Cliente o Usuario y obtiene los datos correspondientes.
 
 **Tablas Involucradas:**
-- `PQ_PARTES_usuario`
+- `USERS` (sin prefijo PQ_PARTES_) - Tabla de autenticación
+- `PQ_PARTES_CLIENTES` - Si el usuario es cliente
+- `PQ_PARTES_USUARIOS` - Si el usuario es empleado/asistente
 
 **Operaciones de Datos:**
 
-1. **Validar código de usuario y contraseña:**
+1. **Validar código de usuario y contraseña en USERS:**
    ```php
-   // Eloquent
-   $usuario = Usuario::where('code', $code)
+   // Eloquent - Buscar en tabla USERS
+   $user = User::where('code', $code)
        ->where('activo', true)
        ->where('inhabilitado', false)
        ->first();
    
    // Verificar contraseña
-   if (!$usuario || !Hash::check($password, $usuario->password_hash)) {
+   if (!$user || !Hash::check($password, $user->password_hash)) {
        // Error 3201: Credenciales inválidas
    }
    ```
 
-2. **Actualizar último login (opcional):**
+2. **Determinar tipo de usuario:**
    ```php
-   $usuario->last_login_at = now();
-   $usuario->save();
+   $tipoUsuario = null;
+   $clienteId = null;
+   $usuarioId = null;
+   $esSupervisor = false;
+   $nombre = null;
+   $email = null;
+   
+   // Buscar en PQ_PARTES_CLIENTES
+   $cliente = Cliente::where('code', $user->code)
+       ->where('activo', true)
+       ->where('inhabilitado', false)
+       ->first();
+   
+   if ($cliente) {
+       $tipoUsuario = 'cliente';
+       $clienteId = $cliente->id;
+       $usuarioId = null;
+       $esSupervisor = false;
+       $nombre = $cliente->nombre;
+       $email = $cliente->email;
+   } else {
+       // Buscar en PQ_PARTES_USUARIOS
+       $usuario = Usuario::where('code', $user->code)
+           ->where('activo', true)
+           ->where('inhabilitado', false)
+           ->first();
+       
+       if (!$usuario) {
+           // Error 3202: Usuario no encontrado
+       }
+       
+       $tipoUsuario = 'usuario';
+       $clienteId = null;
+       $usuarioId = $usuario->id;
+       $esSupervisor = $usuario->supervisor;
+       $nombre = $usuario->nombre;
+       $email = $usuario->email;
+   }
    ```
 
-3. **Generar token Sanctum:**
+3. **Actualizar último login (opcional):**
    ```php
-   $token = $usuario->createToken('auth-token')->plainTextToken;
+   $user->last_login_at = now();
+   $user->save();
+   ```
+
+4. **Generar token Sanctum asociado al User:**
+   ```php
+   $token = $user->createToken('auth-token')->plainTextToken;
    ```
 
 **Validaciones:**
 - Código de usuario: no vacío (1102)
 - Contraseña: no vacía (1103)
-- Usuario existe y está activo (3202, 4203)
+- User existe en `USERS` y está activo (3202, 4203)
+- User.code debe existir en `PQ_PARTES_CLIENTES` O `PQ_PARTES_USUARIOS` (3202)
 
 **Índices Utilizados:**
-- `idx_usuario_code` (UNIQUE)
-- `idx_usuario_activo`
+- `USERS.code` (UNIQUE)
+- `USERS.activo`
+- `PQ_PARTES_CLIENTES.code` (UNIQUE)
+- `PQ_PARTES_USUARIOS.code` (UNIQUE)
 
 **Response Mapping:**
 ```php
@@ -85,13 +135,20 @@ Todas las tablas físicas utilizan el prefijo obligatorio: `PQ_PARTES_`
 [
     'token' => $token,
     'user' => [
-        'id' => $usuario->id,
-        'code' => $usuario->code,
-        'nombre' => $usuario->nombre,
-        'email' => $usuario->email
+        'user_id' => $user->id,
+        'user_code' => $user->code,
+        'tipo_usuario' => $tipoUsuario,
+        'usuario_id' => $usuarioId,
+        'cliente_id' => $clienteId,
+        'es_supervisor' => $esSupervisor,
+        'nombre' => $nombre,
+        'email' => $email
     ]
 ]
 ```
+
+**Valores a conservar durante el ciclo del proceso:**
+Todos los campos de `resultado.user` deben conservarse durante todo el ciclo del proceso (desde login hasta logout) y estar disponibles en cada request autenticado. Ver `docs/modelo-datos.md` para más detalles.
 
 **Campos Excluidos:**
 - `password_hash` (nunca se expone)
@@ -640,7 +697,7 @@ $totalGeneral = RegistroTarea::where('usuario_id', auth()->id())
 
 | Endpoint | Tablas Principales | Operación |
 |----------|-------------------|-----------|
-| POST /auth/login | `PQ_PARTES_usuario` | SELECT, UPDATE |
+| POST /auth/login | `USERS`, `PQ_PARTES_CLIENTES`, `PQ_PARTES_USUARIOS` | SELECT, UPDATE |
 | GET /clientes | `PQ_PARTES_cliente`, `PQ_PARTES_tipo_cliente` | SELECT (JOIN) |
 | GET /tipos-cliente | `PQ_PARTES_tipo_cliente` | SELECT |
 | GET /tipos-tarea | `PQ_PARTES_tipo_tarea` | SELECT |
@@ -655,9 +712,13 @@ $totalGeneral = RegistroTarea::where('usuario_id', auth()->id())
 
 | Índice | Tabla | Uso |
 |--------|-------|-----|
-| `idx_usuario_code` (UNIQUE) | `PQ_PARTES_usuario` | Login, búsqueda |
-| `idx_usuario_activo` | `PQ_PARTES_usuario` | Filtros |
-| `idx_usuario_inhabilitado` | `PQ_PARTES_usuario` | Filtros, validaciones |
+| `USERS.code` (UNIQUE) | `USERS` | Login, búsqueda |
+| `USERS.activo` | `USERS` | Filtros |
+| `USERS.inhabilitado` | `USERS` | Filtros, validaciones |
+| `PQ_PARTES_CLIENTES.code` (UNIQUE) | `PQ_PARTES_CLIENTES` | Determinación tipo usuario |
+| `PQ_PARTES_USUARIOS.code` (UNIQUE) | `PQ_PARTES_USUARIOS` | Determinación tipo usuario |
+| `PQ_PARTES_USUARIOS.activo` | `PQ_PARTES_USUARIOS` | Filtros |
+| `PQ_PARTES_USUARIOS.inhabilitado` | `PQ_PARTES_USUARIOS` | Filtros, validaciones |
 | `idx_cliente_activo` | `PQ_PARTES_cliente` | Filtros, validaciones |
 | `idx_cliente_inhabilitado` | `PQ_PARTES_cliente` | Filtros, validaciones |
 | `idx_cliente_tipo_cliente` | `PQ_PARTES_cliente` | JOIN con tipo_cliente |

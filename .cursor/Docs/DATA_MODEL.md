@@ -12,6 +12,7 @@ Este archivo contiene la especificación técnica detallada del modelo de datos 
 - **Usuario**: Representa empleados/consultores que registran tareas
 - **Cliente**: Representa clientes para los cuales se registran tareas
 - **TipoTarea**: Representa tipos de tareas (ej: Desarrollo, Reunión, Análisis)
+- **TipoCliente**: Representa tipos de clientes (ej: Abonados, Paquetes Horas, Libres)
 - **RegistroTarea**: Representa el registro de una tarea realizada
 
 ### Información Técnica Incluida

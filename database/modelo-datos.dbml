@@ -1,0 +1,106 @@
+// Modelo de Datos - Sistema de Registro de Tareas MVP
+// Generado desde: docs/modelo-datos.md
+// Última actualización: 2025-01-20
+//
+// IMPORTANTE: Este archivo debe mantenerse sincronizado con docs/modelo-datos.md
+// Ver regla: .cursor/rules/13-dbml-sync-rule.md
+
+// Tabla de autenticación centralizada (SIN prefijo PQ_PARTES_)
+Table User {
+  id int [pk]
+  code varchar [unique, not null, note: 'Código de usuario para autenticación']
+  password_hash varchar [not null, note: 'Hash de contraseña']
+  activo boolean [default: true]
+  inhabilitado boolean [default: false, note: 'Indica si el usuario está inhabilitado']
+  created_at timestamp
+  updated_at timestamp
+  
+  Note: 'Tabla de autenticación centralizada. Única tabla SIN prefijo PQ_PARTES_. Después del login exitoso, se determina si el User corresponde a un Cliente o a un Usuario.'
+}
+
+Table Usuario {
+  id int [pk]
+  user_id int [unique, not null, ref: > User.id, note: 'FK → User, obligatorio, relación 1:1']
+  code varchar [unique, not null, note: 'Código de usuario (debe coincidir con User.code)']
+  nombre varchar [not null]
+  email varchar [unique, note: 'Email del usuario']
+  supervisor boolean [default: false, note: 'Indica si el usuario es supervisor']
+  activo boolean [default: true]
+  inhabilitado boolean [default: false, note: 'Indica si el usuario está inhabilitado']
+  created_at timestamp
+  updated_at timestamp
+  
+  Note: 'Tabla física: PQ_PARTES_USUARIOS. Representa empleados/asistentes/agentes que cargan tareas.'
+}
+
+Table Cliente {
+  id int [pk]
+  user_id int [unique, ref: > User.id, note: 'FK → User, opcional, relación 1:1 (si el cliente tiene acceso al sistema)']
+  nombre varchar [not null, note: 'Descripción/nombre del cliente']
+  tipo_cliente_id int [not null, ref: > TipoCliente.id, note: 'FK → TipoCliente, obligatorio']
+  code varchar [unique, not null, note: 'Código del cliente (debe coincidir con User.code si tiene user_id)']
+  email varchar [unique, note: 'Email del cliente']
+  activo boolean [default: true]
+  inhabilitado boolean [default: false, note: 'Indica si el cliente está inhabilitado']
+  created_at timestamp
+  updated_at timestamp
+  
+  Note: 'Tabla física: PQ_PARTES_CLIENTES. Si tiene user_id, puede autenticarse y consultar tareas relacionadas (solo lectura).'
+}
+
+Table TipoCliente {
+  id int [pk]
+  code varchar [unique, not null, note: 'Código del tipo de cliente']
+  descripcion varchar [not null]
+  activo boolean [default: true]
+  inhabilitado boolean [default: false, note: 'Indica si el tipo de cliente está inhabilitado']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table TipoTarea {
+  id int [pk]
+  code varchar [unique, not null, note: 'Código del tipo de tarea']
+  descripcion varchar [not null]
+  is_generico boolean [default: false, note: 'Indica si el tipo de tarea es genérico (disponible para todos los clientes)']
+  is_default boolean [default: false, note: 'Indica si este tipo de tarea es el predeterminado del sistema']
+  activo boolean [default: true]
+  inhabilitado boolean [default: false, note: 'Indica si el tipo de tarea está inhabilitado']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table RegistroTarea {
+  id int [pk]
+  usuario_id int [ref: > Usuario.id, note: 'FK → Usuario']
+  cliente_id int [ref: > Cliente.id, note: 'FK → Cliente']
+  tipo_tarea_id int [ref: > TipoTarea.id, note: 'FK → TipoTarea']
+  fecha date [not null]
+  duracion_minutos int [not null, note: 'Duración en minutos (múltiplo de 15, máximo 1440)']
+  sin_cargo boolean [default: false, note: 'Indica si la tarea es sin cargo para el cliente']
+  presencial boolean [default: false, note: 'Indica si la tarea es presencial (en el cliente)']
+  observacion text [not null, note: 'Descripción de la tarea (obligatorio)']
+  cerrado boolean [default: false, note: 'Indica si la tarea está cerrada (no se puede modificar ni eliminar)']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ClienteTipoTarea {
+  id int [pk]
+  cliente_id int [ref: > Cliente.id, note: 'FK → Cliente']
+  tipo_tarea_id int [ref: > TipoTarea.id, note: 'FK → TipoTarea']
+  created_at timestamp
+  updated_at timestamp
+  
+  Note: 'Tabla de asociación muchos-a-muchos entre Cliente y TipoTarea. Permite asignar tipos de tarea específicos a clientes (cuando el tipo NO es genérico).'
+}
+
+// Relaciones principales:
+// - User 1 → 0..1 Usuario (user_id en PQ_PARTES_USUARIOS, relación 1:1)
+// - User 1 → 0..1 Cliente (user_id en PQ_PARTES_CLIENTES, relación 1:1 opcional)
+// - Usuario 1 → N RegistroTarea (usuario_id en PQ_PARTES_REGISTRO_TAREA)
+// - Cliente 1 → N RegistroTarea (cliente_id en PQ_PARTES_REGISTRO_TAREA)
+// - Cliente N → 1 TipoCliente (tipo_cliente_id, obligatorio)
+// - TipoCliente 1 → N Cliente
+// - TipoTarea 1 → N RegistroTarea
+// - Cliente N → M TipoTarea (a través de ClienteTipoTarea)
