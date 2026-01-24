@@ -30,9 +30,10 @@ Este documento define las especificaciones técnicas y de diseño para el fronte
 - Bootstrap (Framework agnóstico)
 
 **Decisión:** 
-UI Library: None (Custom UI components / Design System wrappers)
-
-Styling: CSS Modules (scoped CSS por componente) + (opcional) src/shared/styles para tokens globales
+- **UI Library:** Tailwind CSS + shadcn/ui (Radix UI)
+- **Styling:** Tailwind CSS para estilos utilitarios
+- **Componentes:** shadcn/ui (basado en Radix UI) para componentes accesibles y personalizables
+- **Arquitectura:** Los componentes de shadcn/ui se instalan como código fuente en `src/shared/ui/`, permitiendo personalización completa
 
 ---
 

@@ -47,15 +47,37 @@ Mensaje legible para el usuario, apto para mostrar directamente en la UI.
 - ❌ "SQLSTATE[23000]: Integrity constraint violation"
 - ❌ "Error 500: Internal Server Error"
 
-### `resultado` (mixed, requerido)
+### `resultado` (object, requerido)
+
+**Regla fundamental:** Debe ser siempre un objeto JSON. Si no hay datos para retornar, debe ser un objeto JSON vacío `{}`, nunca `null` ni ausente.
 
 Contiene los datos de la respuesta. Puede ser:
 
 - **Objeto complejo**: Para respuestas de un solo recurso
-- **Array/colección**: Para listados
+- **Array/colección**: Para listados (el array está dentro del objeto)
 - **Objeto con metadata**: Para listados paginados
-- **`null`**: Cuando no aplica (especialmente en errores)
-- **Ausente**: Solo cuando no aplica y se documente explícitamente
+- **Objeto vacío `{}`**: Cuando no hay datos para retornar (éxito sin datos o errores sin información adicional)
+
+**Ejemplos válidos:**
+```json
+// Objeto con datos
+"resultado": { "id": 1, "nombre": "Ejemplo" }
+
+// Array dentro del objeto
+"resultado": { "items": [ {...}, {...} ] }
+
+// Objeto vacío (sin datos)
+"resultado": {}
+```
+
+**Ejemplos inválidos:**
+```json
+// ❌ INCORRECTO - null
+"resultado": null
+
+// ❌ INCORRECTO - Ausente
+// (sin campo resultado)
+```
 
 ---
 
@@ -82,16 +104,18 @@ Contiene los datos de la respuesta. Puede ser:
 {
   "error": 0,
   "respuesta": "Clientes obtenidos correctamente",
-  "resultado": [
-    {
-      "id": 1,
-      "nombre": "Cliente A"
-    },
-    {
-      "id": 2,
-      "nombre": "Cliente B"
-    }
-  ]
+  "resultado": {
+    "items": [
+      {
+        "id": 1,
+        "nombre": "Cliente A"
+      },
+      {
+        "id": 2,
+        "nombre": "Cliente B"
+      }
+    ]
+  }
 }
 ```
 
@@ -138,7 +162,7 @@ Contiene los datos de la respuesta. Puede ser:
 {
   "error": 4005,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -148,7 +172,7 @@ Contiene los datos de la respuesta. Puede ser:
 {
   "error": 3001,
   "respuesta": "Usuario no autenticado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -284,7 +308,7 @@ if (result.success) {
 
 ## Referencias
 
-- Contrato base de API: `.cursor/rules/01-api-contract.md`
+- Contrato base de API: `.cursor/rules/05-api-contract.md`
 - Códigos de error: `specs/errors/domain-error-codes.md`
 
 ---
