@@ -82,14 +82,14 @@ Login → Registro de tarea diaria → Visualización de tareas / resumen
 - **Framework:** React
 - **Build Tool:** Vite (recomendado) o Webpack
 - **State Management:** Context API o Redux/Zustand (según necesidad)
-- **UI Library:** Por definir (Material-UI, Ant Design, Tailwind CSS, etc.)
+- **UI Library:** Tailwind CSS + shadcn/ui (Radix UI)
 - **Testing:** Jest/Vitest (unitarios), Playwright (E2E)
 - **Internacionalización:** i18n con función `t()` obligatoria
 
 ### Base de Datos
 
 - **Sistema:** SQL Server / PostgreSQL / MySQL
-- **Prefijo de tablas:** `PQ_PARTES_`
+- **Prefijo de tablas:** `PQ_PARTES_` (excepto la tabla USERS, para el login inicial )
 - **Autenticación:** Por código de usuario (no email)
 
 ### Infraestructura y DevOps
