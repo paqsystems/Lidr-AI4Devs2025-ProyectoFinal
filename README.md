@@ -134,6 +134,12 @@ El MVP se considera funcionalmente completo cuando todas las historias MUST-HAVE
 ### Modelo de Datos
 📄 Ver `docs/modelo-datos.md` para el modelo completo con entidades, relaciones y restricciones.
 
+**Arquitectura de Autenticación:**
+- **Tabla `USERS`** (sin prefijo PQ_PARTES_): Tabla central de autenticación del sistema
+- **Flujo de autenticación:** Login se valida contra `USERS`, luego se determina si corresponde a un Cliente (`PQ_PARTES_CLIENTES`) o Usuario (`PQ_PARTES_USUARIOS`)
+- **Valores conservados durante el ciclo:** `tipo_usuario`, `user_code`, `usuario_id`/`cliente_id`, `es_supervisor`
+- **Visualización gráfica:** Ver `database/modelo-datos.dbml` para el modelo en formato DBML (compatible con dbdiagram.io)
+
 📄 Ver `specs/models/` para especificaciones detalladas de cada modelo:
 - `usuario-model.md` - Modelo de Usuario (Empleado/Asistente)
 - `registro-tarea-model.md` - Modelo de Registro de Tarea
@@ -162,8 +168,10 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 #### Endpoints Principales
 
 **Autenticación:**
-- `POST /api/v1/auth/login` - Autenticación de usuario
+- `POST /api/v1/auth/login` - Autenticación unificada contra tabla `USERS`, determina tipo de usuario (cliente/usuario) y rol (supervisor)
 - `POST /api/v1/auth/logout` - Cerrar sesión
+
+> **Nota:** El endpoint de login valida contra la tabla `USERS` (sin prefijo PQ_PARTES_) y luego determina si el usuario es un Cliente o un Usuario interno. Los valores de autenticación (`tipo_usuario`, `user_code`, `usuario_id`/`cliente_id`, `es_supervisor`) se conservan durante todo el ciclo de la sesión.
 
 **Gestión de Clientes (Solo Supervisores):**
 - `GET /api/v1/clientes` - Listar clientes
@@ -198,7 +206,7 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 
 **Registro de Tareas:**
 - `POST /api/v1/tareas` - Crear registro de tarea
-- `GET /api/v1/tareas` - Listar tareas (filtrado automático por rol)
+- `GET /api/v1/tareas` - Listar tareas (filtrado automático por rol: clientes ven solo sus tareas, empleados NO supervisores ven solo las propias)
 - `GET /api/v1/tareas/{id}` - Obtener tarea
 - `PUT /api/v1/tareas/{id}` - Actualizar tarea
 - `DELETE /api/v1/tareas/{id}` - Eliminar tarea
@@ -209,17 +217,24 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 - `POST /api/v1/tareas/proceso-masivo` - Procesar tareas masivamente (cerrar/reabrir)
 
 **Informes y Consultas:**
-- `GET /api/v1/informes/detalle` - Consulta detallada de tareas
-- `GET /api/v1/informes/por-asistente` - Consulta agrupada por asistente
-- `GET /api/v1/informes/por-cliente` - Consulta agrupada por cliente
-- `GET /api/v1/informes/por-tipo` - Consulta agrupada por tipo de tarea
-- `GET /api/v1/informes/por-fecha` - Consulta agrupada por fecha
-- `GET /api/v1/informes/exportar` - Exportar informe a Excel
+- `GET /api/v1/informes/detalle` - Consulta detallada de tareas (filtrado automático por rol)
+- `GET /api/v1/informes/por-asistente` - Consulta agrupada por asistente (filtrado automático por rol)
+- `GET /api/v1/informes/por-cliente` - Consulta agrupada por cliente (filtrado automático por rol)
+- `GET /api/v1/informes/por-tipo` - Consulta agrupada por tipo de tarea (filtrado automático por rol)
+- `GET /api/v1/informes/por-fecha` - Consulta agrupada por fecha (filtrado automático por rol)
+- `GET /api/v1/informes/exportar` - Exportar informe a Excel (respeta permisos del usuario)
+
+> **Nota:** Todos los endpoints de informes aplican filtros automáticos según el rol del usuario autenticado:
+> - **Clientes:** Solo ven tareas donde `cliente_id` coincide con su `cliente_id`
+> - **Empleados NO supervisores:** Solo ven tareas donde `usuario_id` coincide con su `usuario_id`
+> - **Supervisores:** Ven todas las tareas de todos los usuarios
 
 **Dashboard:**
-- `GET /api/v1/dashboard/resumen` - Resumen ejecutivo del dashboard
-- `GET /api/v1/dashboard/por-cliente` - Resumen por cliente
-- `GET /api/v1/dashboard/por-asistente` - Resumen por asistente
+- `GET /api/v1/dashboard/resumen` - Resumen ejecutivo del dashboard (filtrado automático por rol)
+- `GET /api/v1/dashboard/por-cliente` - Resumen por cliente (filtrado automático por rol)
+- `GET /api/v1/dashboard/por-asistente` - Resumen por asistente (filtrado automático por rol)
+
+> **Nota:** Todos los endpoints de dashboard aplican filtros automáticos según el rol del usuario autenticado (mismas reglas que Informes y Consultas).
 
 **Documentación completa:** Ver `specs/endpoints/` para especificaciones detalladas de cada endpoint.
 

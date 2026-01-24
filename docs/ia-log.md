@@ -3,7 +3,7 @@
 Este documento registra el uso consciente y controlado de herramientas de IA
 durante el desarrollo del MVP.
 
-# EJEMPLO 
+# EJEMPLO
 ## Entrada #x
 Fecha: 2026-01-18
 Etapa: Backend – API tareas
@@ -13,8 +13,7 @@ Resultado IA: CRUD inicial de tareas
 Ajuste humano: Simplifiqué validaciones y eliminé estados no usados
 Motivo: Mantener alcance MVP
 
-## Entrada #1
-
+# ENTREGA 1
 ---
 
 ## Entrada #1
@@ -212,3 +211,124 @@ El documento `docs/historias-y-tickets.md` se adopta como:
 - Fuente única de verdad funcional del MVP
 - Referencia para validar la completitud del desarrollo
 - Insumo directo para el README final del proyecto
+
+---
+
+## Entrada #4
+
+### Fecha
+2025-01-20
+
+### Etapa del proyecto
+Rediseño de arquitectura de autenticación y actualización de documentación
+
+### Herramientas de IA utilizadas
+- Cursor IDE (generación y actualización de documentación técnica)
+
+### Prompt o instrucción utilizada
+1. **Cambio arquitectónico:** Introducir una tabla `USERS` (sin prefijo PQ_PARTES_) como tabla central de autenticación. Después del login exitoso, determinar si es un login de cliente (PQ_PARTES_CLIENTES) o de usuario (PQ_PARTES_USUARIOS), y conservar los valores de tipo de usuario, user_code, cliente_id/usuario_id y es_supervisor durante todo el ciclo del proceso.
+
+2. **Actualización de documentación:** Actualizar todas las historias de usuario y tickets técnicos afectados por el cambio de autenticación.
+
+3. **Revisión de permisos:** Revisar historias de Épicas 9 (Informes y consultas) y 10 (Dashboard) para asegurar que contemplen explícitamente que:
+   - Los clientes solo pueden ver tareas donde `cliente_id` coincide con su `cliente_id`
+   - Los empleados NO supervisores solo pueden ver tareas donde `usuario_id` coincide con su `usuario_id`
+
+### Resultado generado por IA
+
+#### Cambio arquitectónico de autenticación:
+- **Modelo de datos actualizado:**
+  - Agregada tabla `USERS` (sin prefijo PQ_PARTES_) con campos: `id`, `code`, `password_hash`, `activo`, `inhabilitado`
+  - Actualizada tabla `PQ_PARTES_USUARIOS`: agregado `user_id` (FK → User, obligatorio), eliminado `password_hash`
+  - Actualizada tabla `PQ_PARTES_CLIENTES`: agregado `user_id` (FK → User, opcional), eliminado `password_hash`
+  - Documentado flujo de autenticación: validación contra `USERS`, determinación de tipo (cliente/usuario), obtención de datos adicionales
+  - Documentados valores a conservar durante el ciclo: `tipo_usuario`, `user_code`, `usuario_id`/`cliente_id`, `es_supervisor`
+
+- **Documentación técnica actualizada:**
+  - `docs/modelo-datos.md`: Nueva estructura con tabla `USERS` y flujo de autenticación completo
+  - `database/modelo-datos.dbml`: Actualizado con tabla `User` y relaciones
+  - `specs/endpoints/auth-login.md`: Endpoint actualizado con nuevo flujo y ejemplos de respuesta
+  - `specs/flows/e2e-core-flow.md`: Flujo E2E actualizado con nuevos valores de autenticación
+  - `architecture/api-to-data-mapping.md`: Mapeo API actualizado con operaciones en `USERS`
+
+- **Historias de usuario actualizadas (6):**
+  - HU-001 (Login empleado): Flujo contra `USERS`, determinación de tipo, valores a conservar
+  - HU-002 (Login cliente): Mismo flujo que HU-001
+  - HU-009 (Creación cliente): Creación en `USERS` si se habilita acceso al sistema
+  - HU-010 (Edición cliente): Sincronización de estados y contraseñas con `USERS`
+  - HU-019 (Creación asistente): Creación simultánea en `USERS`
+  - HU-020 (Edición asistente): Sincronización de estados y contraseñas con `USERS`
+
+- **Tickets técnicos actualizados (5):**
+  - TK-001: Migración de `USERS`, actualización de modelos y relaciones
+  - TK-002: Endpoint unificado de login, determinación de tipo, middleware
+  - TK-003: Creación/sincronización con `USERS` en gestión de clientes
+  - TK-005: Creación/sincronización con `USERS` en gestión de asistentes
+  - TK-016: Middleware para conservar valores de autenticación
+
+- **Supuestos y Definiciones actualizados:**
+  - Agregada entidad `User` en Entidades Principales
+  - Actualizadas entidades `Usuario` y `Cliente` (eliminado `password_hash`, agregado `user_id`)
+  - Actualizados Supuestos Adicionales con nuevo flujo de autenticación
+
+#### Revisión de permisos de visualización:
+- **Historias actualizadas en Épica 9 (7 historias):**
+  - HU-044: Aclarado que "Empleado" se refiere a "Empleado (NO supervisor)"
+  - HU-046: Agregados filtros automáticos según rol en notas de reglas de negocio
+  - HU-048: Agregados filtros automáticos según rol en criterios de aceptación y notas
+  - HU-049: Agregado que los datos exportados respetan permisos del usuario
+  - HU-050: Agregado que los filtros automáticos se aplican antes de verificar resultados vacíos
+
+- **Historias actualizadas en Épica 10 (5 historias):**
+  - HU-051: Aclarado que "Empleado" se refiere a "Empleado (NO supervisor)" y agregados filtros automáticos
+  - HU-052: Agregados filtros automáticos según permisos en criterios de aceptación y notas
+  - HU-054: Aclarado que gráficos respetan permisos según rol
+  - HU-055: Agregado que actualizaciones automáticas respetan filtros según rol
+
+- **Reglas de permisos documentadas:**
+  - Clientes: Solo tareas donde `cliente_id` coincide con su `cliente_id`
+  - Empleados (NO supervisores): Solo tareas donde `usuario_id` coincide con su `usuario_id`
+  - Supervisores: Todas las tareas de todos los usuarios
+
+### Ajustes humanos realizados
+
+1. **Análisis previo:**
+   - Se generó archivo `docs/ANALISIS-HISTORIAS-AUTENTICACION.md` con análisis detallado de cambios necesarios
+   - Se revisó y confirmó el análisis antes de proceder con las actualizaciones
+
+2. **Validación de cambios:**
+   - Se verificó que todos los cambios fueran consistentes entre documentos
+   - Se aseguró que las referencias cruzadas entre documentos estuvieran actualizadas
+   - Se validó que el flujo de autenticación fuera completo y coherente
+
+3. **Eliminación de archivos temporales:**
+   - Se eliminó `docs/ANALISIS-HISTORIAS-AUTENTICACION.md` después de aplicar los cambios
+
+4. **Revisión de permisos:**
+   - Se identificaron historias que no especificaban explícitamente los filtros por rol
+   - Se agregaron aclaraciones en todas las historias afectadas para evitar ambigüedades
+
+### Motivo del ajuste
+
+1. **Cambio arquitectónico:**
+   - Centralizar la autenticación en una única tabla `USERS` simplifica el modelo y permite un mejor control de acceso
+   - Separar la autenticación de las entidades de negocio (Usuario/Cliente) permite mayor flexibilidad
+   - Conservar valores de autenticación durante el ciclo del proceso es necesario para autorización y auditoría
+
+2. **Documentación de permisos:**
+   - Asegurar que todas las historias especifiquen explícitamente los filtros por rol evita ambigüedades en la implementación
+   - Garantizar que clientes y empleados NO supervisores solo vean sus propios datos es un requisito de seguridad y privacidad
+   - Documentar estos permisos en cada historia facilita la implementación y testing
+
+### Archivos modificados
+
+- `docs/modelo-datos.md`
+- `database/modelo-datos.dbml`
+- `specs/endpoints/auth-login.md`
+- `specs/flows/e2e-core-flow.md`
+- `architecture/api-to-data-mapping.md`
+- `docs/historias-y-tickets.md` (múltiples actualizaciones)
+
+### Archivos eliminados
+
+- `docs/ANALISIS-HISTORIAS-AUTENTICACION.md` (archivo temporal de análisis)
