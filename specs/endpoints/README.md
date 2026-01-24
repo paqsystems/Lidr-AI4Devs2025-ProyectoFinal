@@ -27,12 +27,12 @@ Los archivos están organizados por funcionalidad:
 - `tipos-cliente-update.md`
 - `tipos-cliente-delete.md`
 
-### Asistentes
-- `asistentes-list.md`
-- `asistentes-create.md`
-- `asistentes-get.md`
-- `asistentes-update.md`
-- `asistentes-delete.md`
+### Empleados
+- `empleados-list.md`
+- `empleados-create.md`
+- `empleados-get.md`
+- `empleados-update.md`
+- `empleados-delete.md`
 
 ### Tipos de Tarea
 - `tipos-tarea-create.md`
@@ -54,7 +54,7 @@ Los archivos están organizados por funcionalidad:
 
 ### Informes
 - `informes-detalle.md`
-- `informes-por-asistente.md`
+- `informes-por-empleado.md`
 - `informes-por-cliente.md`
 - `informes-por-tipo.md`
 - `informes-por-fecha.md`
@@ -63,7 +63,7 @@ Los archivos están organizados por funcionalidad:
 ### Dashboard
 - `dashboard-resumen.md`
 - `dashboard-por-cliente.md`
-- `dashboard-por-asistente.md`
+- `dashboard-por-empleado.md`
 
 ## Formato
 

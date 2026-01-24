@@ -9,7 +9,7 @@ Este documento proporciona el contexto general del proyecto para que el agente I
 
 ## Contexto General
 
-Este proyecto es un **MVP web** para consultorías y empresas de servicios. El sistema permite que empleados o asistentes registren las tareas realizadas diariamente, indicando cliente, tipo de tarea y duración, con el fin de obtener informes de dedicación para análisis operativo y comercial.
+Este proyecto es un **MVP web** para consultorías y empresas de servicios. El sistema permite que empleados registren las tareas realizadas diariamente, indicando cliente, tipo de tarea y duración, con el fin de obtener informes de dedicación para análisis operativo y comercial.
 
 ## Objetivo del MVP
 

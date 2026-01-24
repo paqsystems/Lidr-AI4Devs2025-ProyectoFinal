@@ -9,7 +9,7 @@ Este documento cubre las siguientes áreas funcionales:
 - Configuración de usuario
 - Gestión de clientes (ABM)
 - Gestión de tipos de cliente (ABM)
-- Gestión de asistentes/empleados (ABM)
+- Gestión de empleados (ABM)
 - Gestión de tipos de tarea (ABM)
 - Registro de tareas
 - Proceso masivo de tareas
@@ -28,8 +28,8 @@ Este documento cubre las siguientes áreas funcionales:
 
 ### Entidades Principales
 
-- **User (Tabla de Autenticación)**: Tabla `USERS` (sin prefijo PQ_PARTES_). Es la tabla central de autenticación del sistema. Tiene atributos: `id`, `code` (único, obligatorio), `password_hash` (obligatorio), `activo`, `inhabilitado` (boolean), `created_at`, `updated_at`. Después del login exitoso, se determina si el `User` corresponde a un Cliente (tabla `PQ_PARTES_CLIENTES`) o a un Usuario (tabla `PQ_PARTES_USUARIOS`).
-- **Usuario/Empleado/Asistente**: Representa a los empleados/asistentes/agentes que cargan las tareas al sistema. Tabla física: `PQ_PARTES_USUARIOS`. Tiene atributos: `id`, `user_id` (FK → User, obligatorio, único), `code` (único, obligatorio, debe coincidir con User.code), `nombre`, `email` (único, opcional), `supervisor` (boolean), `activo`, `inhabilitado` (boolean), `created_at`, `updated_at`. Cada registro debe tener una relación 1:1 con la tabla `USERS`.
+- **User (Tabla de Autenticación)**: Tabla `USERS` (sin prefijo PQ_PARTES_). Es la tabla central de autenticación del sistema. Tiene atributos: `id`, `code` (único, obligatorio), `password_hash` (obligatorio), `activo`, `inhabilitado` (boolean), `created_at`, `updated_at`. Después del login exitoso, se determina si el `User` corresponde a un Cliente (tabla `PQ_PARTES_CLIENTES`) o a un Empleado (tabla `PQ_PARTES_USUARIOS`).
+- **Empleado**: Representa a los empleados que cargan las tareas al sistema. Tabla física: `PQ_PARTES_USUARIOS`. Tiene atributos: `id`, `user_id` (FK → User, obligatorio, único), `code` (único, obligatorio, debe coincidir con User.code), `nombre`, `email` (único, opcional), `supervisor` (boolean), `activo`, `inhabilitado` (boolean), `created_at`, `updated_at`. Cada registro debe tener una relación 1:1 con la tabla `USERS`.
 - **Cliente**: Representa a los clientes para los cuales se registran tareas. Tabla física: `PQ_PARTES_CLIENTES`. Tiene atributos: `id`, `user_id` (FK → User, opcional, único), `nombre`, `tipo_cliente_id` (FK), `code` (único, obligatorio, debe coincidir con User.code si tiene user_id), `email` (único, opcional), `activo`, `inhabilitado` (boolean), `created_at`, `updated_at`. Si tiene `user_id` configurado, puede autenticarse y consultar tareas relacionadas (solo lectura).
 - **TipoCliente**: Catálogo de tipos de cliente (ej: "Corporativo", "PyME", "Startup"). Tiene atributos: `id`, `code` (único, obligatorio), `descripcion`, `activo`, `inhabilitado` (boolean).
 - **TipoTarea**: Catálogo de tipos de tarea. Tiene atributos: `id`, `code` (único, obligatorio), `descripcion`, `is_generico` (boolean), `is_default` (boolean), `activo`, `inhabilitado` (boolean).
@@ -59,7 +59,7 @@ Este documento cubre las siguientes áreas funcionales:
 
 ## Épica 1: Autenticación y Acceso
 
-### HU-001 – Login de empleado/asistente
+### HU-001 – Login de empleado
 
 **Rol:** Empleado / Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
@@ -527,16 +527,16 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-## Épica 5: Gestión de Asistentes/Empleados (ABM)
+## Épica 5: Gestión de Empleados (ABM)
 
-### HU-018 – Listado de asistentes/empleados
+### HU-018 – Listado de empleados
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero ver el listado de todos los asistentes/empleados para gestionarlos.
+**Historia:** Como supervisor quiero ver el listado de todos los empleados para gestionarlos.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder a la sección "Asistentes" o "Empleados".
+- El supervisor puede acceder a la sección "Empleados".
 - Se muestra una tabla con todos los usuarios/empleados.
 - La tabla muestra: código, nombre, email, supervisor (sí/no), estado (activo/inactivo), inhabilitado (sí/no).
 - Los usuarios se listan paginados (si hay muchos).
@@ -555,14 +555,14 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### HU-019 – Creación de asistente/empleado
+### HU-019 – Creación de empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero crear un nuevo asistente/empleado para que pueda acceder al sistema y registrar tareas.
+**Historia:** Como supervisor quiero crear un nuevo empleado para que pueda acceder al sistema y registrar tareas.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder al formulario de creación de asistente.
+- El supervisor puede acceder al formulario de creación de empleado.
 - El formulario tiene los siguientes campos:
   - Código (obligatorio, único)
   - Nombre (obligatorio)
@@ -581,16 +581,16 @@ Este documento cubre las siguientes áreas funcionales:
 - El sistema valida que la contraseña no esté vacía.
 - El sistema valida que la contraseña y confirmación coincidan.
 - El sistema valida la complejidad de la contraseña (si aplica).
-- Al guardar, el sistema crea primero un registro en `USERS` con: `code` (del asistente), `password_hash` (de la contraseña proporcionada), `activo` (del asistente), `inhabilitado` (del asistente).
-- Al guardar, el sistema crea el usuario en `PQ_PARTES_USUARIOS` con: `user_id` (FK al `USERS` creado), `code` (debe coincidir con `User.code`), y los demás campos.
-- El sistema valida que el `code` del asistente coincida con el `code` del `User` creado.
+- Al guardar, el sistema crea primero un registro en `USERS` con: `code` (del empleado), `password_hash` (de la contraseña proporcionada), `activo` (del empleado), `inhabilitado` (del empleado).
+- Al guardar, el sistema crea el empleado en `PQ_PARTES_USUARIOS` con: `user_id` (FK al `USERS` creado), `code` (debe coincidir con `User.code`), y los demás campos.
+- El sistema valida que el `code` del empleado coincida con el `code` del `User` creado.
 - Se muestra un mensaje de confirmación.
-- El usuario es redirigido al listado de asistentes o puede crear otro.
+- El usuario es redirigido al listado de empleados o puede crear otro.
 
 **Notas de reglas de negocio:**
 - `code` es obligatorio y único.
 - `nombre` es obligatorio.
-- La creación de un asistente requiere la creación simultánea de un registro en `USERS`.
+- La creación de un empleado requiere la creación simultánea de un registro en `USERS`.
 - El `user_id` en `PQ_PARTES_USUARIOS` es obligatorio y debe referenciar a `USERS.id`.
 - El `code` en `PQ_PARTES_USUARIOS` debe coincidir exactamente con el `code` en `USERS`.
 - `password_hash` se genera a partir de la contraseña en texto plano y se almacena en `USERS`.
@@ -599,16 +599,16 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### HU-020 – Edición de asistente/empleado
+### HU-020 – Edición de empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero editar la información de un asistente/empleado existente para mantener actualizados sus datos.
+**Historia:** Como supervisor quiero editar la información de un empleado existente para mantener actualizados sus datos.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder a la edición de un asistente desde el listado.
+- El supervisor puede acceder a la edición de un empleado desde el listado.
 - Se carga el formulario con los datos actuales.
-- El código del asistente no es modificable (solo lectura).
+- El código del empleado no es modificable (solo lectura).
 - El supervisor puede modificar: nombre, email, supervisor, estado activo, estado inhabilitado.
 - El supervisor puede cambiar la contraseña (opcional, con campos separados).
 - El sistema valida que el nombre no esté vacío.
@@ -632,47 +632,47 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### HU-021 – Eliminación de asistente/empleado
+### HU-021 – Eliminación de empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero eliminar un asistente/empleado que ya no trabaja para mantener el catálogo actualizado.
+**Historia:** Como supervisor quiero eliminar un empleado que ya no trabaja para mantener el catálogo actualizado.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder a la opción de eliminar un asistente desde el listado o detalle.
-- Antes de eliminar, el sistema verifica si el asistente tiene tareas asociadas.
-- Si el asistente tiene tareas asociadas, se muestra un error y no se permite la eliminación.
-- Si el asistente no tiene tareas asociadas, se muestra un diálogo de confirmación.
-- El diálogo muestra el código y nombre del asistente a eliminar.
+- El supervisor puede acceder a la opción de eliminar un empleado desde el listado o detalle.
+- Antes de eliminar, el sistema verifica si el empleado tiene tareas asociadas.
+- Si el empleado tiene tareas asociadas, se muestra un error y no se permite la eliminación.
+- Si el empleado no tiene tareas asociadas, se muestra un diálogo de confirmación.
+- El diálogo muestra el código y nombre del empleado a eliminar.
 - El usuario debe confirmar la eliminación.
-- Al confirmar, el sistema elimina el asistente de la base de datos.
+- Al confirmar, el sistema elimina el empleado de la base de datos.
 - Se muestra un mensaje de confirmación.
-- El asistente desaparece del listado.
+- El empleado desaparece del listado.
 
 **Notas de reglas de negocio:**
-- No se puede eliminar un asistente si tiene tareas asociadas (integridad referencial).
+- No se puede eliminar un empleado si tiene tareas asociadas (integridad referencial).
 - Código de error: 2113.
 
 **Dependencias:** HU-020.
 
 ---
 
-### HU-022 – Visualización de detalle de asistente/empleado
+### HU-022 – Visualización de detalle de empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** SHOULD-HAVE  
-**Historia:** Como supervisor quiero ver el detalle completo de un asistente/empleado incluyendo estadísticas básicas de tareas registradas.
+**Historia:** Como supervisor quiero ver el detalle completo de un empleado incluyendo estadísticas básicas de tareas registradas.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder al detalle de un asistente desde el listado.
-- Se muestra toda la información del asistente: código, nombre, email, supervisor, estado.
-- Se muestra la cantidad total de tareas registradas por el asistente (opcional).
+- El supervisor puede acceder al detalle de un empleado desde el listado.
+- Se muestra toda la información del empleado: código, nombre, email, supervisor, estado.
+- Se muestra la cantidad total de tareas registradas por el empleado (opcional).
 - Se muestra la fecha de creación y última actualización (opcional).
-- El supervisor puede editar el asistente desde el detalle.
-- El supervisor puede eliminar el asistente desde el detalle (si no tiene tareas).
+- El supervisor puede editar el empleado desde el detalle.
+- El supervisor puede eliminar el empleado desde el detalle (si no tiene tareas).
 
 **Notas de reglas de negocio:**
-- Mostrar información completa y contextual del asistente.
+- Mostrar información completa y contextual del empleado.
 
 **Dependencias:** HU-020.
 
@@ -1160,7 +1160,7 @@ Este documento cubre las siguientes áreas funcionales:
 **Criterios de aceptación:**
 - El supervisor puede filtrar por rango de fechas (fecha desde, fecha hasta).
 - El supervisor puede filtrar por cliente (todos o cliente específico).
-- El supervisor puede filtrar por asistente (todos o asistente específico).
+- El supervisor puede filtrar por empleado (todos o empleado específico).
 - El supervisor puede filtrar por estado (Cerrados / Abiertos).
 - El sistema valida que `fecha_desde <= fecha_hasta`.
 - Al hacer clic en "Aplicar Filtros", se cargan las tareas que cumplen los criterios.
@@ -1261,16 +1261,16 @@ Este documento cubre las siguientes áreas funcionales:
   - **Empleado (NO supervisor):** Solo sus propias tareas (donde `usuario_id` coincide con su `usuario_id`).
   - **Supervisor:** Todas las tareas de todos los usuarios.
   - **Cliente:** Solo tareas donde es el cliente (donde `cliente_id` coincide con su `cliente_id`).
-- La tabla muestra: asistente (si supervisor), cliente, fecha, tipo de tarea, horas (decimal), sin cargo, presencial, descripción.
+- La tabla muestra: empleado (si supervisor), cliente, fecha, tipo de tarea, horas (decimal), sin cargo, presencial, descripción.
 - El usuario puede aplicar filtros:
   - Período (fecha desde, fecha hasta)
   - Tipo de cliente (todos o específico, solo para supervisor)
   - Cliente (todos o específico, filtrado automático para cliente)
-  - Asistente (todos o específico, solo para supervisor, filtrado automático para empleado)
+  - Empleado (todos o específico, solo para supervisor, filtrado automático para empleado normal)
 - Los filtros se aplican con botón "Aplicar Filtros".
 - La tabla se actualiza con los resultados filtrados.
 - Se muestra el total de horas del período filtrado.
-- Se puede ordenar por columnas (fecha, cliente, asistente, etc.).
+- Se puede ordenar por columnas (fecha, cliente, empleado, etc.).
 - Se puede paginar si hay muchos resultados.
 
 **Notas de reglas de negocio:**
@@ -1282,22 +1282,22 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### HU-045 – Consulta agrupada por asistente
+### HU-045 – Consulta agrupada por empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** SHOULD-HAVE  
-**Historia:** Como supervisor quiero consultar tareas agrupadas por asistente para analizar la dedicación de cada empleado.
+**Historia:** Como supervisor quiero consultar tareas agrupadas por empleado para analizar la dedicación de cada empleado.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder a la sección "Tareas por Asistente".
+- El supervisor puede acceder a la sección "Tareas por Empleado".
 - Se muestran los mismos filtros que en consulta detallada.
-- Los resultados se agrupan por asistente.
+- Los resultados se agrupan por empleado.
 - Cada grupo muestra:
-  - Nombre del asistente
+  - Nombre del empleado
   - Total de horas en formato decimal
   - Cantidad de tareas
 - Cada grupo es expandible (accordion o similar).
-- Al expandir un grupo, se muestra el detalle de todas las tareas de ese asistente.
+- Al expandir un grupo, se muestra el detalle de todas las tareas de ese empleado.
 - El detalle muestra las mismas columnas que la consulta detallada.
 - Se puede colapsar el grupo para ocultar el detalle.
 - Se muestra el total general de horas y tareas.
@@ -1328,7 +1328,7 @@ Este documento cubre las siguientes áreas funcionales:
   - Cantidad de tareas
 - Cada grupo es expandible (accordion o similar).
 - Al expandir un grupo, se muestra el detalle de todas las tareas de ese cliente.
-- El detalle muestra: fecha, tipo de tarea, horas, asistente (si supervisor), descripción.
+- El detalle muestra: fecha, tipo de tarea, horas, empleado (si supervisor), descripción.
 - Se puede colapsar el grupo para ocultar el detalle.
 - Se muestra el total general de horas y tareas.
 - Los grupos se ordenan por total de horas (mayor a menor).
@@ -1484,7 +1484,7 @@ Este documento cubre las siguientes áreas funcionales:
 - El usuario puede acceder al dashboard desde el menú principal o como página de inicio post-login.
 - El dashboard muestra información según el rol del usuario:
   - **Empleado (NO supervisor):** Resumen de sus propias tareas (donde `usuario_id` coincide con su `usuario_id`) - total de horas del mes, cantidad de tareas, top clientes.
-  - **Supervisor:** Resumen de todas las tareas de todos los usuarios - total de horas del mes, cantidad de tareas, top clientes, top asistentes.
+  - **Supervisor:** Resumen de todas las tareas de todos los empleados - total de horas del mes, cantidad de tareas, top clientes, top empleados.
   - **Cliente:** Resumen de tareas recibidas (donde `cliente_id` coincide con su `cliente_id`) - total de horas del mes, cantidad de tareas, distribución por tipo.
 - Se muestra un período por defecto (mes actual o último mes).
 - El usuario puede cambiar el período (selector de mes o rango de fechas).
@@ -1546,23 +1546,23 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### HU-053 – Resumen de dedicación por asistente en dashboard (supervisor)
+### HU-053 – Resumen de dedicación por empleado en dashboard (supervisor)
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** SHOULD-HAVE  
-**Historia:** Como supervisor quiero ver un resumen de dedicación por asistente en el dashboard para identificar rápidamente la carga de trabajo de cada empleado.
+**Historia:** Como supervisor quiero ver un resumen de dedicación por empleado en el dashboard para identificar rápidamente la carga de trabajo de cada empleado.
 
 **Criterios de aceptación:**
-- El dashboard del supervisor muestra una sección "Dedicación por Asistente".
-- Se muestra una lista o tabla con los asistentes y sus totales de horas del período.
-- Se muestran los top N asistentes (ej: top 5 o top 10).
-- Cada asistente muestra:
-  - Nombre del asistente
+- El dashboard del supervisor muestra una sección "Dedicación por Empleado".
+- Se muestra una lista o tabla con los empleados y sus totales de horas del período.
+- Se muestran los top N empleados (ej: top 5 o top 10).
+- Cada empleado muestra:
+  - Nombre del empleado
   - Total de horas en formato decimal
   - Cantidad de tareas
   - Porcentaje del total (opcional)
-- Los asistentes se ordenan por total de horas (mayor a menor).
-- El supervisor puede hacer clic en un asistente para ver el detalle (redirección a consulta por asistente).
+- Los empleados se ordenan por total de horas (mayor a menor).
+- El supervisor puede hacer clic en un empleado para ver el detalle (redirección a consulta por empleado).
 - Se muestra un total general de horas.
 
 **Notas de reglas de negocio:**
@@ -1583,7 +1583,7 @@ Este documento cubre las siguientes áreas funcionales:
 **Criterios de aceptación:**
 - El dashboard muestra gráficos según el rol:
   - **Empleado (NO supervisor):** Gráfico de distribución de horas por cliente (barras o pie) - solo de sus propias tareas (donde `usuario_id` coincide con su `usuario_id`).
-  - **Supervisor:** Gráfico de distribución de horas por cliente y por asistente - todas las tareas de todos los usuarios.
+  - **Supervisor:** Gráfico de distribución de horas por cliente y por empleado - todas las tareas de todos los empleados.
   - **Cliente:** Gráfico de distribución de horas por tipo de tarea - solo tareas donde es el cliente (donde `cliente_id` coincide con su `cliente_id`).
 - Los datos de los gráficos se filtran automáticamente según los permisos del usuario.
 - Los gráficos se actualizan al cambiar el período.
@@ -1634,7 +1634,7 @@ Este documento cubre las siguientes áreas funcionales:
 
 | ID | Épica | Rol | Clasificación | Breve Descripción |
 |----|-------|-----|---------------|-------------------|
-| HU-001 | Autenticación | Empleado / Supervisor | MUST-HAVE | Login de empleado/asistente |
+| HU-001 | Autenticación | Empleado / Supervisor | MUST-HAVE | Login de empleado |
 | HU-002 | Autenticación | Cliente | SHOULD-HAVE | Login de cliente |
 | HU-003 | Autenticación | Todos | MUST-HAVE | Logout |
 | HU-004 | Autenticación | Todos | SHOULD-HAVE | Recuperación de contraseña |
@@ -1651,11 +1651,11 @@ Este documento cubre las siguientes áreas funcionales:
 | HU-015 | Gestión Tipos Cliente | Supervisor | MUST-HAVE | Creación de tipo de cliente |
 | HU-016 | Gestión Tipos Cliente | Supervisor | MUST-HAVE | Edición de tipo de cliente |
 | HU-017 | Gestión Tipos Cliente | Supervisor | MUST-HAVE | Eliminación de tipo de cliente |
-| HU-018 | Gestión Asistentes | Supervisor | MUST-HAVE | Listado de asistentes |
-| HU-019 | Gestión Asistentes | Supervisor | MUST-HAVE | Creación de asistente |
-| HU-020 | Gestión Asistentes | Supervisor | MUST-HAVE | Edición de asistente |
-| HU-021 | Gestión Asistentes | Supervisor | MUST-HAVE | Eliminación de asistente |
-| HU-022 | Gestión Asistentes | Supervisor | SHOULD-HAVE | Detalle de asistente |
+| HU-018 | Gestión Empleados | Supervisor | MUST-HAVE | Listado de empleados |
+| HU-019 | Gestión Empleados | Supervisor | MUST-HAVE | Creación de empleado |
+| HU-020 | Gestión Empleados | Supervisor | MUST-HAVE | Edición de empleado |
+| HU-021 | Gestión Empleados | Supervisor | MUST-HAVE | Eliminación de empleado |
+| HU-022 | Gestión Empleados | Supervisor | SHOULD-HAVE | Detalle de empleado |
 | HU-023 | Gestión Tipos Tarea | Supervisor | MUST-HAVE | Listado de tipos de tarea |
 | HU-024 | Gestión Tipos Tarea | Supervisor | MUST-HAVE | Creación de tipo de tarea |
 | HU-025 | Gestión Tipos Tarea | Supervisor | MUST-HAVE | Edición de tipo de tarea |
@@ -1678,7 +1678,7 @@ Este documento cubre las siguientes áreas funcionales:
 | HU-042 | Proceso Masivo | Supervisor | SHOULD-HAVE | Procesamiento masivo de tareas |
 | HU-043 | Proceso Masivo | Supervisor | SHOULD-HAVE | Validación de selección para procesamiento |
 | HU-044 | Informes | Todos | MUST-HAVE | Consulta detallada de tareas |
-| HU-045 | Informes | Supervisor | SHOULD-HAVE | Consulta agrupada por asistente |
+| HU-045 | Informes | Supervisor | SHOULD-HAVE | Consulta agrupada por empleado |
 | HU-046 | Informes | Todos | MUST-HAVE | Consulta agrupada por cliente |
 | HU-047 | Informes | Supervisor | SHOULD-HAVE | Consulta agrupada por tipo de tarea |
 | HU-048 | Informes | Todos | SHOULD-HAVE | Consulta agrupada por fecha |
@@ -1686,7 +1686,7 @@ Este documento cubre las siguientes áreas funcionales:
 | HU-050 | Informes | Todos | MUST-HAVE | Manejo de resultados vacíos en consultas |
 | HU-051 | Dashboard | Todos | MUST-HAVE | Dashboard principal |
 | HU-052 | Dashboard | Todos | MUST-HAVE | Resumen de dedicación por cliente |
-| HU-053 | Dashboard | Supervisor | SHOULD-HAVE | Resumen de dedicación por asistente |
+| HU-053 | Dashboard | Supervisor | SHOULD-HAVE | Resumen de dedicación por empleado |
 | HU-054 | Dashboard | Todos | SHOULD-HAVE | Gráficos y visualizaciones |
 | HU-055 | Dashboard | Todos | SHOULD-HAVE | Actualización automática del dashboard |
 
@@ -1785,20 +1785,20 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### TK-005 – Endpoints de Gestión de Asistentes/Empleados
+### TK-005 – Endpoints de Gestión de Empleados
 
 **HU Relacionadas:** HU-018, HU-019, HU-020, HU-021, HU-022
 
 **Descripción:**
-- `GET /api/v1/asistentes` - Listado con filtros y paginación.
-- `POST /api/v1/asistentes` - Creación de asistente. Al crear un asistente, crear también registro en `USERS`. Validar que el `code` no exista en `USERS`. Sincronizar estados (`activo`, `inhabilitado`) entre `USERS` y `PQ_PARTES_USUARIOS`.
-- `GET /api/v1/asistentes/{id}` - Detalle de asistente.
-- `PUT /api/v1/asistentes/{id}` - Edición de asistente. Si se cambia contraseña, actualizar `password_hash` en `USERS` (no en `PQ_PARTES_USUARIOS`). Sincronizar estados (`activo`, `inhabilitado`) entre `USERS` y `PQ_PARTES_USUARIOS`.
-- `DELETE /api/v1/asistentes/{id}` - Eliminación (con validación de referencias). Al eliminar asistente, eliminar también registro en `USERS` (o marcar como inhabilitado según diseño).
+- `GET /api/v1/empleados` - Listado con filtros y paginación.
+- `POST /api/v1/empleados` - Creación de empleado. Al crear un empleado, crear también registro en `USERS`. Validar que el `code` no exista en `USERS`. Sincronizar estados (`activo`, `inhabilitado`) entre `USERS` y `PQ_PARTES_USUARIOS`.
+- `GET /api/v1/empleados/{id}` - Detalle de empleado.
+- `PUT /api/v1/empleados/{id}` - Edición de empleado. Si se cambia contraseña, actualizar `password_hash` en `USERS` (no en `PQ_PARTES_USUARIOS`). Sincronizar estados (`activo`, `inhabilitado`) entre `USERS` y `PQ_PARTES_USUARIOS`.
+- `DELETE /api/v1/empleados/{id}` - Eliminación (con validación de referencias). Al eliminar empleado, eliminar también registro en `USERS` (o marcar como inhabilitado según diseño).
 - Validaciones de permisos (solo supervisores).
 
 **Entregables:**
-- Controlador `AsistenteController` o `UsuarioController`.
+- Controlador `EmpleadoController` o `UsuarioController`.
 - Requests de validación.
 - Servicios de negocio para creación/sincronización con `USERS`.
 - Middleware de permisos para supervisores.
@@ -1923,19 +1923,19 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### TK-012 – Componentes UI de Gestión de Asistentes
+### TK-012 – Componentes UI de Gestión de Empleados
 
 **HU Relacionadas:** HU-018, HU-019, HU-020, HU-021, HU-022
 
 **Descripción:**
-- Componente `AsistentesList` con tabla, filtros y paginación.
-- Componente `AsistenteForm` (crear/editar).
-- Componente `AsistenteDetail` (opcional).
+- Componente `EmpleadosList` con tabla, filtros y paginación.
+- Componente `EmpleadoForm` (crear/editar).
+- Componente `EmpleadoDetail` (opcional).
 - Integración con i18n y data-testid.
 - Validaciones en frontend.
 
 **Entregables:**
-- Componentes React en `frontend/src/features/asistentes/`.
+- Componentes React en `frontend/src/features/empleados/`.
 - Tests unitarios de componentes.
 - Integración con servicios API.
 
@@ -1993,7 +1993,7 @@ Este documento cubre las siguientes áreas funcionales:
 - Servicio `AuthService` para autenticación.
 - Servicio `ClienteService` para gestión de clientes.
 - Servicio `TipoClienteService` para gestión de tipos de cliente.
-- Servicio `AsistenteService` para gestión de asistentes.
+- Servicio `EmpleadoService` para gestión de empleados.
 - Servicio `TipoTareaService` para gestión de tipos de tarea.
 - Servicio `TareaService` para gestión de tareas.
 - Servicio `BulkTaskProcessService` para proceso masivo.
@@ -2172,7 +2172,7 @@ Este documento cubre las siguientes áreas funcionales:
 - Seeder de tipos de cliente básicos.
 - Seeder de tipos de tarea (incluyendo uno por defecto y genéricos).
 - Seeder de clientes de ejemplo.
-- Seeder de asistentes/empleados (incluyendo supervisores).
+- Seeder de empleados (incluyendo supervisores).
 - Seeder de tareas de ejemplo.
 - Comando `php artisan db:seed` para poblar datos de prueba.
 
@@ -2243,7 +2243,7 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Descripción:**
 - `GET /api/v1/informes/detalle` - Consulta detallada de tareas con filtros.
-- `GET /api/v1/informes/por-asistente` - Consulta agrupada por asistente.
+- `GET /api/v1/informes/por-empleado` - Consulta agrupada por empleado.
 - `GET /api/v1/informes/por-cliente` - Consulta agrupada por cliente.
 - `GET /api/v1/informes/por-tipo` - Consulta agrupada por tipo de tarea.
 - `GET /api/v1/informes/por-fecha` - Consulta agrupada por fecha.
@@ -2267,7 +2267,7 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Descripción:**
 - Componente `ConsultaDetallePage` para consulta detallada.
-- Componente `ConsultaAgrupadaPage` genérico para consultas agrupadas (por asistente, cliente, tipo, fecha).
+- Componente `ConsultaAgrupadaPage` genérico para consultas agrupadas (por empleado, cliente, tipo, fecha).
 - Componente `FiltrosConsulta` común para todos los tipos de consulta.
 - Componente `TablaResultados` con paginación y ordenamiento.
 - Componente `GrupoExpandible` (accordion) para consultas agrupadas.
@@ -2310,7 +2310,7 @@ Este documento cubre las siguientes áreas funcionales:
 **Descripción:**
 - `GET /api/v1/dashboard/resumen` - Resumen ejecutivo del dashboard.
 - `GET /api/v1/dashboard/por-cliente` - Resumen por cliente (top N).
-- `GET /api/v1/dashboard/por-asistente` - Resumen por asistente (top N, solo supervisor).
+- `GET /api/v1/dashboard/por-empleado` - Resumen por empleado (top N, solo supervisor).
 - Query parameters: `fecha_desde`, `fecha_hasta`, `limit` (para top N).
 - Validación de permisos según rol (filtros automáticos).
 - Cálculo de KPIs (totales, promedios).
@@ -2332,7 +2332,7 @@ Este documento cubre las siguientes áreas funcionales:
 - Componente `DashboardPage` principal.
 - Componente `KPICard` para indicadores clave (total horas, cantidad tareas, promedio).
 - Componente `ResumenPorCliente` para lista de top clientes.
-- Componente `ResumenPorAsistente` para lista de top asistentes (solo supervisor).
+- Componente `ResumenPorEmpleado` para lista de top empleados (solo supervisor).
 - Componente `SelectorPeriodo` para cambiar período.
 - Componente `GraficoDistribucion` para gráficos (Chart.js, Recharts, etc.).
 - Integración con i18n y data-testid.

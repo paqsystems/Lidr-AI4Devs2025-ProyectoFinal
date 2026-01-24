@@ -90,7 +90,7 @@ El MVP se considera funcionalmente completo cuando todas las historias MUST-HAVE
 ### Gestión base (Supervisor)
 - [ ] ABM de Clientes (HU-008 a HU-012)
 - [ ] ABM de Tipos de Cliente (HU-014 a HU-017)
-- [ ] ABM de Empleados/Asistentes (HU-018 a HU-021)
+- [ ] ABM de Empleados (HU-018 a HU-021)
 - [ ] ABM de Tipos de Tarea con reglas de genérico y por defecto (HU-023 a HU-026)
 
 ### Registro de tareas
@@ -141,7 +141,7 @@ El MVP se considera funcionalmente completo cuando todas las historias MUST-HAVE
 - **Visualización gráfica:** Ver `database/modelo-datos.dbml` para el modelo en formato DBML (compatible con dbdiagram.io)
 
 📄 Ver `specs/models/` para especificaciones detalladas de cada modelo:
-- `usuario-model.md` - Modelo de Usuario (Empleado/Asistente)
+- `usuario-model.md` - Modelo de Empleado
 - `registro-tarea-model.md` - Modelo de Registro de Tarea
 - `cliente-model.md` - Modelo de Cliente
 - `tipo-cliente-model.md` - Modelo de Tipo de Cliente
@@ -190,12 +190,12 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 - `PUT /api/v1/tipos-cliente/{id}` - Actualizar tipo de cliente
 - `DELETE /api/v1/tipos-cliente/{id}` - Eliminar tipo de cliente
 
-**Gestión de Asistentes/Empleados (Solo Supervisores):**
-- `GET /api/v1/asistentes` - Listar asistentes
-- `POST /api/v1/asistentes` - Crear asistente
-- `GET /api/v1/asistentes/{id}` - Obtener asistente
-- `PUT /api/v1/asistentes/{id}` - Actualizar asistente
-- `DELETE /api/v1/asistentes/{id}` - Eliminar asistente
+**Gestión de Empleados (Solo Supervisores):**
+- `GET /api/v1/empleados` - Listar empleados
+- `POST /api/v1/empleados` - Crear empleado
+- `GET /api/v1/empleados/{id}` - Obtener empleado
+- `PUT /api/v1/empleados/{id}` - Actualizar empleado
+- `DELETE /api/v1/empleados/{id}` - Eliminar empleado
 
 **Gestión de Tipos de Tarea (Solo Supervisores):**
 - `GET /api/v1/tipos-tarea` - Listar tipos de tarea
@@ -218,7 +218,7 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 
 **Informes y Consultas:**
 - `GET /api/v1/informes/detalle` - Consulta detallada de tareas (filtrado automático por rol)
-- `GET /api/v1/informes/por-asistente` - Consulta agrupada por asistente (filtrado automático por rol)
+- `GET /api/v1/informes/por-empleado` - Consulta agrupada por empleado (filtrado automático por rol)
 - `GET /api/v1/informes/por-cliente` - Consulta agrupada por cliente (filtrado automático por rol)
 - `GET /api/v1/informes/por-tipo` - Consulta agrupada por tipo de tarea (filtrado automático por rol)
 - `GET /api/v1/informes/por-fecha` - Consulta agrupada por fecha (filtrado automático por rol)
@@ -232,7 +232,7 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 **Dashboard:**
 - `GET /api/v1/dashboard/resumen` - Resumen ejecutivo del dashboard (filtrado automático por rol)
 - `GET /api/v1/dashboard/por-cliente` - Resumen por cliente (filtrado automático por rol)
-- `GET /api/v1/dashboard/por-asistente` - Resumen por asistente (filtrado automático por rol)
+- `GET /api/v1/dashboard/por-empleado` - Resumen por empleado (filtrado automático por rol)
 
 > **Nota:** Todos los endpoints de dashboard aplican filtros automáticos según el rol del usuario autenticado (mismas reglas que Informes y Consultas).
 

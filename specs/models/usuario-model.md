@@ -4,7 +4,7 @@
 
 - **Tabla:** `PQ_PARTES_usuario`
 - **Modelo:** `App\Models\Usuario`
-- **Descripción:** Representa a los empleados/asistentes/agentes que cargan las tareas al sistema
+- **Descripción:** Representa a los empleados que cargan las tareas al sistema
 
 ---
 

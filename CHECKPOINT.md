@@ -242,4 +242,5 @@ El proyecto está en fase de **especificación completa**. Se ha definido toda l
 - Eliminación de archivos duplicados en reglas de Cursor
 - Actualización de reglas de documentación de código: obligatoriedad de documentar TODAS las clases, métodos y propiedades
 - Actualización de checklist de documentación y manual del programador
+- **Estandarización de nomenclatura:** Reemplazo de "asistente" y "agente" por "empleado" en toda la documentación. Renombrados endpoints y archivos de especificación (`asistentes-*.md` → `empleados-*.md`, rutas API actualizadas)
 

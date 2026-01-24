@@ -20,7 +20,7 @@ claridad y valor completo en un flujo E2E.
 ---
 
 ## Público Objetivo
-- **Empleados/Asistentes/Agentes:** Consultores, empleados administrativos, equipos de servicios profesionales que registran tareas
+- **Empleados:** Consultores, empleados administrativos, equipos de servicios profesionales que registran tareas
 - **Clientes:** Empresas/clientes que pueden consultar las tareas realizadas para ellos
 
 ---
@@ -29,7 +29,7 @@ claridad y valor completo en un flujo E2E.
 
 ### Funcionalidades
 
-**Para Empleados/Asistentes/Agentes:**
+**Para Empleados:**
 - Autenticación mediante código de usuario y contraseña
 - Registro de tareas diarias:
   - Fecha

@@ -30,7 +30,7 @@ Table Usuario {
   created_at timestamp
   updated_at timestamp
   
-  Note: 'Tabla física: PQ_PARTES_USUARIOS. Representa empleados/asistentes/agentes que cargan tareas.'
+  Note: 'Tabla física: PQ_PARTES_USUARIOS. Representa empleados que cargan tareas.'
 }
 
 Table Cliente {

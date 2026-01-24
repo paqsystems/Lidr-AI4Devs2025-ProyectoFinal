@@ -124,36 +124,36 @@ erDiagram
 1. Login se valida contra la tabla `USERS` usando `code` y `password_hash`
 2. Si el login es exitoso, se busca el `User.code` en:
    - Tabla `PQ_PARTES_CLIENTES` (campo `code`)
-   - Tabla `PQ_PARTES_USUARIOS` (campo `code`)
-3. Se determina el tipo de usuario (cliente o usuario)
-4. Si es usuario, se verifica si es supervisor (campo `supervisor` en `PQ_PARTES_USUARIOS`)
+   - Tabla `PQ_PARTES_USUARIOS` (campo `code`) - para empleados
+3. Se determina el tipo de usuario (cliente o empleado)
+4. Si es empleado, se verifica si es supervisor (campo `supervisor` en `PQ_PARTES_USUARIOS`)
 5. Los siguientes valores se conservan durante todo el ciclo del proceso:
-   - **Tipo de usuario:** `"cliente"` o `"usuario"`
+   - **Tipo de usuario:** `"cliente"` o `"empleado"`
    - **User.Code:** Código del usuario autenticado
-   - **ID del cliente/usuario:** ID del registro en `PQ_PARTES_CLIENTES` o `PQ_PARTES_USUARIOS`
-   - **Es supervisor:** `false` para clientes, valor de `supervisor` para usuarios
+   - **ID del cliente/empleado:** ID del registro en `PQ_PARTES_CLIENTES` o `PQ_PARTES_USUARIOS`
+   - **Es supervisor:** `false` para clientes, valor de `supervisor` para empleados
 
 ---
 
-### Usuario (Empleado/Asistente/Agente)
+### Empleado
 **Tabla física:** `PQ_PARTES_USUARIOS`
 
 - id (PK)
 - user_id (FK → User, obligatorio, único) - Referencia a la tabla USERS
-- code (único, obligatorio) - Código de usuario (debe coincidir con User.code)
+- code (único, obligatorio) - Código de empleado (debe coincidir con User.code)
 - nombre (obligatorio)
 - email (único, opcional)
-- supervisor (boolean, default: false) - Indica si el usuario es supervisor
+- supervisor (boolean, default: false) - Indica si el empleado es supervisor
 - activo (boolean, default: true)
-- inhabilitado (boolean, default: false) - Indica si el usuario está inhabilitado
+- inhabilitado (boolean, default: false) - Indica si el empleado está inhabilitado
 - created_at
 - updated_at
 
-**Nota:** Representa a los empleados/asistentes/agentes que cargan las tareas al sistema. Cada registro debe tener una relación 1:1 con la tabla `USERS` a través del campo `code`.
+**Nota:** Representa a los empleados que cargan las tareas al sistema. Cada registro debe tener una relación 1:1 con la tabla `USERS` a través del campo `code`.
 
-**Permisos según tipo de usuario:**
-- **Usuario normal (`supervisor = false`):** Puede crear, editar y eliminar solo sus propias tareas. Solo ve sus propias tareas.
-- **Supervisor (`supervisor = true`):** Puede ver todas las tareas de todos los usuarios. Puede crear, editar y eliminar tareas de cualquier usuario. Al crear una tarea, puede seleccionar el usuario (por defecto aparece él mismo).
+**Permisos según tipo de empleado:**
+- **Empleado normal (`supervisor = false`):** Puede crear, editar y eliminar solo sus propias tareas. Solo ve sus propias tareas.
+- **Supervisor (`supervisor = true`):** Puede ver todas las tareas de todos los empleados. Puede crear, editar y eliminar tareas de cualquier empleado. Al crear una tarea, puede seleccionar el empleado (por defecto aparece él mismo).
 
 ---
 

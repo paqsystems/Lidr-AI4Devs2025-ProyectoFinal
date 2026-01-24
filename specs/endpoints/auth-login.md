@@ -13,7 +13,7 @@
 
 Autentica un usuario en el sistema mediante código y contraseña. La autenticación se realiza contra la tabla `USERS` (sin prefijo PQ_PARTES_). Si las credenciales son válidas:
 
-1. Se determina si el usuario es un **Cliente** (tabla `PQ_PARTES_CLIENTES`) o un **Usuario** (tabla `PQ_PARTES_USUARIOS`)
+1. Se determina si el usuario es un **Cliente** (tabla `PQ_PARTES_CLIENTES`) o un **Empleado** (tabla `PQ_PARTES_USUARIOS`)
 2. Se obtienen los datos correspondientes (ID, nombre, email, etc.)
 3. Si es usuario, se verifica si es supervisor
 4. Se genera un token de acceso que incluye toda la información necesaria para el ciclo del proceso
@@ -53,7 +53,7 @@ Accept: application/json
 
 ### Success (200 OK)
 
-**Ejemplo 1: Usuario (Empleado/Asistente)**
+**Ejemplo 1: Empleado**
 ```json
 {
   "error": 0,
@@ -237,7 +237,7 @@ Todos los campos de `resultado.user` deben conservarse durante todo el ciclo del
 
 - `USERS` (sin prefijo PQ_PARTES_) - Tabla de autenticación
 - `PQ_PARTES_CLIENTES` - Si el usuario es cliente
-- `PQ_PARTES_USUARIOS` - Si el usuario es empleado/asistente
+- `PQ_PARTES_USUARIOS` - Si el usuario es empleado
 
 ### Consultas
 
