@@ -17,11 +17,11 @@
 - [ ] Elegir herramientas de testing (PHPUnit, Playwright, etc.)
 - [ ] Documentar decisiones en `docs/producto.md` o `README.md`
 
-### 1.3 Consignas y Requisitos
-- [ ] Revisar consignas del proyecto (si aplica)
+### 1.3 Consignas y Requisitos (si aplica)
+- [ ] Revisar consignas del proyecto
 - [ ] Identificar entregables obligatorios
 - [ ] Definir criterios de aceptación del MVP
-- [ ] Crear archivo `docs/consignas-mvp.md` (si aplica)
+- [ ] Crear archivo `docs/consignas-mvp.md`
 
 ---
 
@@ -271,7 +271,7 @@
 
 ---
 
-## FASE 12: REGISTRO DE USO DE IA
+## FASE 12: REGISTRO DE USO DE IA (si aplica)
 
 ### 12.1 Plantilla de IA Log
 - [ ] Crear plantilla en `docs/plantillas/ia-log.md`
@@ -319,6 +319,29 @@
 - [ ] Hacer commit de documentación
 - [ ] Crear Pull Request con descripción completa
 - [ ] Documentar cambios en el PR
+
+---
+
+## FASE 15: CODIFICACIÓN Y DOCUMENTACIÓN DE CÓDIGO
+
+### 15.1 Reglas de Documentación Durante la Codificación
+- [ ] Establecer que **TODAS las clases** deben documentarse (públicas, privadas, internas)
+- [ ] Establecer que **TODOS los métodos** deben documentarse (públicos, privados, protegidos, estáticos)
+- [ ] Establecer que **TODAS las propiedades** deben documentarse (públicas, privadas, protegidas, constantes)
+- [ ] Definir formato de documentación según lenguaje:
+  - [ ] Backend PHP/Laravel: PHPDoc con `@param`, `@return`, `@throws`
+  - [ ] Frontend TypeScript/React: JSDoc con tipos y descripciones
+  - [ ] Backend C#: Comentarios XML con `<summary>`, `<param>`, `<returns>`
+- [ ] Documentar reglas en `specs/governance/code-documentation-rules.md`
+- [ ] Incluir ejemplos de documentación correcta en las reglas
+- [ ] Establecer que código sin documentación se considera incompleto
+
+### 15.2 Validación de Documentación
+- [ ] Configurar herramientas de validación (si aplica):
+  - [ ] Linters que verifiquen presencia de documentación
+  - [ ] Herramientas de análisis estático
+- [ ] Incluir revisión de documentación en proceso de code review
+- [ ] Establecer criterio: "Sin documentación = cambio incompleto"
 
 ---
 

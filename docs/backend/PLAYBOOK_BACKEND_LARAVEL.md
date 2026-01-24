@@ -71,6 +71,60 @@ Reglas internas de implementación BackEnd para cumplir el contrato de APIs y lo
 
 ---
 
+## Documentación de Código (Obligatoria)
+
+**Regla fundamental:** **TODAS las clases, métodos y propiedades deben documentarse** durante la codificación.
+
+### Reglas Obligatorias
+
+- ✅ **Todas las clases** (públicas, privadas, internas) deben tener PHPDoc
+- ✅ **Todos los métodos** (públicos, privados, protegidos, estáticos) deben tener PHPDoc
+- ✅ **Todas las propiedades** (públicas, privadas, protegidas, constantes) deben tener PHPDoc
+
+### Formato PHPDoc
+
+Usar PHPDoc estándar con:
+- `@param` para parámetros de métodos
+- `@return` para valores de retorno
+- `@throws` para excepciones (si aplica)
+- `@var` para propiedades
+
+### Ejemplo
+
+```php
+/**
+ * Servicio para gestionar el registro de tareas diarias.
+ * 
+ * Este servicio maneja la lógica de negocio relacionada con la creación,
+ * actualización y consulta de registros de tareas.
+ */
+class RegistroTareaService
+{
+    /**
+     * ID del usuario autenticado que realiza la operación.
+     * 
+     * @var int
+     */
+    private int $usuarioId;
+
+    /**
+     * Crea un nuevo registro de tarea para el usuario autenticado.
+     * 
+     * @param array $datos Datos del registro de tarea
+     * @return RegistroTarea El registro de tarea creado
+     * @throws ValidationException Si los datos no son válidos
+     */
+    public function crearRegistroTarea(array $datos): RegistroTarea
+    {
+        // Implementación...
+    }
+}
+```
+
+**Referencia completa:** Ver `specs/governance/code-documentation-rules.md` para reglas detalladas y más ejemplos.
+
+---
+
 ## Documentación de API (Swagger/OpenAPI)
 
 ### Instalación y Configuración

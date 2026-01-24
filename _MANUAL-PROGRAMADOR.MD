@@ -325,7 +325,9 @@ Lidr-AI4Devs2025-ProyectoFinal/
 2. **No sobre-ingeniería**: Simplicidad sobre sofisticación
 3. **Evitar duplicidad de código**: DRY (Don't Repeat Yourself)
 4. **Testing obligatorio**: Unit, integración y al menos 1 E2E del flujo principal
-5. **Documentación actualizada**: Mantener docs sincronizadas con código
+5. **Documentación de código obligatoria**: **TODAS las clases, métodos y propiedades deben documentarse** (sin excepciones)
+   - Ver reglas detalladas en: `specs/governance/code-documentation-rules.md`
+6. **Documentación actualizada**: Mantener docs sincronizadas con código
 
 ### Backend (Laravel)
 
@@ -335,6 +337,9 @@ Lidr-AI4Devs2025-ProyectoFinal/
 - **Validación:** Form Requests en `app/Http/Requests/`
 - **Modelos:** Eloquent en `app/Models/`
 - **NO usar:** PSL/Prisma (usar herramientas nativas de Laravel)
+- **Documentación:** PHPDoc obligatorio para todas las clases, métodos y propiedades
+  - Usar `@param`, `@return`, `@throws` según corresponda
+  - Ver ejemplos en: `specs/governance/code-documentation-rules.md`
 
 ### Frontend (React)
 

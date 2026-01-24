@@ -11,7 +11,8 @@
 ### Código
 
 - Usar camelCase para variables, propiedades, métodos y funciones
-- Documentar funciones y clases complejas
+- **Documentar TODAS las clases, métodos y propiedades** (obligatorio, sin excepciones)
+  - Ver reglas detalladas en: `specs/governance/code-documentation-rules.md`
 - Seguir principios SOLID
 - Mantener funciones pequeñas y enfocadas
 
@@ -98,4 +99,3 @@
 - Estas reglas pueden actualizarse conforme avance el proyecto
 - Priorizar funcionalidad sobre perfección
 - Iterar y mejorar continuamente
-

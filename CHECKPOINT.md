@@ -236,5 +236,10 @@ El proyecto está en fase de **especificación completa**. Se ha definido toda l
 ---
 
 **Última actualización:** 2025-01-20  
-**Cambios recientes:** Agregado campo `inhabilitado` a Usuario, Cliente, TipoTarea y TipoCliente
+**Cambios recientes:** 
+- Agregado campo `inhabilitado` a Usuario, Cliente, TipoTarea y TipoCliente
+- Homogeneización de extensiones: conversión de archivos `.mdc` a `.md` en `.cursor/rules/`
+- Eliminación de archivos duplicados en reglas de Cursor
+- Actualización de reglas de documentación de código: obligatoriedad de documentar TODAS las clases, métodos y propiedades
+- Actualización de checklist de documentación y manual del programador
 
