@@ -340,7 +340,7 @@ Las validaciones se aplican en el siguiente orden:
 ## Referencias
 
 - Códigos de error: `specs/errors/domain-error-codes.md`
-- Contrato de API: `.cursor/rules/01-api-contract.md`
+- Contrato de API: `.cursor/rules/06-api-contract.md`
 - Mapeo API-Datos: `architecture/api-to-data-mapping.md`
 
 ---

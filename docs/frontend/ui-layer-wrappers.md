@@ -292,8 +292,8 @@ Para agregar un nuevo componente wrapper:
 
 ## Referencias
 
-- `.cursor/rules/03-i18n-and-testid.mdc` - Reglas de i18n y test-ids
-- `.cursor/rules/02-frontend-norms.mdc` - Normas de frontend
+- `.cursor/rules/10-i18n-and-testid.md` - Reglas de i18n y test-ids
+- `.cursor/rules/07-frontend-norms.md` - Normas de frontend
 - `docs/frontend/frontend-specifications.md` - Especificaciones generales
 
 ---

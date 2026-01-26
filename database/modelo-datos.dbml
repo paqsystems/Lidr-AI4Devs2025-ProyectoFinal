@@ -3,7 +3,7 @@
 // Última actualización: 2025-01-20
 //
 // IMPORTANTE: Este archivo debe mantenerse sincronizado con docs/modelo-datos.md
-// Ver regla: .cursor/rules/13-dbml-sync-rule.md
+// Ver regla: .cursor/rules/14-dbml-sync-rule.md
 
 // Tabla de autenticación centralizada (SIN prefijo PQ_PARTES_)
 Table User {

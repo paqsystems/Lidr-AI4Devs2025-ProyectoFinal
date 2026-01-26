@@ -124,7 +124,7 @@ describe('TaskEntryForm Integration', () => {
 - ✅ **Playwright** (instalado, versión 1.57.0, obligatorio para TDD)
 - Configuración: `frontend/playwright.config.ts`
 - Tests: `frontend/tests/e2e/`
-- Reglas: `.cursor/rules/06-playwright-testing-rules.md`
+- Reglas: `.cursor/rules/11-playwright-testing-rules.md`
 
 **Estrategia TDD:**
 1. **Red:** Escribir test primero usando `data-testid` planificados
@@ -517,7 +517,7 @@ await page.click('[data-testid="login-form-submit-button"]');
 
 - `specs/flows/e2e-core-flow.md` - Flujo E2E a testear
 - `docs/frontend/frontend-specifications.md` - Especificaciones generales
-- `.cursor/rules/03-i18n-and-testid.mdc` - Reglas de test-ids y accesibilidad
+- `.cursor/rules/10-i18n-and-testid.md` - Reglas de test-ids y accesibilidad
 
 ---
 

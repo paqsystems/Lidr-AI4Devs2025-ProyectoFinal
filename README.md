@@ -9,11 +9,20 @@ Este paquete contiene **solo reglas y especificaciones**. **NO** debe implementa
 
 ### Reglas para Cursor (primario)
 Copiar a:
-- `/.cursor/rules/00-backend-policy.md`
-- `/.cursor/rules/01-api-contract.md`
-- `/.cursor/rules/02-security-sessions-tokens.md`
-- `/.cursor/rules/03-data-access-orm-sql.md`
-- `/.cursor/rules/04-ticketing-domain.md`
+- `/.cursor/rules/01-project-context.md`
+- `/.cursor/rules/02-mvp-entregables.md`
+- `/.cursor/rules/03-general-quality.md`
+- `/.cursor/rules/04-custom-rules.md`
+- `/.cursor/rules/05-backend-policy.md`
+- `/.cursor/rules/06-api-contract.md`
+- `/.cursor/rules/07-frontend-norms.md`
+- `/.cursor/rules/08-security-sessions-tokens.md`
+- `/.cursor/rules/09-data-access-orm-sql.md`
+- `/.cursor/rules/10-i18n-and-testid.md`
+- `/.cursor/rules/11-playwright-testing-rules.md`
+- `/.cursor/rules/12-ticketing-domain.md`
+- `/.cursor/rules/13-user-story-to-task-breakdown.md`
+- `/.cursor/rules/14-dbml-sync-rule.md`
 
 > Si tu instalación de Cursor usa un único archivo `.cursorrules`, concatená el contenido de los archivos anteriores en ese archivo (manteniendo el orden).
 
@@ -24,11 +33,20 @@ Copiar a:
 - `/docs/api/TICKETING_API_SPEC.md`
 
 ## Orden recomendado de lectura para Cursor
-1. 00-backend-policy.md
-2. 01-api-contract.md
-3. 02-security-sessions-tokens.md
-4. 03-data-access-orm-sql.md
-5. 04-ticketing-domain.md
+1. 01-project-context.md
+2. 02-mvp-entregables.md
+3. 03-general-quality.md
+4. 04-custom-rules.md
+5. 05-backend-policy.md
+6. 06-api-contract.md
+7. 07-frontend-norms.md
+8. 08-security-sessions-tokens.md
+9. 09-data-access-orm-sql.md
+10. 10-i18n-and-testid.md
+11. 11-playwright-testing-rules.md
+12. 12-ticketing-domain.md
+13. 13-user-story-to-task-breakdown.md
+14. 14-dbml-sync-rule.md
 
 Luego usar `/docs/*` como material ampliado.
 

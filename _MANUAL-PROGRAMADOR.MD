@@ -425,7 +425,7 @@ Lee y ejecuta el flujo E2E principal:
   npm run test:e2e:ui      # Con UI interactiva (recomendado para aprender)
   ```
 - Revisa `frontend/tests/e2e/README.md` para convenciones de testing
-- Revisa `.cursor/rules/06-playwright-testing-rules.md` para reglas obligatorias
+- Revisa `.cursor/rules/11-playwright-testing-rules.md` para reglas obligatorias
 
 ### 4. Identificar tu Tarea
 
@@ -445,7 +445,7 @@ Lee y ejecuta el flujo E2E principal:
 3. **Escribir tests:**
    - Unitarios para lógica crítica
    - Integración para API
-   - E2E si es parte del flujo principal (usar Playwright, ver `.cursor/rules/06-playwright-testing-rules.md`)
+   - E2E si es parte del flujo principal (usar Playwright, ver `.cursor/rules/11-playwright-testing-rules.md`)
 4. **Actualizar documentación** si es necesario
 5. **Commit y Push:**
    ```bash
@@ -464,7 +464,7 @@ Lee y ejecuta el flujo E2E principal:
 - [ ] UI Layer wrappers usados correctamente (frontend)
 - [ ] i18n implementado (frontend)
 - [ ] Test IDs agregados (frontend) - Ver `.cursor/rules/03-i18n-and-testid.mdc`
-- [ ] Tests E2E escritos si es parte del flujo principal - Ver `.cursor/rules/06-playwright-testing-rules.md`
+- [ ] Tests E2E escritos si es parte del flujo principal - Ver `.cursor/rules/11-playwright-testing-rules.md`
 - [ ] Formato de respuesta API correcto (backend)
 
 ---
@@ -567,7 +567,7 @@ Este documento se actualiza de forma específica cuando se indique. Las actualiz
 **Cambios en v1.1:**
 - Agregadas instrucciones de instalación de Playwright
 - Actualizada sección de testing con comandos E2E
-- Referencias a reglas de Playwright en `.cursor/rules/06-playwright-testing-rules.md`
+- Referencias a reglas de Playwright en `.cursor/rules/11-playwright-testing-rules.md`
 
 **Cambios en v1.2:**
 - Agregadas referencias a README.md de carpetas principales (docs/, specs/, backend/, specs/endpoints/)

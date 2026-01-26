@@ -41,7 +41,7 @@ Reglas internas de implementación BackEnd para cumplir el contrato de APIs y lo
 - Definir esquema usando Laravel Migrations con Schema Builder.
 - Cada cambio de estructura genera una migration nueva y versionada.
 - Migrations deben ser reversibles (método `down()`).
-- Ver detalles en `/.cursor/rules/03-data-access-orm-sql.md`.
+- Ver detalles en `/.cursor/rules/09-data-access-orm-sql.md`.
 
 ### Modelos Eloquent
 - Definir `$fillable` explícitamente.
@@ -182,12 +182,12 @@ class RegistroTareaService
 ---
 
 ## Seguridad
-Ver `/.cursor/rules/02-security-sessions-tokens.md`.
+Ver `/.cursor/rules/08-security-sessions-tokens.md`.
 
 ---
 
 ## ORM/SQL complejo
-Ver `/.cursor/rules/03-data-access-orm-sql.md`.
+Ver `/.cursor/rules/09-data-access-orm-sql.md`.
 
 **Regla importante:** NO usar subqueries en WHERE para verificar existencia. Usar LEFT JOIN + verificación de NULL en su lugar.
 

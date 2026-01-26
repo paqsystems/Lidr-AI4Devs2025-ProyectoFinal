@@ -136,7 +136,7 @@ Una vez que Playwright esté instalado:
 4. **Implementar tests reales:**
    - Seguir las especificaciones en `specs/tests/e2e/`
    - Usar `data-testid` en todos los componentes
-   - Seguir las reglas en `.cursor/rules/06-playwright-testing-rules.md`
+   - Seguir las reglas en `.cursor/rules/11-playwright-testing-rules.md`
 
 ---
 
@@ -145,5 +145,5 @@ Una vez que Playwright esté instalado:
 - [Documentación oficial de Playwright](https://playwright.dev)
 - `docs/frontend/testing.md` - Estrategia de testing del proyecto
 - `frontend/tests/e2e/README.md` - Convenciones de tests E2E
-- `.cursor/rules/06-playwright-testing-rules.md` - Reglas obligatorias de testing
+- `.cursor/rules/11-playwright-testing-rules.md` - Reglas obligatorias de testing
 - `specs/flows/e2e-core-flow.md` - Flujo E2E a testear

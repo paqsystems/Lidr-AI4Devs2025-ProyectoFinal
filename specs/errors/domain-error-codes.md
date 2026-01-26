@@ -364,7 +364,7 @@ Este catálogo puede extenderse según necesidades futuras:
 
 ## Notas
 
-- Este catálogo está alineado con el contrato de API definido en `.cursor/rules/01-api-contract.md`
+- Este catálogo está alineado con el contrato de API definido en `.cursor/rules/06-api-contract.md`
 - Los códigos deben ser consistentes en toda la aplicación
 - El frontend debe manejar todos los códigos definidos
 - Documentar cualquier código nuevo que se agregue

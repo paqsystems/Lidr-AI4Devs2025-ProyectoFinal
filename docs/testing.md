@@ -42,7 +42,7 @@ Login → Registro de tarea → Visualización de tareas.
 - ✅ **Playwright** (instalado y configurado en `frontend/`)
 - Configuración: `frontend/playwright.config.ts`
 - Tests ubicados en: `frontend/tests/e2e/`
-- Documentación: `docs/frontend/testing.md` y `.cursor/rules/06-playwright-testing-rules.md`
+- Documentación: `docs/frontend/testing.md` y `.cursor/rules/11-playwright-testing-rules.md`
 
 **Ejecutar tests E2E:**
 ```bash

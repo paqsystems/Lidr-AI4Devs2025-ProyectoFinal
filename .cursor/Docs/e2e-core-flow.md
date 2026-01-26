@@ -28,7 +28,7 @@ Este archivo especifica el flujo End-to-End (E2E) prioritario del MVP del sistem
 ## Relación con Otros Documentos
 - Implementa el flujo definido en `docs/producto.md`
 - Alineado con las historias de usuario en `docs/historias-y-tickets.md`
-- Sigue el contrato de API definido en `.cursor/rules/01-api-contract.md`
+- Sigue el contrato de API definido en `.cursor/rules/06-api-contract.md`
 - Refleja el modelo de datos en `docs/domain/DATA_MODEL.md`
 
 ## Uso

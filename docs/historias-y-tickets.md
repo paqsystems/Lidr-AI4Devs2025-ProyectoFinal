@@ -2187,7 +2187,7 @@ Debe ejecutarse **antes** del desarrollo de las historias funcionales del sistem
 - ✅ Estructura de tests en `frontend/tests/e2e/`
 - ✅ Test de ejemplo en `frontend/tests/e2e/example.spec.ts`
 - ✅ Documentación en `frontend/tests/e2e/README.md`
-- ✅ Reglas de testing en `.cursor/rules/06-playwright-testing-rules.md`
+- ✅ Reglas de testing en `.cursor/rules/11-playwright-testing-rules.md`
 - ✅ Scripts npm configurados (`test:e2e`, `test:e2e:ui`, `test:e2e:headed`)
 
 **Pendiente:**

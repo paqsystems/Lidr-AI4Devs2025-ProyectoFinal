@@ -308,7 +308,7 @@ if (result.success) {
 
 ## Referencias
 
-- Contrato base de API: `.cursor/rules/05-api-contract.md`
+- Contrato base de API: `.cursor/rules/06-api-contract.md`
 - Códigos de error: `specs/errors/domain-error-codes.md`
 
 ---

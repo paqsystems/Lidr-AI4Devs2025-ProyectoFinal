@@ -22,7 +22,7 @@ Esta carpeta contiene archivos relacionados con el diseño y visualización del 
 
 **Sincronización:**
 - Este archivo debe mantenerse sincronizado con `docs/modelo-datos.md`
-- Ver regla de sincronización: `.cursor/rules/13-dbml-sync-rule.md`
+- Ver regla de sincronización: `.cursor/rules/14-dbml-sync-rule.md`
 - Cada modificación en `docs/modelo-datos.md` requiere actualizar este archivo
 
 ### `ejemplo.md`
@@ -73,6 +73,6 @@ Usa el servidor MCP `db-diagram` para visualizar el modelo desde el agente IA:
 ## Referencias
 
 - **Documentación del modelo:** `docs/modelo-datos.md`
-- **Regla de sincronización:** `.cursor/rules/13-dbml-sync-rule.md`
+- **Regla de sincronización:** `.cursor/rules/14-dbml-sync-rule.md`
 - **Sintaxis DBML:** https://dbdiagram.io/docs
 - **MCP Server:** `mcp/db-diagram/README.md`

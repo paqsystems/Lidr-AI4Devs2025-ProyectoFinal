@@ -5,7 +5,7 @@
 Actuá como ingeniero senior responsable del diseño del MVP.
 
 Usá SOLO la regla
-".cursor/rules/12-user-story-to-task-breakdown.md"
+".cursor/rules/13-user-story-to-task-breakdown.md"
 como fuente de verdad.
 
 Tarea:
@@ -37,7 +37,7 @@ Historia de Usuario:
 Actuá como ingeniero senior responsable del refinamiento funcional del MVP.
 
 Usá exclusivamente la regla
-".cursor/rules/12-user-story-to-task-breakdown.md"
+".cursor/rules/13-user-story-to-task-breakdown.md"
 como fuente de verdad.
 
 Objetivo:
@@ -73,7 +73,7 @@ de la Historia de Usuario anterior,
 generá el plan completo de tareas/tickets del MVP.
 
 Regla obligatoria:
-".cursor/rules/12-user-story-to-task-breakdown.md"
+".cursor/rules/13-user-story-to-task-breakdown.md"
 
 Salida requerida:
 - Crear (o regenerar si ya existe) un archivo Markdown.

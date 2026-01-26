@@ -1,7 +1,7 @@
 # Documentación: 03-data-access-orm-sql.md
 
 ## Ubicación
-`.cursor/rules/03-data-access-orm-sql.md`
+`.cursor/rules/09-data-access-orm-sql.md`
 
 ## Propósito
 Este archivo define las reglas obligatorias para el acceso a datos en el backend Laravel, incluyendo:
@@ -40,7 +40,7 @@ Este archivo define las reglas obligatorias para el acceso a datos en el backend
 
 ## Relación con Otros Documentos
 - Complementa `docs/backend/PLAYBOOK_BACKEND_LARAVEL.md`
-- Referenciado desde `.cursor/rules/00-backend-policy.md`
+- Referenciado desde `.cursor/rules/05-backend-policy.md`
 - Alineado con `docs/domain/DATA_MODEL.md`
 
 ## Uso

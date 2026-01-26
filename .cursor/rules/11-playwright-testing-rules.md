@@ -48,7 +48,7 @@ data-testid="submit-btn"   // No usar camelCase
 data-testid="form#1"       // No usar caracteres especiales
 ```
 
-**Referencia completa:** Ver `.cursor/rules/03-i18n-and-testid.mdc` para convenciones detalladas.
+**Referencia completa:** Ver `.cursor/rules/10-i18n-and-testid.md` para convenciones detalladas.
 
 ### 2. Selectores en Tests (OBLIGATORIO)
 
@@ -574,7 +574,7 @@ CI=true npm run test:e2e
 - `specs/flows/e2e-core-flow.md` - Flujo E2E documentado
 - `specs/tests/e2e/` - Especificaciones de tests
 - `frontend/tests/e2e/README.md` - Convenciones de tests E2E
-- `.cursor/rules/03-i18n-and-testid.mdc` - Reglas de `data-testid` e i18n
+- `.cursor/rules/10-i18n-and-testid.md` - Reglas de `data-testid` e i18n
 
 ### Documentación Externa
 
