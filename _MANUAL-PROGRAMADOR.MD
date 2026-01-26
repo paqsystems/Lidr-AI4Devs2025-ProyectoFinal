@@ -398,6 +398,26 @@ Lidr-AI4Devs2025-ProyectoFinal/
    npm run dev
    ```
 
+4. **Ejecutar Tests**
+   ```bash
+   # Tests del backend (desde backend/)
+   cd backend
+   php artisan test              # Todos los tests
+   php artisan test --filter Unit    # Solo tests unitarios
+   php artisan test --filter Feature # Solo tests de integración
+   
+   # Tests E2E del frontend (desde frontend/)
+   cd frontend
+   npm run test:e2e          # Todos los tests E2E
+   npm run test:e2e:ui      # Con UI interactiva
+   npm run test:e2e:headed # Ver navegador
+   ```
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
 4. **Instalar Playwright (Tests E2E)**
    ```bash
    cd frontend

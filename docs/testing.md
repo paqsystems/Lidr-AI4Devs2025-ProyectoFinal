@@ -67,8 +67,8 @@ npm run test:e2e:headed # Ver navegador
 ### Backend
 backend/
 tests/
-unit/
-integration/
+  Unit/          # Tests unitarios (lógica de negocio, servicios)
+  Feature/       # Tests de integración (API + base de datos)
 
 
 ### Frontend

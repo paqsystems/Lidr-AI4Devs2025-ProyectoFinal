@@ -302,9 +302,9 @@ Cada ticket técnico referencia las historias de usuario relacionadas y está cl
 ### Testing
 
 **Estrategia de Testing:**
-- Tests unitarios: Lógica de negocio y componentes
-- Tests de integración: API + Base de datos
-- Tests E2E: Flujo principal completo con **Playwright**
+- Tests unitarios: Lógica de negocio y componentes (ubicados en `backend/tests/Unit/`)
+- Tests de integración: API + Base de datos (ubicados en `backend/tests/Feature/`)
+- Tests E2E: Flujo principal completo con **Playwright** (ubicados en `frontend/tests/e2e/`)
 
 **Playwright (E2E):**
 - ✅ Instalado y configurado en `frontend/`
@@ -354,7 +354,10 @@ Los cambios de la **Entrega 1 - Documentación Técnica** se encuentran en la ra
 ```
 ├── backend/              # Backend Laravel
 │   ├── app/Models/       # Modelos Eloquent
-│   └── database/         # Migraciones
+│   ├── database/         # Migraciones
+│   └── tests/            # Tests PHPUnit
+│       ├── Unit/         # Tests unitarios
+│       └── Feature/      # Tests de integración
 ├── frontend/             # Frontend React
 │   └── src/
 │       ├── shared/       # Componentes UI base e i18n
