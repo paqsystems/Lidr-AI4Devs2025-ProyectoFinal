@@ -349,6 +349,12 @@ Los siguientes valores **DEBEN** conservarse durante todo el ciclo del proceso (
 ## Decisiones de diseño
 - No se implementa facturación en el MVP.
 - El modelo prioriza simplicidad y trazabilidad.
+- **Normalización de base de datos:** El modelo de datos debe cumplir con la **Tercera Forma Normal (3NF)** como mínimo. Esto implica:
+  - **1NF (Primera Forma Normal):** Todos los campos son atómicos (sin grupos repetitivos). Cada campo contiene un solo valor.
+  - **2NF (Segunda Forma Normal):** No hay dependencias parciales. Todos los atributos no clave dependen completamente de la clave primaria.
+  - **3NF (Tercera Forma Normal):** No hay dependencias transitivas. Los atributos no clave dependen directamente de la clave primaria, no de otros atributos no clave.
+  - **Justificación:** La normalización 3NF elimina redundancia de datos, reduce anomalías de inserción/actualización/eliminación, y facilita el mantenimiento y la integridad de los datos.
+  - **Excepciones:** Cualquier desnormalización intencional debe estar documentada y justificada por razones de performance o funcionalidad específica del negocio.
 - **Autenticación centralizada:** La tabla `USERS` (sin prefijo PQ_PARTES_) es la única tabla de autenticación del sistema. Todos los logins se validan contra esta tabla.
 - **Flujo de autenticación:**
   1. Login se valida contra `USERS` usando `code` y `password_hash`

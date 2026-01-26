@@ -232,8 +232,90 @@ await page.waitForSelector('[data-testid="tasks.table.row.1"]', { state: 'visibl
 // ✅ CORRECTO - Esperar navegación
 await expect(page).toHaveURL('/dashboard');
 
+// ✅ CORRECTO - Esperar que un elemento desaparezca
+await expect(page.locator('[data-testid="loading.spinner"]')).not.toBeVisible();
+
+// ✅ CORRECTO - Esperar respuesta de red
+await page.waitForResponse(response => response.url().includes('/api/tasks') && response.status() === 200);
+
 // ❌ INCORRECTO - No esperar
 await page.click('[data-testid="button"]');  // Puede fallar si el botón aún no está listo
+```
+
+### 7.1. Prohibición de Esperas Ciegas (OBLIGATORIO)
+
+**Regla:** Está **PROHIBIDO** usar esperas ciegas (blind waits) o delays fijos en los tests.
+
+**Prohibido:**
+- `page.waitForTimeout(milliseconds)` - Espera ciega sin condición
+- `setTimeout()` / `sleep()` / `delay()` - Delays fijos
+- Cualquier espera basada en tiempo fijo sin verificar estado
+
+**Razones:**
+- Las esperas ciegas hacen los tests lentos e ineficientes
+- Son frágiles: pueden fallar en máquinas lentas o pasar en máquinas rápidas cuando deberían fallar
+- No verifican el estado real de la aplicación
+- Dificultan la detección de problemas reales de performance
+
+**Ejemplos de lo que NO se debe hacer:**
+```typescript
+// ❌ PROHIBIDO - Espera ciega con waitForTimeout
+await page.waitForTimeout(2000);  // Esperar 2 segundos sin verificar nada
+await page.click('[data-testid="button"]');
+
+// ❌ PROHIBIDO - Delay fijo con setTimeout
+await new Promise(resolve => setTimeout(resolve, 1000));
+await page.fill('[data-testid="input"]', 'valor');
+
+// ❌ PROHIBIDO - Sleep o delay de librerías externas
+await sleep(500);
+await page.click('[data-testid="submitButton"]');
+
+// ❌ PROHIBIDO - Espera ciega antes de verificar
+await page.waitForTimeout(3000);
+await expect(page.locator('[data-testid="result"]')).toBeVisible();
+```
+
+**Alternativas correctas:**
+```typescript
+// ✅ CORRECTO - Esperar visibilidad del elemento
+await expect(page.locator('[data-testid="button"]')).toBeVisible();
+await page.click('[data-testid="button"]');
+
+// ✅ CORRECTO - Esperar que un elemento esté en estado específico
+await expect(page.locator('[data-testid="loading.spinner"]')).not.toBeVisible();
+await expect(page.locator('[data-testid="result"]')).toBeVisible();
+
+// ✅ CORRECTO - Esperar respuesta de red
+await page.waitForResponse(response => 
+  response.url().includes('/api/tasks') && response.status() === 200
+);
+await expect(page.locator('[data-testid="tasks.table"]')).toBeVisible();
+
+// ✅ CORRECTO - Esperar que el texto aparezca
+await expect(page.locator('[data-testid="message"]')).toContainText('Éxito');
+
+// ✅ CORRECTO - Esperar cambio de URL
+await expect(page).toHaveURL('/dashboard');
+
+// ✅ CORRECTO - Esperar que un elemento sea interactuable
+await expect(page.locator('[data-testid="submitButton"]')).toBeEnabled();
+await page.click('[data-testid="submitButton"]');
+
+// ✅ CORRECTO - Esperar múltiples condiciones
+await Promise.all([
+  expect(page.locator('[data-testid="table"]')).toBeVisible(),
+  expect(page.locator('[data-testid="loading"]')).not.toBeVisible()
+]);
+```
+
+**Excepciones (muy raras):**
+- Solo se permite `waitForTimeout` en casos excepcionales y debe estar documentado con justificación clara:
+```typescript
+// ⚠️ EXCEPCIÓN - Solo si es absolutamente necesario y está documentado
+// Justificación: Esperar animación CSS que no expone estado en DOM
+await page.waitForTimeout(300);  // Duración mínima de animación CSS
+// TODO: Reemplazar cuando se agregue data-testid para estado de animación
 ```
 
 ### 8. Validaciones y Mensajes de Error (OBLIGATORIO)

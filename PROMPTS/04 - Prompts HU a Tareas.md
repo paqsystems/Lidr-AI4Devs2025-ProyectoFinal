@@ -15,7 +15,7 @@ y guardarlo como archivo Markdown.
 
 Archivo:
 - Ruta: docs/hu-tareas/
-- Nombre: "TR-[TITULO_HU].md"
+- Nombre: igual al nombre del HU, reemplazando "HU" por "TR".
 - Si existe, regenerarlo desde cero (overwrite total).
 
 Prohibido:
