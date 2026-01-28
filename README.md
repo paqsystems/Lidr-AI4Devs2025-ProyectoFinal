@@ -299,6 +299,8 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 
 Cada ticket técnico referencia las historias de usuario relacionadas y está clasificado según su prioridad (MUST-HAVE o SHOULD-HAVE).
 
+**Trazabilidad de ejecución:** Durante el desarrollo del MVP, la evidencia de ejecución y cambios se documenta al pie de cada TR para facilitar la trazabilidad y la evaluación.
+
 ### Testing
 
 **Estrategia de Testing:**

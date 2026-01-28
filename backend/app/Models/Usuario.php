@@ -4,54 +4,55 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 
 /**
  * Modelo: Usuario (Empleado/Asistente/Agente)
  * 
- * Representa a los empleados/asistentes/agentes que cargan las tareas al sistema.
+ * Tabla física: PQ_PARTES_USUARIOS
  * 
- * Campos importantes:
- * - code: Código único de usuario para autenticación
- * - supervisor: Indica si el usuario tiene permisos de supervisor
- * - activo: Indica si el usuario está activo
- * - inhabilitado: Indica si el usuario está inhabilitado (soft delete)
+ * Representa a los empleados que cargan las tareas al sistema.
+ * Tiene relación 1:1 obligatoria con la tabla USERS.
  * 
  * Permisos según tipo de usuario:
- * - Usuario normal (supervisor = false): Solo puede crear, editar y eliminar sus propias tareas
- * - Supervisor (supervisor = true): Puede ver todas las tareas y gestionar tareas de cualquier usuario
+ * - Usuario normal (supervisor=false): Solo puede gestionar sus propias tareas
+ * - Supervisor (supervisor=true): Puede gestionar tareas de cualquier usuario
+ * 
+ * @property int $id
+ * @property int $user_id FK → USERS
+ * @property string $code Código de usuario (debe coincidir con User.code)
+ * @property string $nombre Nombre completo del empleado
+ * @property string|null $email Email del empleado
+ * @property bool $supervisor Indica si es supervisor
+ * @property bool $activo Indica si está activo
+ * @property bool $inhabilitado Indica si está inhabilitado
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * 
+ * @see docs/modelo-datos.md
+ * @see TR-00(MH)-Generacion-base-datos-inicial.md
  */
-class Usuario extends Authenticatable
+class Usuario extends Model
 {
-    use HasApiTokens, HasFactory;
+    use HasFactory;
 
     /**
      * Nombre de la tabla
      */
-    protected $table = 'PQ_PARTES_usuario';
+    protected $table = 'PQ_PARTES_USUARIOS';
 
     /**
      * Campos que pueden ser asignados masivamente
      */
     protected $fillable = [
+        'user_id',
         'code',
         'nombre',
         'email',
-        'password',
         'supervisor',
         'activo',
         'inhabilitado',
-    ];
-
-    /**
-     * Campos ocultos en serialización
-     */
-    protected $hidden = [
-        'password',
-        'password_hash',
-        'remember_token',
     ];
 
     /**
@@ -75,6 +76,15 @@ class Usuario extends Authenticatable
     ];
 
     /**
+     * Relación: Un Usuario pertenece a un User
+     * Relación 1:1 obligatoria
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
      * Relación: Un Usuario tiene muchos RegistroTarea
      */
     public function registrosTarea(): HasMany
@@ -84,8 +94,6 @@ class Usuario extends Authenticatable
 
     /**
      * Verificar si el usuario está habilitado
-     * 
-     * @return bool
      */
     public function isHabilitado(): bool
     {
@@ -94,8 +102,6 @@ class Usuario extends Authenticatable
 
     /**
      * Verificar si el usuario es supervisor
-     * 
-     * @return bool
      */
     public function isSupervisor(): bool
     {
@@ -108,7 +114,7 @@ class Usuario extends Authenticatable
     public function scopeHabilitados($query)
     {
         return $query->where('activo', true)
-            ->where('inhabilitado', false);
+                     ->where('inhabilitado', false);
     }
 
     /**
@@ -119,4 +125,3 @@ class Usuario extends Authenticatable
         return $query->where('supervisor', true);
     }
 }
-

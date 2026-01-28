@@ -9,8 +9,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Modelo: TipoCliente
  * 
- * Representa los tipos de cliente disponibles en el sistema.
- * Ejemplos: "Corporativo", "PyME", "Startup", "Gobierno", etc.
+ * Tabla física: PQ_PARTES_TIPOS_CLIENTE
+ * 
+ * Catálogo de tipos de cliente (ej: Corporativo, PyME, Startup, Gobierno).
+ * 
+ * @property int $id
+ * @property string $code Código único del tipo de cliente
+ * @property string $descripcion Descripción del tipo de cliente
+ * @property bool $activo Indica si está activo
+ * @property bool $inhabilitado Indica si está inhabilitado
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * 
+ * @see docs/modelo-datos.md
+ * @see TR-00(MH)-Generacion-base-datos-inicial.md
  */
 class TipoCliente extends Model
 {
@@ -19,14 +31,16 @@ class TipoCliente extends Model
     /**
      * Nombre de la tabla
      */
-    protected $table = 'PQ_PARTES_tipo_cliente';
+    protected $table = 'PQ_PARTES_TIPOS_CLIENTE';
 
     /**
      * Campos que pueden ser asignados masivamente
      */
     protected $fillable = [
+        'code',
         'descripcion',
         'activo',
+        'inhabilitado',
     ];
 
     /**
@@ -34,6 +48,7 @@ class TipoCliente extends Model
      */
     protected $casts = [
         'activo' => 'boolean',
+        'inhabilitado' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -43,14 +58,31 @@ class TipoCliente extends Model
      */
     protected $attributes = [
         'activo' => true,
+        'inhabilitado' => false,
     ];
 
     /**
-     * Relación: Un TipoCliente tiene muchos Cliente
+     * Relación: Un TipoCliente tiene muchos Clientes
      */
     public function clientes(): HasMany
     {
         return $this->hasMany(Cliente::class, 'tipo_cliente_id');
     }
-}
 
+    /**
+     * Verificar si el tipo está habilitado
+     */
+    public function isHabilitado(): bool
+    {
+        return $this->activo && !$this->inhabilitado;
+    }
+
+    /**
+     * Scope para tipos habilitados
+     */
+    public function scopeHabilitados($query)
+    {
+        return $query->where('activo', true)
+                     ->where('inhabilitado', false);
+    }
+}

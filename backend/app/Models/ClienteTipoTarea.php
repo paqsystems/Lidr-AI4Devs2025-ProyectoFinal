@@ -2,29 +2,36 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Modelo: ClienteTipoTarea
  * 
- * Tabla de asociación (pivot) entre Cliente y TipoTarea.
- * Permite asignar tipos de tarea específicos (no genéricos) a clientes.
+ * Tabla física: PQ_PARTES_CLIENTE_TIPO_TAREA
  * 
- * NOTA: La regla de negocio de visibilidad se implementará en una fase posterior:
- * - TODO: Al crear tarea, mostrar tipos genéricos + tipos asociados al cliente
+ * Tabla de asociación N:M entre Cliente y TipoTarea.
+ * Permite asignar tipos de tarea específicos a clientes 
+ * (cuando el tipo NO es genérico).
+ * 
+ * @property int $id
+ * @property int $cliente_id FK → PQ_PARTES_CLIENTES
+ * @property int $tipo_tarea_id FK → PQ_PARTES_TIPOS_TAREA
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * 
+ * @see docs/modelo-datos.md
+ * @see TR-00(MH)-Generacion-base-datos-inicial.md
  */
 class ClienteTipoTarea extends Model
 {
+    use HasFactory;
+
     /**
      * Nombre de la tabla
      */
-    protected $table = 'PQ_PARTES_cliente_tipo_tarea';
-
-    /**
-     * Indica si el modelo debe usar timestamps
-     */
-    public $timestamps = true;
+    protected $table = 'PQ_PARTES_CLIENTE_TIPO_TAREA';
 
     /**
      * Campos que pueden ser asignados masivamente
@@ -35,7 +42,15 @@ class ClienteTipoTarea extends Model
     ];
 
     /**
-     * Relación: Un ClienteTipoTarea pertenece a un Cliente
+     * Casts de tipos de datos
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
+     * Relación: Pertenece a un Cliente
      */
     public function cliente(): BelongsTo
     {
@@ -43,11 +58,10 @@ class ClienteTipoTarea extends Model
     }
 
     /**
-     * Relación: Un ClienteTipoTarea pertenece a un TipoTarea
+     * Relación: Pertenece a un TipoTarea
      */
     public function tipoTarea(): BelongsTo
     {
         return $this->belongsTo(TipoTarea::class, 'tipo_tarea_id');
     }
 }
-
