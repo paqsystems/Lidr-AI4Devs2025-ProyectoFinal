@@ -332,3 +332,330 @@ Rediseño de arquitectura de autenticación y actualización de documentación
 ### Archivos eliminados
 
 - `docs/ANALISIS-HISTORIAS-AUTENTICACION.md` (archivo temporal de análisis)
+
+---
+
+# ENTREGA 2
+
+---
+
+## Entrada #6
+
+### Fecha
+2026-01-27
+
+### Etapa del proyecto
+Implementación de infraestructura de base de datos (TR-00)
+
+### Herramientas de IA utilizadas
+- Cursor IDE (Claude) - Implementación completa
+
+### Prompt o instrucción utilizada
+
+```
+Implementá la TR completa ubicada en:
+"docs/tareas/TR-00(MH)-Generacion-base-datos-inicial.md"
+
+Reglas:
+- Ejecutar estrictamente las tareas T2 a T15 como fuente de verdad.
+- T1 (script SQL via MCP) solo si es necesario para validar rápidamente, pero la FUENTE DE VERDAD deben ser migraciones Laravel.
+- Respetar nombres de tablas y prefijo PQ_PARTES_ (excepto USERS).
+- No inventar tablas ni campos fuera del modelo indicado en la TR.
+- Al terminar, actualizar el mismo archivo TR marcando cada tarea como DONE e incluyendo notas de implementación.
+
+Deliverables mínimos:
+- Migraciones (up/down) + seeders + modelos Eloquent + tests de migraciones y seed.
+- Documentación del proceso (docs/deploy-ci-cd.md o archivo dedicado).
+- Entrada en docs/ia-log.md con prompts usados y ajustes humanos.
+```
+
+### Resultado generado por IA
+
+**Migraciones creadas (7 archivos):**
+- `2026_01_27_000001_create_users_table.php`
+- `2026_01_27_000002_create_tipos_cliente_table.php`
+- `2026_01_27_000003_create_tipos_tarea_table.php`
+- `2026_01_27_000004_create_usuarios_table.php`
+- `2026_01_27_000005_create_clientes_table.php`
+- `2026_01_27_000006_create_registro_tarea_table.php`
+- `2026_01_27_000007_create_cliente_tipo_tarea_table.php`
+
+**Seeders creados (6 archivos):**
+- `DatabaseSeeder.php` - Orquestador principal
+- `TipoClienteSeeder.php` - Tipos de cliente (CORP, PYME)
+- `TipoTareaSeeder.php` - Tipos de tarea (GENERAL, SOPORTE, DESARROLLO)
+- `UserSeeder.php` - Usuarios de autenticación (ADMIN, CLI001, EMP001)
+- `UsuarioSeeder.php` - Empleados (Administrador, Empleado Demo)
+- `ClienteSeeder.php` - Clientes (CLI001, CLI002)
+
+**Modelos Eloquent creados/actualizados (7 archivos):**
+- `User.php` - Tabla USERS (autenticación centralizada)
+- `Usuario.php` - Tabla PQ_PARTES_USUARIOS
+- `Cliente.php` - Tabla PQ_PARTES_CLIENTES
+- `TipoCliente.php` - Tabla PQ_PARTES_TIPOS_CLIENTE
+- `TipoTarea.php` - Tabla PQ_PARTES_TIPOS_TAREA
+- `RegistroTarea.php` - Tabla PQ_PARTES_REGISTRO_TAREA
+- `ClienteTipoTarea.php` - Tabla PQ_PARTES_CLIENTE_TIPO_TAREA
+
+**Tests creados (2 archivos):**
+- `MigrationTest.php` - Tests de estructura de tablas y foreign keys
+- `SeederTest.php` - Tests de datos mínimos
+
+**Documentación actualizada:**
+- `docs/deploy-ci-cd.md` - Agregada sección de migraciones y BD
+
+### Ajustes humanos realizados
+Leído las tareas realizadas documentadas en el mismo archivo "docs/tareas/TR-00(MH)-Generacion-base-datos-inicial.md", se procedió a realizar todos los pasos indicados en el tópico "Tareas pendientes", obviamente realizados por la IA, siguiendo el cumplimiento del paso a paso, hasta verificar la generación de todas las tablas a través del versionado Laravel.
+
+En función de los problemas generados durante la migración Laravel, se agregó una regla para que en SQL Server se trabaje con el formato de fecha YMD y la programación se adapte a este formato
+
+### Motivo del ajuste
+N/A - Primera implementación sin ajustes.
+
+### Decisiones técnicas tomadas por la IA
+
+1. **Eliminación de migraciones parciales existentes:** Se eliminaron 4 migraciones parciales que no seguían el modelo de datos completo.
+
+2. **Orden de migraciones:** Se estableció un orden estricto para respetar dependencias de foreign keys.
+
+3. **Seeders idempotentes:** Se implementaron con `updateOrInsert` para evitar duplicados en ejecuciones repetidas.
+
+4. **Modelo User separado:** Se creó un modelo `User.php` para la tabla `USERS` (autenticación), separado de `Usuario.php` (empleados).
+
+5. **Nomenclatura de tablas:** Se respetó el prefijo `PQ_PARTES_` para todas las tablas excepto `USERS`.
+
+### Archivos creados
+
+**Backend/Database/Migrations:**
+- `backend/database/migrations/2026_01_27_000001_create_users_table.php`
+- `backend/database/migrations/2026_01_27_000002_create_tipos_cliente_table.php`
+- `backend/database/migrations/2026_01_27_000003_create_tipos_tarea_table.php`
+- `backend/database/migrations/2026_01_27_000004_create_usuarios_table.php`
+- `backend/database/migrations/2026_01_27_000005_create_clientes_table.php`
+- `backend/database/migrations/2026_01_27_000006_create_registro_tarea_table.php`
+- `backend/database/migrations/2026_01_27_000007_create_cliente_tipo_tarea_table.php`
+
+**Backend/Database/Seeders:**
+- `backend/database/seeders/DatabaseSeeder.php`
+- `backend/database/seeders/TipoClienteSeeder.php`
+- `backend/database/seeders/TipoTareaSeeder.php`
+- `backend/database/seeders/UserSeeder.php`
+- `backend/database/seeders/UsuarioSeeder.php`
+- `backend/database/seeders/ClienteSeeder.php`
+
+**Backend/App/Models:**
+- `backend/app/Models/User.php`
+- `backend/app/Models/Usuario.php`
+- `backend/app/Models/Cliente.php`
+- `backend/app/Models/TipoCliente.php`
+- `backend/app/Models/TipoTarea.php`
+- `backend/app/Models/RegistroTarea.php`
+- `backend/app/Models/ClienteTipoTarea.php`
+
+**Backend/Tests:**
+- `backend/tests/Feature/Database/MigrationTest.php`
+- `backend/tests/Feature/Database/SeederTest.php`
+
+### Archivos modificados
+
+- `docs/deploy-ci-cd.md` - Agregada sección de migraciones y base de datos
+
+### Archivos eliminados
+
+- `backend/database/migrations/2025_01_20_000001_add_fields_to_tipo_tarea_table.php`
+- `backend/database/migrations/2025_01_20_000002_create_cliente_tipo_tarea_table.php`
+- `backend/database/migrations/2025_01_20_000003_create_tipo_cliente_table.php`
+- `backend/database/migrations/2025_01_20_000004_add_tipo_cliente_id_to_cliente_table.php`
+
+---
+
+## Entrada #7
+
+### Fecha
+2026-01-27
+
+### Etapa del proyecto
+Configuración del proyecto Laravel y verificación de migraciones
+
+### Herramientas de IA utilizadas
+- Cursor IDE (Claude) - Configuración y debugging
+
+### Prompt o instrucción utilizada
+
+```
+podés realizar la configuración del proyecto Laravel?
+```
+
+### Resultado generado por IA
+
+1. **Proyecto Laravel 10.x creado** mediante `composer create-project`
+2. **Archivos personalizados preservados** (migraciones, seeders, modelos, tests)
+3. **Conexión SQL Server configurada** en `.env`
+4. **Migraciones y seeders ejecutados exitosamente**
+
+### Ajustes técnicos para compatibilidad SQL Server
+
+Durante la ejecución, se encontraron y resolvieron los siguientes problemas:
+
+1. **`ON DELETE RESTRICT` no soportado:**
+   - Error: "Sintaxis incorrecta cerca de la palabra clave 'restrict'"
+   - Solución: Cambiar a `ON DELETE NO ACTION` (mismo comportamiento en SQL Server)
+
+2. **IDENTITY_INSERT OFF:**
+   - Error: "No se puede insertar un valor explícito en la columna de identidad"
+   - Solución: Eliminar IDs explícitos de los seeders, dejar que SQL Server genere los IDs
+
+3. **Formato de fecha fuera de rango:**
+   - Error: "La conversión del tipo de datos nvarchar en datetime produjo un valor fuera de intervalo"
+   - Solución: Usar `DB::raw('GETDATE()')` en lugar de `now()` en los seeders
+
+### Archivos modificados
+
+- `backend/database/migrations/2026_01_27_000004_create_usuarios_table.php` - `restrict` → `no action`
+- `backend/database/migrations/2026_01_27_000005_create_clientes_table.php` - `restrict` → `no action`
+- `backend/database/migrations/2026_01_27_000006_create_registro_tarea_table.php` - `restrict` → `no action`
+- `backend/database/seeders/TipoClienteSeeder.php` - Timestamps con GETDATE()
+- `backend/database/seeders/TipoTareaSeeder.php` - Timestamps con GETDATE()
+- `backend/database/seeders/UserSeeder.php` - Timestamps con GETDATE()
+- `backend/database/seeders/UsuarioSeeder.php` - IDs dinámicos + GETDATE()
+- `backend/database/seeders/ClienteSeeder.php` - IDs dinámicos + GETDATE()
+- `backend/.env` - Configuración SQL Server
+- `docs/hu-tareas/TR-00(MH)-Generacion-base-datos-inicial.md` - Actualizado con estado final
+
+### Archivos creados
+
+- `backend/.env.example` - Template de variables de entorno
+
+### Comandos ejecutados
+
+```bash
+composer create-project laravel/laravel backend
+php artisan migrate
+php artisan db:seed
+php artisan migrate:fresh --seed  # Verificación completa ✅
+```
+
+### Verificación final
+
+- ✅ 10 tablas creadas (7 del modelo + 3 de Laravel)
+- ✅ Datos de seed insertados correctamente
+- ✅ `migrate:fresh --seed` funciona sin errores
+- ✅ Reproducibilidad completa verificada
+
+---
+
+## Entrada #8
+
+### Fecha
+2026-01-27
+
+### Etapa del proyecto
+Implementación de Login de Empleado (TR-001)
+
+### Herramientas de IA utilizadas
+- Cursor IDE (Claude) - Implementación completa
+
+### Prompt o instrucción utilizada
+
+```
+Implementá la TR funcional ubicada en:
+"docs/tareas/TR-001(MH)-login-de-empleado.md"
+
+Esta TR es la FUENTE DE VERDAD del alcance.
+
+Reglas generales:
+- Implementar estrictamente las tareas definidas en la TR.
+- No inventar funcionalidades fuera del alcance.
+- Backend, Frontend, Tests y Documentación según lo indicado en la TR.
+```
+
+### Resultado generado por IA
+
+**Tareas implementadas: 18 de 18**
+
+**Backend (T1-T6):**
+- `database/seeders/TestUsersSeeder.php` - Seeder con usuarios de prueba
+- `app/Http/Requests/Auth/LoginRequest.php` - FormRequest de validación
+- `app/Services/AuthService.php` - Servicio de autenticación con lógica completa
+- `app/Http/Controllers/Api/V1/AuthController.php` - Controller
+- `routes/api.php` - Ruta POST /api/v1/auth/login
+- `app/Http/Resources/Auth/LoginResource.php` - Resource de respuesta
+
+**Frontend (T7-T11):**
+- `src/shared/utils/tokenStorage.ts` - Utilidad de almacenamiento de token
+- `src/features/auth/services/auth.service.ts` - Servicio de autenticación
+- `src/features/auth/components/LoginForm.tsx` - Componente de formulario
+- `src/features/auth/components/LoginForm.css` - Estilos
+- `src/routes/ProtectedRoute.tsx` - Protección de rutas
+- `src/routes/PublicRoute.tsx` - Rutas públicas
+- `src/app/App.tsx` - Componente raíz con router
+- `src/app/Dashboard.tsx` - Dashboard básico
+
+**Tests (T12-T14):**
+- `tests/Unit/Services/AuthServiceTest.php` - 10 unit tests
+- `tests/Feature/Api/V1/Auth/LoginTest.php` - 11 integration tests
+- `tests/e2e/auth-login.spec.ts` - 10 E2E tests con Playwright
+
+**Documentación (T15-T17):**
+- `docs/backend/autenticacion.md` - Documentación del flujo de autenticación
+- Actualización de `docs/ia-log.md`
+
+### Ajustes humanos realizados
+- Ninguno hasta el momento.
+
+### Decisiones técnicas tomadas por la IA
+
+1. **Estructura de carpetas:**
+   - Backend: Controllers en `Api/V1/` para versionado
+   - Frontend: Features organizados por dominio (`features/auth/`)
+
+2. **Seguridad:**
+   - Mensajes de error genéricos para no revelar existencia de usuarios
+   - Validación en dos niveles (USERS y PQ_PARTES_USUARIOS)
+
+3. **Frontend:**
+   - React con TypeScript
+   - localStorage para persistencia de token
+   - Rutas protegidas con redirección automática
+
+4. **Tests E2E:**
+   - Uso exclusivo de `data-testid` como selectores
+   - Sin esperas ciegas (waitForTimeout)
+   - Verificación de localStorage
+
+### Archivos creados
+
+**Backend:**
+- `backend/database/seeders/TestUsersSeeder.php`
+- `backend/app/Http/Requests/Auth/LoginRequest.php`
+- `backend/app/Services/AuthService.php`
+- `backend/app/Http/Controllers/Api/V1/AuthController.php`
+- `backend/app/Http/Resources/Auth/LoginResource.php`
+- `backend/tests/Unit/Services/AuthServiceTest.php`
+- `backend/tests/Feature/Api/V1/Auth/LoginTest.php`
+
+**Frontend:**
+- `frontend/src/shared/utils/tokenStorage.ts`
+- `frontend/src/features/auth/services/auth.service.ts`
+- `frontend/src/features/auth/components/LoginForm.tsx`
+- `frontend/src/features/auth/components/LoginForm.css`
+- `frontend/src/features/auth/components/index.ts`
+- `frontend/src/features/auth/services/index.ts`
+- `frontend/src/features/auth/index.ts`
+- `frontend/src/routes/ProtectedRoute.tsx`
+- `frontend/src/routes/PublicRoute.tsx`
+- `frontend/src/routes/index.ts`
+- `frontend/src/app/App.tsx`
+- `frontend/src/app/App.css`
+- `frontend/src/app/Dashboard.tsx`
+- `frontend/src/app/Dashboard.css`
+- `frontend/src/main.tsx`
+- `frontend/index.html`
+- `frontend/tests/e2e/auth-login.spec.ts`
+
+**Docs:**
+- `docs/backend/autenticacion.md`
+
+### Archivos modificados
+
+- `backend/routes/api.php` - Agregada ruta de login
