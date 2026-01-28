@@ -1016,31 +1016,38 @@ mkdir -p src\app
 
 ## Pendientes / Follow-ups
 
-1. **Ejecutar tests de backend:**
+### Completados (2026-01-28)
+
+1. **Ejecutar tests de backend:** ✅ COMPLETADO
+   - Tests corregidos para evitar conflictos con datos del TestUsersSeeder
+   - 31 tests pasando (13 Unit + 11 Login + 7 Logout)
    ```bash
-   cd backend
-   php artisan test
+   php artisan test --filter=Auth
    ```
 
-2. **Instalar dependencias del frontend:**
+2. **Configuración de conexión SQL Server:** ✅ COMPLETADO
+   - Puerto 2544 configurado en `.env`
+   - Formato: `DB_HOST=servidor\instancia,puerto`
+
+3. **Seeder de usuarios de prueba:** ✅ COMPLETADO
    ```bash
-   cd frontend
-   npm install
+   php artisan db:seed --class=TestUsersSeeder
    ```
 
-3. **Ejecutar tests E2E:**
+### Pendientes
+
+1. **Ejecutar tests E2E:**
    ```bash
    cd frontend
    npm run test:e2e
    ```
 
-4. **Configurar variable de entorno para API URL:**
-   - Crear archivo `.env` en frontend con `VITE_API_URL`
+### Archivos modificados (2026-01-28)
 
-5. **Ejecutar seeder de usuarios de prueba:**
-   ```bash
-   php artisan db:seed --class=TestUsersSeeder
-   ```
+- `backend/tests/Unit/Services/AuthServiceTest.php` - Agregada limpieza de datos antes de inserts
+- `backend/tests/Feature/Api/V1/Auth/LoginTest.php` - Agregada limpieza de datos antes de inserts
+- `backend/tests/Feature/Api/V1/Auth/LogoutTest.php` - Agregada limpieza de datos antes de inserts
+- `backend/.env` - Configuración de puerto SQL Server (2544)
 
 ---
 

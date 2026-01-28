@@ -409,16 +409,6 @@ Este checklist está basado en el proceso seguido en este proyecto. Para más de
 - [ ] Testing manualmente
 - [ ] Reprocesar puntos 2 al 4
 
-  ### Comandos de test
-  
-  Backend : 
-  cd backend
-  php artisan test --filter=Logout
-
-  FrontEnd : 
-  cd frontend
-  npx playwright test auth-login.spec.ts
-
   ### Comandos de setup de servidores
 
   Backend:
@@ -429,9 +419,33 @@ Este checklist está basado en el proceso seguido en este proyecto. Para más de
   cd frontend
   npm run dev
 
+  ### Comandos de test
+  
+  Backend : 
+  cd backend
+  php artisan test --filter=Logout
+
+  FrontEnd : 
+  cd frontend
+  npx playwright test auth-login.spec.ts
+
   Test E2E:
   cd frontend
   npx playwright test auth-login.spec.ts
+
+  Playwright : comandos útiles
+  // Visualizar reporte
+  npx playwright show-report
+  //  Ejecutar tests con UI interactiva
+  npx playwright test --ui
+  // Ejecutar tests y mostrar reporte automáticamente
+  npx playwright test --reporter=html
+  //  Ver trace de un test fallido (si está configurado)
+  npx playwright show-trace path/to/trace.zip
+  //  Ejecutar un test específico
+  npx playwright test auth-login.spec.ts
+  //  Ejecutar en modo debug
+  npx playwright test --debug
 
 ## Implementación
 

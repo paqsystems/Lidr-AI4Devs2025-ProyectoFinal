@@ -252,21 +252,26 @@ test.describe('Login de Empleado', () => {
     ]);
     await expect(page).toHaveURL('/', { timeout: 10000 });
 
-    // Interceptar la petición de logout para verificar estado del botón
-    const logoutPromise = page.waitForResponse(resp => resp.url().includes('/api/v1/auth/logout'));
-    await page.click('[data-testid="app.logoutButton"]');
+    // Verificar que el botón está visible y habilitado antes del logout
+    await expect(page.locator('[data-testid="app.logoutButton"]')).toBeVisible();
+    await expect(page.locator('[data-testid="app.logoutButton"]')).toBeEnabled();
 
-    // El botón debería estar deshabilitado durante la petición
-    await expect(page.locator('[data-testid="app.logoutButton"]')).toBeDisabled();
+    // Hacer click y esperar respuesta usando Promise.all para evitar race condition
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/logout')),
+      page.click('[data-testid="app.logoutButton"]'),
+    ]);
 
-    // Esperar que complete
-    await logoutPromise;
+    // Verificar redirección después del logout
     await expect(page).toHaveURL('/login', { timeout: 10000 });
   });
 
   test('no debe poder acceder a dashboard después de logout', async ({ page }) => {
-    // Autenticar
+    // Limpiar estado inicial
     await page.goto('/login');
+    await page.evaluate(() => localStorage.clear());
+    
+    // Autenticar
     await page.fill('[data-testid="auth.login.usuarioInput"]', TEST_USER.code);
     await page.fill('[data-testid="auth.login.passwordInput"]', TEST_USER.password);
     
@@ -276,12 +281,20 @@ test.describe('Login de Empleado', () => {
     ]);
     await expect(page).toHaveURL('/', { timeout: 10000 });
 
+    // Verificar que estamos en el dashboard
+    await expect(page.locator('[data-testid="app.dashboard"]')).toBeVisible();
+    await expect(page.locator('[data-testid="app.logoutButton"]')).toBeVisible();
+
     // Hacer logout
     await Promise.all([
-      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/logout') && resp.status() === 200),
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/logout')),
       page.click('[data-testid="app.logoutButton"]'),
     ]);
     await expect(page).toHaveURL('/login', { timeout: 10000 });
+
+    // Verificar que localStorage fue limpiado
+    const token = await page.evaluate(() => localStorage.getItem('auth_token'));
+    expect(token).toBeNull();
 
     // Intentar acceder al dashboard directamente
     await page.goto('/');

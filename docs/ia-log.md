@@ -724,3 +724,78 @@ Esta TR es la FUENTE DE VERDAD del alcance.
 **Docs:**
 - `docs/backend/autenticacion.md` - Agregada sección de logout
 - `docs/hu-tareas/TR-003(MH)-logout.md` - Actualizado estado de tareas
+
+---
+
+## Entrada #10
+
+**Fecha:** 2026-01-28  
+**Herramienta:** Cursor (Claude)  
+**HU/TR relacionada:** TR-001(MH)-login-de-empleado.md (Corrección de tests)
+
+### Problema identificado
+
+Después de ejecutar `migrate:fresh --seed`, los tests de autenticación fallaban con error `UniqueConstraintViolationException`:
+
+```
+Cannot insert duplicate key row in object 'dbo.USERS' with unique index 'idx_users_code'. 
+The duplicate key value is (JPEREZ).
+```
+
+### Causa raíz
+
+Los tests usan `DatabaseTransactions` para mejor rendimiento con SQL Server remoto. Sin embargo:
+1. El `TestUsersSeeder` insertaba usuarios con códigos fijos ("JPEREZ", "MGARCIA", etc.) en la base de datos real
+2. Los tests intentaban insertar los mismos usuarios dentro de las transacciones
+3. Aunque `DatabaseTransactions` hace rollback después de cada test, los datos del seeder permanecían
+
+### Solución implementada
+
+Modificar el método `seedTestUsers()` en los archivos de test para que **limpie los datos existentes antes de insertar**:
+
+```php
+protected function seedTestUsers(): void
+{
+    // Limpiar usuarios existentes que podrían causar conflictos
+    $testCodes = ['JPEREZ', 'MGARCIA', 'INACTIVO', 'INHABILITADO', 'USUINACTIVO'];
+    
+    // Eliminar de PQ_PARTES_USUARIOS primero (por FK)
+    DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->delete();
+    
+    // Eliminar tokens asociados
+    $userIds = DB::table('USERS')->whereIn('code', $testCodes)->pluck('id');
+    if ($userIds->isNotEmpty()) {
+        DB::table('personal_access_tokens')
+            ->where('tokenable_type', 'App\\Models\\User')
+            ->whereIn('tokenable_id', $userIds)
+            ->delete();
+    }
+    
+    // Eliminar de USERS
+    DB::table('USERS')->whereIn('code', $testCodes)->delete();
+    
+    // ... continúa con los inserts normales
+}
+```
+
+### Archivos modificados
+
+- `backend/tests/Unit/Services/AuthServiceTest.php` - Agregada limpieza de datos antes de inserts
+- `backend/tests/Feature/Api/V1/Auth/LoginTest.php` - Agregada limpieza de datos antes de inserts
+- `backend/tests/Feature/Api/V1/Auth/LogoutTest.php` - Agregada limpieza de datos antes de inserts
+
+### Resultado
+
+31 tests pasando correctamente:
+- `AuthServiceTest`: 13 tests
+- `LoginTest`: 11 tests  
+- `LogoutTest`: 7 tests
+
+### Decisión técnica
+
+Se optó por limpiar datos existentes en lugar de:
+1. Usar `RefreshDatabase` (más lento con SQL Server remoto)
+2. Cambiar códigos de usuarios de test (requiere cambiar más código)
+3. Eliminar el `TestUsersSeeder` (útil para desarrollo manual)
+
+Esta solución permite que los tests sean idempotentes y puedan ejecutarse independientemente del estado de la base de datos.

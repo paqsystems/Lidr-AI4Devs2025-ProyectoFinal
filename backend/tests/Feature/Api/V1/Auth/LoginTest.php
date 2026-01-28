@@ -28,9 +28,28 @@ class LoginTest extends TestCase
     /**
      * Crear usuarios de prueba para los tests
      * Usa DB::table con GETDATE() para compatibilidad con SQL Server
+     * Primero elimina usuarios existentes para evitar conflictos de clave única
      */
     protected function seedTestUsers(): void
     {
+        // Limpiar usuarios existentes que podrían causar conflictos
+        $testCodes = ['JPEREZ', 'MGARCIA', 'INACTIVO', 'INHABILITADO'];
+        
+        // Eliminar de PQ_PARTES_USUARIOS primero (por FK)
+        DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->delete();
+        
+        // Eliminar tokens asociados a usuarios de prueba
+        $userIds = DB::table('USERS')->whereIn('code', $testCodes)->pluck('id');
+        if ($userIds->isNotEmpty()) {
+            DB::table('personal_access_tokens')
+                ->where('tokenable_type', 'App\\Models\\User')
+                ->whereIn('tokenable_id', $userIds)
+                ->delete();
+        }
+        
+        // Eliminar de USERS
+        DB::table('USERS')->whereIn('code', $testCodes)->delete();
+
         // Usuario activo normal
         DB::table('USERS')->insert([
             'code' => 'JPEREZ',
