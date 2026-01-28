@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Database;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\QueryException;
@@ -13,12 +13,13 @@ use Tests\TestCase;
  * 
  * Verifica que todas las tablas del modelo de datos fueron creadas
  * correctamente con sus columnas, índices y foreign keys.
+ * Usa DatabaseTransactions para mejor rendimiento con SQL Server remoto.
  * 
  * @see TR-00(MH)-Generacion-base-datos-inicial.md
  */
 class MigrationTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /**
      * Lista de tablas que deben existir después de las migraciones

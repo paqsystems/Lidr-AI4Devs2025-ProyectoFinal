@@ -5,9 +5,10 @@
  * Maneja las llamadas al API de autenticación y el almacenamiento de tokens.
  * 
  * @see TR-001(MH)-login-de-empleado.md
+ * @see TR-003(MH)-logout.md
  */
 
-import { setToken, setUserData, clearAuth, AuthUser } from '../../../shared/utils/tokenStorage';
+import { setToken, setUserData, clearAuth, getToken, AuthUser } from '../../../shared/utils/tokenStorage';
 
 /**
  * URL base del API
@@ -122,8 +123,66 @@ export async function login(usuario: string, password: string): Promise<LoginRes
 }
 
 /**
- * Cierra la sesión del usuario
+ * Resultado del logout
  */
-export function logout(): void {
+export interface LogoutResult {
+  success: boolean;
+  errorMessage?: string;
+}
+
+/**
+ * Cierra la sesión del usuario
+ * 
+ * Comportamiento fail-safe:
+ * - Siempre limpia localStorage aunque el API falle
+ * - Si el token ya era inválido (401), igual se considera éxito
+ * - Si hay error de red, igual limpia y permite continuar
+ * 
+ * @returns Resultado del logout
+ * @see TR-003(MH)-logout.md
+ */
+export async function logout(): Promise<LogoutResult> {
+  const token = getToken();
+  
+  try {
+    // Intentar llamar al API de logout
+    if (token) {
+      const response = await fetch(`${API_BASE_URL}/v1/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      // Incluso si retorna 401 (token inválido), consideramos éxito
+      // porque el objetivo es cerrar sesión local
+      if (!response.ok && response.status !== 401) {
+        console.warn('Logout API respondió con error:', response.status);
+      }
+    }
+
+    // Siempre limpiar localStorage (fail-safe)
+    clearAuth();
+
+    return { success: true };
+
+  } catch (error) {
+    // Error de red - igual limpiar localStorage (fail-safe)
+    console.warn('Error de red en logout, limpiando sesión local:', error);
+    clearAuth();
+
+    return { 
+      success: true, // Consideramos éxito porque la sesión local se limpió
+    };
+  }
+}
+
+/**
+ * Cierra la sesión del usuario de forma síncrona (solo limpia localStorage)
+ * Usar cuando no se necesita esperar la respuesta del API
+ */
+export function logoutSync(): void {
   clearAuth();
 }

@@ -211,7 +211,7 @@ test.describe('Login de Empleado', () => {
     await page.fill('[data-testid="auth.login.usuarioInput"]', TEST_USER.code);
     await page.fill('[data-testid="auth.login.passwordInput"]', TEST_USER.password);
     
-    // Esperar la respuesta del API
+    // Esperar la respuesta del API de login
     await Promise.all([
       page.waitForResponse(resp => resp.url().includes('/api/v1/auth/login') && resp.status() === 200),
       page.click('[data-testid="auth.login.submitButton"]'),
@@ -222,8 +222,11 @@ test.describe('Login de Empleado', () => {
     let token = await page.evaluate(() => localStorage.getItem('auth_token'));
     expect(token).toBeTruthy();
 
-    // Click en cerrar sesión
-    await page.click('[data-testid="app.logoutButton"]');
+    // Click en cerrar sesión y esperar respuesta del API de logout
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/logout') && resp.status() === 200),
+      page.click('[data-testid="app.logoutButton"]'),
+    ]);
 
     // Verificar redirección a login
     await expect(page).toHaveURL('/login', { timeout: 10000 });
@@ -231,5 +234,60 @@ test.describe('Login de Empleado', () => {
     // Verificar que el token fue eliminado
     token = await page.evaluate(() => localStorage.getItem('auth_token'));
     expect(token).toBeNull();
+
+    // Verificar que user_data también fue eliminado
+    const userData = await page.evaluate(() => localStorage.getItem('auth_user'));
+    expect(userData).toBeNull();
+  });
+
+  test('debe mostrar botón de logout deshabilitado durante la petición', async ({ page }) => {
+    // Autenticar primero
+    await page.goto('/login');
+    await page.fill('[data-testid="auth.login.usuarioInput"]', TEST_USER.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', TEST_USER.password);
+    
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/login') && resp.status() === 200),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+    await expect(page).toHaveURL('/', { timeout: 10000 });
+
+    // Interceptar la petición de logout para verificar estado del botón
+    const logoutPromise = page.waitForResponse(resp => resp.url().includes('/api/v1/auth/logout'));
+    await page.click('[data-testid="app.logoutButton"]');
+
+    // El botón debería estar deshabilitado durante la petición
+    await expect(page.locator('[data-testid="app.logoutButton"]')).toBeDisabled();
+
+    // Esperar que complete
+    await logoutPromise;
+    await expect(page).toHaveURL('/login', { timeout: 10000 });
+  });
+
+  test('no debe poder acceder a dashboard después de logout', async ({ page }) => {
+    // Autenticar
+    await page.goto('/login');
+    await page.fill('[data-testid="auth.login.usuarioInput"]', TEST_USER.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', TEST_USER.password);
+    
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/login') && resp.status() === 200),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+    await expect(page).toHaveURL('/', { timeout: 10000 });
+
+    // Hacer logout
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/logout') && resp.status() === 200),
+      page.click('[data-testid="app.logoutButton"]'),
+    ]);
+    await expect(page).toHaveURL('/login', { timeout: 10000 });
+
+    // Intentar acceder al dashboard directamente
+    await page.goto('/');
+
+    // Debe redirigir a login porque no hay sesión
+    await expect(page).toHaveURL('/login', { timeout: 10000 });
+    await expect(page.locator('[data-testid="auth.login.form"]')).toBeVisible();
   });
 });

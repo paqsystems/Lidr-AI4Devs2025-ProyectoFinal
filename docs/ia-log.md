@@ -659,3 +659,68 @@ Reglas generales:
 ### Archivos modificados
 
 - `backend/routes/api.php` - Agregada ruta de login
+
+---
+
+## Entrada #9
+
+**Fecha:** 2026-01-28  
+**Herramienta:** Cursor (Claude)  
+**HU/TR relacionada:** TR-003(MH)-logout.md
+
+### Prompt principal
+
+```
+Implementá la TR funcional ubicada en:
+"docs/tareas/TR-003(MH)-logout.md"
+
+Esta TR es la FUENTE DE VERDAD del alcance.
+[...]
+```
+
+### Tareas ejecutadas
+
+1. **T1** - Backend: Endpoint POST /api/v1/auth/logout
+2. **T2** - Backend: Tests unitarios AuthService::logout()
+3. **T3** - Backend: Tests de integración del endpoint
+4. **T4** - Frontend: Integrar logout con API
+5. **T5** - Frontend: Actualizar Dashboard con estado loading
+6. **T6** - Frontend: Manejo de errores fail-safe
+7. **T7** - E2E: Tests Playwright para logout
+8. **T8** - Docs: Actualizar autenticacion.md
+9. **T9** - Docs: Registrar en ia-log.md
+
+### Decisiones técnicas
+
+1. **Comportamiento fail-safe:** Si el API de logout falla (401, error de red), el frontend igual limpia localStorage y redirige. Esto garantiza que el usuario siempre pueda "cerrar sesión" localmente.
+
+2. **Solo revoca token actual:** El logout solo elimina el token usado en la petición, no todos los tokens del usuario. Esto permite sesiones en múltiples dispositivos.
+
+3. **Estado loading en botón:** El botón de logout se deshabilita y muestra "Cerrando..." durante la petición para evitar doble clic.
+
+4. **Respuesta con objeto vacío:** `resultado: {}` en lugar de `null` para mantener consistencia con el envelope de la API.
+
+### Archivos creados
+
+**Backend:**
+- `backend/tests/Feature/Api/V1/Auth/LogoutTest.php`
+
+**Frontend:**
+*(ninguno nuevo, solo modificaciones)*
+
+### Archivos modificados
+
+**Backend:**
+- `backend/app/Services/AuthService.php` - Agregado método logout()
+- `backend/app/Http/Controllers/Api/V1/AuthController.php` - Agregado método logout()
+- `backend/routes/api.php` - Agregada ruta POST /api/v1/auth/logout
+- `backend/tests/Unit/Services/AuthServiceTest.php` - Agregados tests de logout
+
+**Frontend:**
+- `frontend/src/features/auth/services/auth.service.ts` - logout() ahora llama al API
+- `frontend/src/app/Dashboard.tsx` - handleLogout async con estado loading
+- `frontend/tests/e2e/auth-login.spec.ts` - Actualizados tests E2E de logout
+
+**Docs:**
+- `docs/backend/autenticacion.md` - Agregada sección de logout
+- `docs/hu-tareas/TR-003(MH)-logout.md` - Actualizado estado de tareas

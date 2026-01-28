@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\Usuario;
 use App\Services\AuthService;
 use App\Services\AuthException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -15,12 +15,14 @@ use Tests\TestCase;
  * Tests Unitarios: AuthService
  * 
  * Tests del servicio de autenticación cubriendo todos los casos de uso.
+ * Usa DatabaseTransactions para mejor rendimiento con SQL Server remoto.
  * 
  * @see TR-001(MH)-login-de-empleado.md
+ * @see TR-003(MH)-logout.md
  */
 class AuthServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected AuthService $authService;
 
@@ -303,5 +305,79 @@ class AuthServiceTest extends TestCase
         // Ambos mensajes deben ser idénticos (no revelar si usuario existe)
         $this->assertEquals($messageNoExiste, $messageIncorrecta);
         $this->assertEquals('Credenciales inválidas', $messageNoExiste);
+    }
+
+    // ========================================
+    // Tests de Logout (TR-003)
+    // ========================================
+
+    /** @test */
+    public function logout_revoca_token_del_usuario()
+    {
+        // Primero hacer login para obtener un token
+        $result = $this->authService->login('JPEREZ', 'password123');
+        $this->assertNotEmpty($result['token']);
+
+        // Obtener el usuario
+        $user = User::where('code', 'JPEREZ')->first();
+        
+        // Verificar que el token existe en la base de datos
+        $this->assertEquals(1, $user->tokens()->count());
+
+        // Obtener el token y establecerlo como token actual
+        $token = $user->tokens()->first();
+        $user->withAccessToken($token);
+
+        // Hacer logout
+        $this->authService->logout($user);
+
+        // Verificar que el token fue eliminado
+        $this->assertEquals(0, $user->fresh()->tokens()->count());
+    }
+
+    /** @test */
+    public function logout_sin_token_no_genera_error()
+    {
+        // Obtener usuario que no tiene token
+        $user = User::where('code', 'JPEREZ')->first();
+        
+        // Verificar que no tiene tokens
+        $this->assertEquals(0, $user->tokens()->count());
+
+        // Logout no debe generar excepción
+        $this->authService->logout($user);
+
+        // Sigue sin tokens
+        $this->assertEquals(0, $user->tokens()->count());
+    }
+
+    /** @test */
+    public function logout_solo_revoca_token_actual()
+    {
+        // Login para crear primer token
+        $result1 = $this->authService->login('JPEREZ', 'password123');
+        
+        // Login otra vez para crear segundo token
+        $result2 = $this->authService->login('JPEREZ', 'password123');
+
+        $user = User::where('code', 'JPEREZ')->first();
+        
+        // Debe tener 2 tokens
+        $this->assertEquals(2, $user->tokens()->count());
+
+        // Obtener el token actual (el más reciente para simular autenticación)
+        // En la práctica, el middleware auth:sanctum establece el token actual
+        // Para el test, usamos el último creado
+        $latestToken = $user->tokens()->latest()->first();
+        
+        // Simular que el token actual es el último creado
+        // Esto se hace normalmente a través de Sanctum cuando se autentica
+        $user->withAccessToken($latestToken);
+
+        // Hacer logout (debe eliminar solo el token actual)
+        $this->authService->logout($user);
+
+        // Debe quedar 1 token (el primero)
+        $this->assertEquals(1, $user->fresh()->tokens()->count());
     }
 }

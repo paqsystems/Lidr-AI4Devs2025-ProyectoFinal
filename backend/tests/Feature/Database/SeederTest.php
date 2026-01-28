@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Database;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 /**
@@ -10,12 +10,13 @@ use Tests\TestCase;
  * 
  * Verifica que los seeders crean los datos mínimos necesarios
  * para el funcionamiento del sistema y los tests.
+ * Usa DatabaseTransactions para mejor rendimiento con SQL Server remoto.
  * 
  * @see TR-00(MH)-Generacion-base-datos-inicial.md
  */
 class SeederTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /**
      * @test

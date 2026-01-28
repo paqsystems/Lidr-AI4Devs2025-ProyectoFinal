@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Auth;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -11,12 +11,13 @@ use Tests\TestCase;
  * Tests de Integración: Endpoint POST /api/v1/auth/login
  * 
  * Tests del endpoint de autenticación con diferentes escenarios.
+ * Usa DatabaseTransactions para mejor rendimiento con SQL Server remoto.
  * 
  * @see TR-001(MH)-login-de-empleado.md
  */
 class LoginTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {

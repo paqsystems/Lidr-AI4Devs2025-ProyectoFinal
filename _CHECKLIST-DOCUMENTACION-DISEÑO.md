@@ -404,10 +404,34 @@ Este checklist está basado en el proceso seguido en este proyecto. Para más de
 - [ ] Generar datos de Prueba (manualmente o con IA)
 - [ ] Generar código (con documentación)
 - [ ] revisar Código (en detalle)
-- [ ] Testing manualmente
 - [ ] Testing IA (unit / integrador / e2e)
 - [ ] Correcciònes al còdigo (desde spec -> codifica IA).
+- [ ] Testing manualmente
 - [ ] Reprocesar puntos 2 al 4
+
+  ### Comandos de test
+  
+  Backend : 
+  cd backend
+  php artisan test --filter=Logout
+
+  FrontEnd : 
+  cd frontend
+  npx playwright test auth-login.spec.ts
+
+  ### Comandos de setup de servidores
+
+  Backend:
+  cd backend
+  php artisan serve
+
+  FrontEnd:
+  cd frontend
+  npm run dev
+
+  Test E2E:
+  cd frontend
+  npx playwright test auth-login.spec.ts
 
 ## Implementación
 

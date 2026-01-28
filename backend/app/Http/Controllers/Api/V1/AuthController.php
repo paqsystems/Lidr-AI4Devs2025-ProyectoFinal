@@ -8,6 +8,7 @@ use App\Http\Resources\Auth\LoginResource;
 use App\Services\AuthService;
 use App\Services\AuthException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Controller: AuthController
@@ -16,8 +17,10 @@ use Illuminate\Http\JsonResponse;
  * 
  * Endpoints:
  * - POST /api/v1/auth/login - Autenticación de empleado
+ * - POST /api/v1/auth/logout - Cierre de sesión
  * 
  * @see TR-001(MH)-login-de-empleado.md
+ * @see TR-003(MH)-logout.md
  */
 class AuthController extends Controller
 {
@@ -104,6 +107,46 @@ class AuthController extends Controller
                 'respuesta' => $e->getMessage(),
                 'resultado' => (object) []
             ], $httpCode);
+
+        } catch (\Exception $e) {
+            // Error inesperado
+            return response()->json([
+                'error' => 9999,
+                'respuesta' => 'Error inesperado del servidor',
+                'resultado' => (object) []
+            ], 500);
+        }
+    }
+
+    /**
+     * Logout de usuario
+     * 
+     * Cierra la sesión del usuario revocando su token actual.
+     * Requiere autenticación (middleware auth:sanctum).
+     * 
+     * @param Request $request Request con usuario autenticado
+     * @return JsonResponse Respuesta de éxito
+     * 
+     * @response 200 {
+     *   "error": 0,
+     *   "respuesta": "Sesión cerrada correctamente",
+     *   "resultado": {}
+     * }
+     * 
+     * @see TR-003(MH)-logout.md
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        try {
+            // Obtener usuario autenticado y cerrar sesión
+            $user = $request->user();
+            $this->authService->logout($user);
+
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Sesión cerrada correctamente',
+                'resultado' => (object) []
+            ], 200);
 
         } catch (\Exception $e) {
             // Error inesperado

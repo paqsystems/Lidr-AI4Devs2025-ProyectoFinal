@@ -31,7 +31,11 @@ Route::prefix('v1')->group(function () {
     
     // Rutas protegidas (requieren autenticación)
     Route::middleware('auth:sanctum')->group(function () {
-        // Aquí irán las rutas protegidas
+        // POST /api/v1/auth/logout - Logout de usuario
+        Route::post('/auth/logout', [AuthController::class, 'logout'])
+            ->name('api.v1.auth.logout');
+            
+        // GET /api/v1/user - Obtener usuario actual
         Route::get('/user', function (Request $request) {
             return $request->user();
         })->name('api.v1.user');

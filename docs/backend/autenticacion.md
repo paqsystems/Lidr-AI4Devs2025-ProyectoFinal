@@ -87,6 +87,54 @@ Accept: application/json
 | 4203 | 401 | Usuario inactivo |
 | 9999 | 500 | Error inesperado del servidor |
 
+## Endpoint de Logout
+
+### Request
+
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer {token}
+Accept: application/json
+```
+
+**Nota:** Este endpoint requiere autenticación.
+
+### Response Exitosa (200 OK)
+
+```json
+{
+  "error": 0,
+  "respuesta": "Sesión cerrada correctamente",
+  "resultado": {}
+}
+```
+
+### Response Sin Autenticación (401)
+
+```json
+{
+  "error": 4001,
+  "respuesta": "No autenticado",
+  "resultado": {}
+}
+```
+
+### Comportamiento
+
+1. El token actual del usuario es revocado (eliminado de `personal_access_tokens`)
+2. Solo se revoca el token usado en la petición, no todos los tokens del usuario
+3. Si el token ya era inválido, retorna 401 pero el frontend debe limpiar localStorage igual
+
+### Códigos de Error de Logout
+
+| Código | HTTP | Descripción |
+|--------|------|-------------|
+| 0 | 200 | Logout exitoso |
+| 4001 | 401 | No autenticado (token inválido o no presente) |
+| 9999 | 500 | Error inesperado del servidor |
+
+---
+
 ## Uso del Token
 
 ### En Frontend
@@ -99,6 +147,10 @@ setToken(response.resultado.token);
 // Obtener token para requests
 import { getToken } from '@/shared/utils/tokenStorage';
 const token = getToken();
+
+// Logout (llama al API y limpia localStorage)
+import { logout } from '@/features/auth/services/auth.service';
+await logout();
 ```
 
 ### En Requests Subsiguientes
@@ -136,18 +188,19 @@ backend/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/Api/V1/
-│   │   │   └── AuthController.php
+│   │   │   └── AuthController.php      # login() y logout()
 │   │   ├── Requests/Auth/
 │   │   │   └── LoginRequest.php
 │   │   └── Resources/Auth/
 │   │       └── LoginResource.php
 │   └── Services/
-│       └── AuthService.php
+│       └── AuthService.php              # login() y logout()
 ├── routes/
 │   └── api.php
 └── tests/
     ├── Feature/Api/V1/Auth/
-    │   └── LoginTest.php
+    │   ├── LoginTest.php
+    │   └── LogoutTest.php
     └── Unit/Services/
         └── AuthServiceTest.php
 ```
@@ -157,11 +210,17 @@ backend/
 ### Ejecutar Tests de Autenticación
 
 ```bash
-# Unit tests del servicio
+# Unit tests del servicio (login y logout)
 php artisan test tests/Unit/Services/AuthServiceTest.php
 
-# Integration tests del endpoint
+# Integration tests del endpoint de login
 php artisan test tests/Feature/Api/V1/Auth/LoginTest.php
+
+# Integration tests del endpoint de logout
+php artisan test tests/Feature/Api/V1/Auth/LogoutTest.php
+
+# Todos los tests de autenticación
+php artisan test --filter=Auth
 
 # Todos los tests
 php artisan test
@@ -170,4 +229,5 @@ php artisan test
 ## Referencias
 
 - [TR-001(MH) - Login de Empleado](../hu-tareas/TR-001(MH)-login-de-empleado.md)
+- [TR-003(MH) - Logout](../hu-tareas/TR-003(MH)-logout.md)
 - [Laravel Sanctum Documentation](https://laravel.com/docs/10.x/sanctum)

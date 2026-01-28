@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Hash;
 /**
  * Service: AuthService
  * 
- * Servicio de autenticación que maneja la lógica de login.
+ * Servicio de autenticación que maneja la lógica de login y logout.
  * 
- * Flujo de autenticación:
+ * Flujo de autenticación (login):
  * 1. Buscar usuario en USERS por code
  * 2. Validar que usuario esté activo y no inhabilitado en USERS
  * 3. Validar contraseña con Hash::check()
@@ -21,13 +21,19 @@ use Illuminate\Support\Facades\Hash;
  * 7. Generar token Sanctum
  * 8. Retornar respuesta con todos los campos requeridos
  * 
+ * Flujo de logout:
+ * 1. Obtener token actual del usuario
+ * 2. Revocar/eliminar el token de la base de datos
+ * 
  * Códigos de error:
  * - 3201: Credenciales inválidas (genérico, no revela si usuario existe)
  * - 3202: Usuario no encontrado (interno, no se expone)
  * - 3203: Contraseña incorrecta (interno, no se expone)
+ * - 4001: No autenticado (logout sin token válido)
  * - 4203: Usuario inactivo
  * 
  * @see TR-001(MH)-login-de-empleado.md
+ * @see TR-003(MH)-logout.md
  */
 class AuthService
 {
@@ -37,6 +43,7 @@ class AuthService
     public const ERROR_INVALID_CREDENTIALS = 3201;
     public const ERROR_USER_NOT_FOUND = 3202;
     public const ERROR_WRONG_PASSWORD = 3203;
+    public const ERROR_NOT_AUTHENTICATED = 4001;
     public const ERROR_USER_INACTIVE = 4203;
 
     /**
@@ -115,6 +122,27 @@ class AuthService
                 'email' => $empleado->email,
             ]
         ];
+    }
+
+    /**
+     * Cerrar sesión del usuario
+     * 
+     * Revoca el token actual del usuario autenticado.
+     *
+     * @param User $user Usuario autenticado
+     * @return void
+     * @throws AuthException Si no hay token para revocar
+     * 
+     * @see TR-003(MH)-logout.md
+     */
+    public function logout(User $user): void
+    {
+        // Obtener y eliminar el token actual
+        $currentToken = $user->currentAccessToken();
+        
+        if ($currentToken) {
+            $currentToken->delete();
+        }
     }
 }
 

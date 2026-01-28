@@ -5,11 +5,13 @@
  * Muestra información básica del usuario autenticado.
  * 
  * @see TR-001(MH)-login-de-empleado.md
+ * @see TR-003(MH)-logout.md
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserData, clearAuth } from '../shared/utils/tokenStorage';
+import { getUserData } from '../shared/utils/tokenStorage';
+import { logout } from '../features/auth/services/auth.service';
 import './Dashboard.css';
 
 /**
@@ -18,10 +20,24 @@ import './Dashboard.css';
 export function Dashboard(): React.ReactElement {
   const navigate = useNavigate();
   const user = getUserData();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = () => {
-    clearAuth();
-    navigate('/login');
+  /**
+   * Maneja el cierre de sesión
+   * - Deshabilita el botón durante la petición
+   * - Llama al API de logout
+   * - Redirige a login al completar
+   */
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    try {
+      await logout();
+    } finally {
+      // Siempre redirigir, incluso si hubo error
+      // (comportamiento fail-safe del servicio)
+      navigate('/login');
+    }
   };
 
   if (!user) {
@@ -35,14 +51,18 @@ export function Dashboard(): React.ReactElement {
         <div className="user-info">
           <span className="user-name">{user.nombre}</span>
           {user.esSupervisor && (
-            <span className="supervisor-badge">Supervisor</span>
+            <span className="supervisor-badge" data-testid="app.supervisorBadge">
+              Supervisor
+            </span>
           )}
           <button 
             onClick={handleLogout}
             className="logout-button"
             data-testid="app.logoutButton"
+            disabled={isLoggingOut}
+            aria-label="Cerrar sesión"
           >
-            Cerrar Sesión
+            {isLoggingOut ? 'Cerrando...' : 'Cerrar Sesión'}
           </button>
         </div>
       </header>
