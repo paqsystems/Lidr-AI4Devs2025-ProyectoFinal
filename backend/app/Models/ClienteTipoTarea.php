@@ -50,6 +50,12 @@ class ClienteTipoTarea extends Model
     ];
 
     /**
+     * Formato de fecha para SQL Server
+     * @see .cursor/rules/20-sql-server-datetime-format.md
+     */
+    protected $dateFormat = 'Y-m-d H:i:s';
+
+    /**
      * Relación: Pertenece a un Cliente
      */
     public function cliente(): BelongsTo

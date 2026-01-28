@@ -12,6 +12,7 @@ Tarea:
 A partir de la Historia de Usuario provista,
 generar el plan completo de tareas/tickets
 y guardarlo como archivo Markdown.
+El TR generado debe incluir al final las secciones de trazabilidad (archivos/comandos/notas/pendientes), inicialmente vacías.
 
 Archivo:
 - Ruta: docs/hu-tareas/

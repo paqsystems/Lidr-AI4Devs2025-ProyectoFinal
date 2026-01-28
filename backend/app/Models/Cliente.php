@@ -67,6 +67,12 @@ class Cliente extends Model
     ];
 
     /**
+     * Formato de fecha para SQL Server
+     * @see .cursor/rules/20-sql-server-datetime-format.md
+     */
+    protected $dateFormat = 'Y-m-d H:i:s';
+
+    /**
      * Valores por defecto
      */
     protected $attributes = [

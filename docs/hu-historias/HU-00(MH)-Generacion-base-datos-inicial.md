@@ -53,7 +53,8 @@ Debe ejecutarse **antes** del desarrollo de las historias funcionales del sistem
 - Laravel está configurado y listo para generar migraciones.
 
 ## Criterios de aceptación
-- La base de datos puede generarse completamente desde cero a partir del repositorio.
+- La base de datos a utilizar es la llamada "Lidr"
+- La base de datos a utilizar puede generarse completamente desde cero a partir del repositorio.
 - Todas las tablas respetan las convenciones del proyecto (prefijo `PQ_PARTES_`, excepto `USERS`).
 - Todas las tablas, campos, índices y foreign keys del modelo están implementados correctamente.
 - Existen migraciones Laravel versionadas con capacidad de rollback (métodos `up()` y `down()`).

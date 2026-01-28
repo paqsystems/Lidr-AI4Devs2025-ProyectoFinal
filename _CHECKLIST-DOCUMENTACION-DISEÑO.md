@@ -373,3 +373,49 @@ Este checklist está basado en el proceso seguido en este proyecto. Para más de
 - `MANUAL-PROGRAMADOR.MD` - Manual de onboarding
 - `docs/consignas-mvp-cursor.md` - Consignas del MVP
 - `docs/historias-y-tickets.md` - Historias y tickets del proyecto
+
+--------------------------------------------------------------------------------------
+
+# CheckList : Paso a Paso para Proyectos nuevos (según Pablo Quarracino)
+
+## Definiciones
+
+- [ ] MegaPrompt a ChatGpt para definición conceptual.
+      Hacer MegaPrompt para ChatGPT con la definición conceptual del nuevo proyecto : objetivo, alcances, inputs/outputs básicos, reglas de negocio básicas, para construir prompts para cursor.
+- [ ] Armar documentación.
+      cursor/rules, .cursor/docs, agents.md, backend, api, frontend, optimización código, tests, documentaciòn
+      en 09-data-access-orm-sql.md aclarar el prefijo de las tablas de la base de datos
+      Verificar se incluyan normativas para backend, frontend, apis y testing unitario/integral/e2e.
+- [ ] Diseñar procesos.
+      Opciones de menú, validaciones y reglas de negocios básicas, modelo de base de datos.
+      diseño de base de datos.
+- [ ] Definir MCPs necesarios
+- [ ] Armar HU (MH y SH)
+      Que configure la IA todo lo que encuentre para definir.
+      Revisar uno a uno.
+      Confirmar Reglas de Negocio 
+      Confirmar validaciones
+- [ ] Verificar con Proyecto Base que no falten reglas y contextos
+- [ ] Armar tareas y specs.
+
+## Programación y Testing
+
+- [ ] Generar Tarea 00 : Armado de Base de datos
+- [ ] Generar datos de Prueba (manualmente o con IA)
+- [ ] Generar código (con documentación)
+- [ ] revisar Código (en detalle)
+- [ ] Testing manualmente
+- [ ] Testing IA (unit / integrador / e2e)
+- [ ] Correcciònes al còdigo (desde spec -> codifica IA).
+- [ ] Reprocesar puntos 2 al 4
+
+## Implementación
+
+- [ ] Readme.md y Manual-Programador.md
+- [ ] Manual del usuario
+- [ ] PR con Testing (Github Action o CodeRabbit)
+- [ ] Deploy
+- [ ] Seguimiento
+
+
+

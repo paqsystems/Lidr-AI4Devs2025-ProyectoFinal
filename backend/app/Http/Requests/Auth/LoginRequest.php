@@ -87,26 +87,29 @@ class LoginRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         $errors = $validator->errors();
+        $failed = $validator->failed();
         
-        // Determinar código de error según el campo que falló
+        // Determinar código de error según el campo y la regla que falló
         $errorCode = 1101; // Default: usuario requerido
         $errorMessage = 'Error de validación';
         
         if ($errors->has('usuario')) {
-            $firstError = $errors->first('usuario');
-            if (str_contains($firstError, 'requerido')) {
+            // Verificar qué regla falló para usuario
+            if (isset($failed['usuario']['Required'])) {
                 $errorCode = 1101;
                 $errorMessage = 'El código de usuario es requerido';
             } else {
+                // Min u otra regla = campo vacío
                 $errorCode = 1102;
                 $errorMessage = 'El código de usuario no puede estar vacío';
             }
         } elseif ($errors->has('password')) {
-            $firstError = $errors->first('password');
-            if (str_contains($firstError, 'requerido') || str_contains($firstError, 'required')) {
+            // Verificar qué regla falló para password
+            if (isset($failed['password']['Required'])) {
                 $errorCode = 1103;
                 $errorMessage = 'La contraseña es requerida';
             } else {
+                // Min u otra regla = muy corta
                 $errorCode = 1104;
                 $errorMessage = 'La contraseña debe tener al menos 8 caracteres';
             }
