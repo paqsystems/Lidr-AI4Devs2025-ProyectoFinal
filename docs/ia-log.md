@@ -799,3 +799,428 @@ Se optó por limpiar datos existentes en lugar de:
 3. Eliminar el `TestUsersSeeder` (útil para desarrollo manual)
 
 Esta solución permite que los tests sean idempotentes y puedan ejecutarse independientemente del estado de la base de datos.
+
+---
+
+## Entrada #11
+
+### Fecha
+2026-01-28
+
+### Etapa del proyecto
+Backend + Tests - TR-002 Login de Cliente
+
+### Herramientas de IA utilizadas
+- Cursor IDE (Claude)
+
+### Prompt o instrucción utilizada
+```
+Implementá la TR funcional ubicada en:
+"docs/tareas/TR-002(SH)-login-de-cliente.md"
+
+Esta TR es la FUENTE DE VERDAD del alcance.
+...
+```
+
+### Resultado generado por IA
+
+**TR-002 generado y ejecutado:**
+
+1. **AuthService extendido** para soportar login de clientes:
+   - Busca primero en `PQ_PARTES_USUARIOS` (empleado)
+   - Si no existe, busca en `PQ_PARTES_CLIENTES` (cliente)
+   - Retorna `tipo_usuario="cliente"`, `es_supervisor=false`, `cliente_id`
+
+2. **Seed de clientes de prueba:**
+   - CLI001 (cliente activo)
+   - CLIINACTIVO (cliente inactivo)
+   - SINPERFIL (usuario sin perfil en ninguna tabla)
+
+3. **Tests unitarios** (6 nuevos tests en AuthServiceTest):
+   - `login_exitoso_con_cliente`
+   - `login_cliente_retorna_es_supervisor_false`
+   - `login_cliente_retorna_usuario_id_null`
+   - `login_fallido_cliente_inactivo_en_pq_partes_clientes`
+   - `login_fallido_usuario_sin_perfil_en_ninguna_tabla`
+   - `login_cliente_retorna_todos_los_campos_requeridos`
+
+4. **Tests de integración** (6 nuevos tests en LoginTest):
+   - `login_exitoso_cliente_retorna_200`
+   - `login_cliente_retorna_tipo_usuario_cliente`
+   - `login_cliente_retorna_es_supervisor_false`
+   - `login_cliente_retorna_usuario_id_null_y_cliente_id_valido`
+   - `login_fallido_cliente_inactivo_retorna_401_error_4203`
+   - `login_cliente_genera_token_valido`
+
+5. **Tests E2E Playwright** (4 nuevos tests):
+   - `debe autenticar cliente y redirigir al dashboard`
+   - `debe almacenar tipo_usuario cliente en localStorage`
+   - `cliente NO debe tener badge de supervisor`
+   - `cliente puede hacer logout igual que empleado`
+
+6. **Documentación actualizada:**
+   - `docs/backend/autenticacion.md` - Agregada información de login de cliente
+   - `docs/hu-tareas/TR-002(SH)-login-de-cliente.md` - TR completo creado
+
+### Archivos creados/modificados
+
+**Backend:**
+- `backend/app/Services/AuthService.php` - Extendido con métodos `loginEmpleado()` y `loginCliente()`
+- `backend/database/seeders/TestUsersSeeder.php` - Agregados clientes de prueba
+
+**Tests:**
+- `backend/tests/Unit/Services/AuthServiceTest.php` - 6 tests de cliente agregados
+- `backend/tests/Feature/Api/V1/Auth/LoginTest.php` - 6 tests de cliente agregados
+- `frontend/tests/e2e/auth-login.spec.ts` - 4 tests de cliente agregados
+
+**Docs:**
+- `docs/hu-tareas/TR-002(SH)-login-de-cliente.md` - Creado
+- `docs/backend/autenticacion.md` - Actualizado
+
+### Ajustes humanos realizados
+
+Ninguno requerido. La implementación siguió estrictamente la TR generada.
+
+### Decisiones técnicas
+
+1. **Refactoring del AuthService**: Se extrajo la lógica de login de empleado y cliente a métodos privados separados (`loginEmpleado()` y `loginCliente()`) para mantener el código limpio y fácil de mantener.
+
+2. **Prioridad empleado vs cliente**: Si un código existe en ambas tablas (caso no permitido por reglas de negocio), se prioriza `PQ_PARTES_USUARIOS` por seguridad.
+
+3. **Tests idempotentes**: Los tests limpian datos existentes incluyendo los códigos de clientes antes de insertar, manteniendo consistencia con el patrón establecido en TR-001.
+
+4. **Frontend sin cambios**: El formulario de login ya soportaba el flujo completo; solo se agregaron tests E2E para verificar el comportamiento con clientes.
+
+---
+
+## Entrada #12
+
+### Fecha
+2026-01-28
+
+### Etapa del proyecto
+Backend + Frontend + Tests - TR-006 Visualización de Perfil de Usuario
+
+### Herramientas de IA utilizadas
+- Cursor IDE (Claude)
+
+### Prompt o instrucción utilizada
+```
+Implementá la TR funcional ubicada en:
+"docs/tareas/TR-006(MH)-visualización-de-perfil-de-usuario.md"
+
+Esta TR es la FUENTE DE VERDAD del alcance.
+...
+```
+
+### Resultado generado por IA
+
+**TR-006 implementada completamente:**
+
+1. **Backend - UserProfileService:**
+   - Servicio que obtiene datos del perfil según tipo de usuario (empleado/cliente)
+   - Métodos privados `buildEmpleadoProfile()`, `buildClienteProfile()`, `buildMinimalProfile()`
+   - Maneja casos edge (usuario sin perfil)
+
+2. **Backend - UserProfileController:**
+   - Endpoint GET `/api/v1/user/profile`
+   - Requiere autenticación (middleware auth:sanctum)
+   - Retorna datos formateados en formato envelope estándar
+
+3. **Backend - Tests unitarios** (8 tests en UserProfileServiceTest):
+   - `getProfile_empleado_normal_retorna_datos_correctos`
+   - `getProfile_empleado_supervisor_retorna_es_supervisor_true`
+   - `getProfile_cliente_retorna_datos_correctos`
+   - `getProfile_usuario_sin_perfil_retorna_perfil_minimo`
+   - `getProfile_empleado_sin_email_retorna_null`
+   - `getProfile_retorna_todos_los_campos_requeridos`
+   - `getProfile_fecha_creacion_formato_iso8601`
+
+4. **Backend - Tests de integración** (7 tests en UserProfileTest):
+   - `get_profile_empleado_normal_retorna_200`
+   - `get_profile_empleado_supervisor_retorna_es_supervisor_true`
+   - `get_profile_cliente_retorna_tipo_cliente`
+   - `get_profile_sin_autenticacion_retorna_401`
+   - `get_profile_empleado_sin_email_retorna_null`
+   - `respuesta_tiene_formato_envelope_correcto`
+
+5. **Frontend - Servicio de usuario:**
+   - `user.service.ts` con función `getProfile()`
+   - Manejo de errores y tipos TypeScript
+
+6. **Frontend - Componente ProfileView:**
+   - Componente React con estados loading/error/success
+   - Muestra todos los campos requeridos
+   - Badge de supervisor si aplica
+   - Botón volver al dashboard
+   - Todos los data-testid requeridos
+
+7. **Frontend - Navegación:**
+   - Ruta `/perfil` agregada en App.tsx
+   - Enlace "Ver Mi Perfil" agregado en Dashboard
+   - Estilos CSS para ProfileView
+
+8. **Tests E2E Playwright** (7 tests):
+   - `debe mostrar el perfil del empleado después de login`
+   - `debe mostrar badge de supervisor si el usuario es supervisor`
+   - `debe mostrar "No configurado" si el email es null`
+   - `debe mostrar el perfil del cliente correctamente`
+   - `debe permitir volver al dashboard desde el perfil`
+   - `debe mostrar loading mientras carga el perfil`
+   - `debe redirigir a login si no está autenticado`
+
+9. **Documentación actualizada:**
+   - `docs/backend/autenticacion.md` - Agregado endpoint de perfil
+   - `docs/hu-tareas/TR-006(MH)-visualización-de-perfil-de-usuario.md` - TR actualizado con trazabilidad
+
+### Archivos creados/modificados
+
+**Backend:**
+- `backend/app/Services/UserProfileService.php` (CREADO)
+- `backend/app/Http/Controllers/Api/V1/UserProfileController.php` (CREADO)
+- `backend/routes/api.php` (MODIFICADO) - Ruta GET /api/v1/user/profile agregada
+
+**Frontend:**
+- `frontend/src/features/user/services/user.service.ts` (CREADO)
+- `frontend/src/features/user/services/index.ts` (CREADO)
+- `frontend/src/features/user/components/ProfileView.tsx` (CREADO)
+- `frontend/src/features/user/components/ProfileView.css` (CREADO)
+- `frontend/src/features/user/components/index.ts` (CREADO)
+- `frontend/src/features/user/index.ts` (CREADO)
+- `frontend/src/app/App.tsx` (MODIFICADO) - Ruta /perfil agregada
+- `frontend/src/app/Dashboard.tsx` (MODIFICADO) - Enlace a perfil agregado
+- `frontend/src/app/Dashboard.css` (MODIFICADO) - Estilos para botón de perfil
+
+**Tests:**
+- `backend/tests/Unit/Services/UserProfileServiceTest.php` (CREADO) - 8 tests
+- `backend/tests/Feature/Api/V1/UserProfileTest.php` (CREADO) - 7 tests
+- `frontend/tests/e2e/user-profile.spec.ts` (CREADO) - 7 tests
+
+**Docs:**
+- `docs/backend/autenticacion.md` (MODIFICADO) - Endpoint de perfil documentado
+- `docs/hu-tareas/TR-006(MH)-visualización-de-perfil-de-usuario.md` (MODIFICADO) - Trazabilidad completada
+
+### Ajustes humanos realizados
+
+Ninguno requerido. La implementación siguió estrictamente la TR.
+
+### Decisiones técnicas
+
+1. **Estructura del servicio**: Se separó la lógica en métodos privados (`buildEmpleadoProfile`, `buildClienteProfile`, `buildMinimalProfile`) para mantener el código limpio y fácil de mantener.
+
+2. **Manejo de email null**: El frontend muestra "No configurado" cuando el email es null, cumpliendo con AC-04.
+
+3. **Formato de fecha**: Se usa `toIso8601String()` en el backend y `toLocaleDateString()` en el frontend para formatear la fecha de creación.
+
+4. **Badge de supervisor**: Se muestra solo si `es_supervisor` es true, usando el mismo estilo que en el Dashboard.
+
+5. **Navegación**: El botón "Volver" redirige al dashboard (`/`), cumpliendo con AC-11.
+
+6. **Tests idempotentes**: Los tests limpian datos existentes antes de insertar, manteniendo consistencia con el patrón establecido.
+
+---
+
+## Entrada #13
+
+### Fecha
+2026-01-28
+
+### Etapa del proyecto
+Diseño - Generación de TR-028 Carga de Tarea Diaria
+
+### Herramientas de IA utilizadas
+- Cursor IDE (Claude)
+
+### Prompt o instrucción utilizada
+```
+Actuá como ingeniero senior responsable del diseño del MVP.
+
+Usá SOLO la regla
+".cursor/rules/13-user-story-to-task-breakdown.md"
+como fuente de verdad.
+
+Tarea:
+A partir de la Historia de Usuario provista,
+generar el plan completo de tareas/tickets
+y guardarlo como archivo Markdown.
+...
+Historia de Usuario:
+---
+HU-028(MH)-carga-de-tarea-diaria.md
+---
+```
+
+### Resultado generado por IA
+
+**TR-028 generado completamente** siguiendo la estructura de la regla:
+
+1. **HU Refinada** con título, narrativa, contexto, suposiciones, in/out scope
+2. **21 Criterios de Aceptación** con 7 escenarios Gherkin
+3. **10 Reglas de Negocio** con permisos y validaciones
+4. **Impacto en Datos** con tablas afectadas y seed mínimo
+5. **4 Contratos de API** documentados (POST /api/v1/tasks, GET endpoints para clientes, tipos, empleados)
+6. **Cambios Frontend** con 6 componentes nuevos, estados UI, validaciones, accesibilidad
+7. **15 Tareas Planificadas** con DoD específico
+8. **Estrategia de Tests** (Unit, Integration, E2E)
+9. **Riesgos y Edge Cases**
+10. **Checklist Final** con 20 items
+
+**Problema detectado:** El TR generado inicialmente especificaba formato de fechas sin considerar la regla establecida del proyecto:
+- El TR especificaba conversión DMY ↔ YMD en múltiples puntos del código
+- No consideraba que los componentes de fecha manejan internamente YMD y solo requieren formateo de visualización
+
+### Ajustes humanos realizados
+
+**Primera modificación solicitada:**
+El usuario detectó que el formato de fechas no estaba acorde con las reglas del proyecto:
+- **Regla establecida:** Base de datos YMD, Frontend DMY para interacción con usuario
+- **Problema:** El TR no especificaba claramente esta separación de formatos
+- **Ajuste:** Se actualizó el TR para reflejar:
+  - Frontend muestra/captura en formato DMY (DD/MM/YYYY)
+  - Frontend convierte DMY → YMD antes de enviar al API
+  - Backend/BD trabajan exclusivamente con YMD (YYYY-MM-DD)
+  - Se agregaron funciones de conversión en `dateUtils.ts`
+  - Se actualizaron todas las secciones relevantes (AC, Reglas, Plan de Tareas, Tests)
+
+**Segunda modificación solicitada:**
+El usuario sugirió una aproximación más práctica y eficiente:
+- **Observación:** Los controles de fecha pueden formatear la presentación sin requerir conversión en el código
+- **Problema:** El TR especificaba conversiones innecesarias en múltiples puntos
+- **Ajuste:** Se refinó el TR para reflejar:
+  - Todo el sistema maneja fechas internamente en formato YMD (YYYY-MM-DD)
+  - Solo la visualización al usuario se formatea a DMY (DD/MM/YYYY)
+  - Los componentes de fecha (`<input type="date">` o librerías) manejan internamente YMD
+  - No se requiere conversión de formato, solo formateo de visualización
+  - Se simplificaron las tareas del plan (T9, T10) para usar formateo en lugar de conversión
+  - Se actualizó la estrategia de tests para verificar formateo de visualización
+  - Se documentaron opciones recomendadas de componentes de fecha
+
+### Motivo del ajuste
+
+**Primera modificación:**
+Alinear el TR con la regla establecida del proyecto sobre formato de fechas, asegurando consistencia entre frontend (DMY para usuario) y backend/BD (YMD interno).
+
+**Segunda modificación:**
+Simplificar la implementación aprovechando las capacidades nativas de los componentes de fecha, evitando conversiones innecesarias y reduciendo complejidad del código. Esta aproximación es más práctica, eficiente y mantenible.
+
+### Decisiones técnicas
+
+1. **Formato interno único:** Todo el sistema maneja fechas en formato YMD internamente, simplificando el código y evitando errores de conversión.
+
+2. **Formateo de visualización:** Solo se formatea la visualización a DMY para el usuario, usando funciones de formato (date-fns, dayjs) o configuración del componente de fecha.
+
+3. **Componentes de fecha:** Se recomienda usar `<input type="date">` nativo HTML5 o librerías como react-datepicker que manejan internamente YMD y permiten configurar formato de visualización.
+
+4. **Sin conversiones:** Se eliminaron todas las conversiones de formato del código, solo se mantiene formateo de visualización.
+
+### Archivos creados/modificados
+
+**Docs:**
+- `docs/hu-tareas/TR-028(MH)-carga-de-tarea-diaria.md` (CREADO y MODIFICADO 2 veces)
+- `prompts.md` (MODIFICADO) - Agregados Prompt 10 y Prompt 11
+- `docs/ia-log.md` (MODIFICADO) - Agregada Entrada #13
+
+### Referencias
+
+- `docs/hu-tareas/TR-028(MH)-carga-de-tarea-diaria.md` - TR completo con formato de fechas corregido
+- `prompts.md` - Prompts 10 y 11 sobre formato de fechas
+
+---
+
+## Entrada #14
+
+### Fecha
+2026-01-28
+
+### Etapa del proyecto
+Implementación completa de TR-028(MH) - Carga de Tarea Diaria
+
+### Herramientas de IA utilizadas
+- Cursor IDE (generación de código completo)
+
+### Prompt o instrucción utilizada
+"Implementá la TR funcional ubicada en: 'docs/tareas/TR-028(MH)-carga-de-tarea-diaria.md'"
+
+### Resultado generado por IA
+Implementación completa del módulo de carga de tareas diarias incluyendo:
+
+**Backend:**
+- `CreateTaskRequest` con validaciones completas (fecha YMD, cliente, tipo de tarea, duración múltiplo de 15, observación, permisos)
+- `TaskService` con lógica de negocio (validación de cliente activo, tipo de tarea válido para cliente, permisos de supervisor)
+- `TaskController` con 4 endpoints (POST /tasks, GET /tasks/clients, GET /tasks/task-types, GET /tasks/employees)
+- Rutas API configuradas
+- `TestTasksSeeder` para datos de prueba
+- Unit tests para `TaskService` (9 tests)
+- Integration tests para `TaskController` (12 tests)
+
+**Frontend:**
+- `task.service.ts` con funciones para crear tarea y obtener listas (clientes, tipos, empleados)
+- `dateUtils.ts` con funciones de formateo DMY para visualización y parsing YMD
+- `TaskForm` componente completo con todos los campos, validaciones y manejo de estados
+- `ClientSelector`, `TaskTypeSelector`, `EmployeeSelector` componentes reutilizables
+- Rutas y navegación agregadas (`/tareas/nueva`)
+- Botón "Cargar Tarea" en Dashboard
+- E2E Playwright tests (9 tests)
+
+**Documentación:**
+- `docs/backend/tareas.md` con documentación completa de API
+
+### Ajustes humanos realizados
+- Verificación de estructura de tabla existente antes de crear código
+- Ajuste de seeder para asegurar datos de prueba correctos (CLI002, ESPECIAL, asignaciones)
+- Validación de formato de fecha YMD en FormRequest y tests
+- Implementación de validaciones custom para tipo de tarea asignado al cliente
+- Manejo de permisos de supervisor en backend y frontend
+- Creación de componentes de selectores con carga dinámica y manejo de estados
+- Implementación de advertencia de fecha futura (no bloquea)
+- Tests E2E con verificación de formato YMD en requests al API
+
+### Motivo del ajuste
+Asegurar que la implementación cumpla estrictamente con el TR, respete las reglas de negocio establecidas (formato de fechas YMD interno, DMY visualización), y mantenga consistencia con TRs ya implementadas (TR-001, TR-002, TR-006).
+
+### Decisiones técnicas
+
+1. **Formato de fechas:** Implementación siguiendo la decisión de Entrada #13: YMD interno, DMY solo para visualización usando `dateUtils.ts`.
+
+2. **Validaciones:** Validaciones en frontend (UX inmediata) y backend (seguridad), incluyendo validación custom de tipo de tarea asignado al cliente.
+
+3. **Selectores dinámicos:** Los selectores cargan datos desde el API y se actualizan dinámicamente (tipos de tarea según cliente seleccionado).
+
+4. **Permisos:** Selector de empleado solo visible para supervisores, validación de permisos en backend.
+
+5. **Tests:** Cobertura completa con unit tests, integration tests y E2E tests verificando formato de fechas.
+
+### Archivos creados/modificados
+
+**Backend:**
+- `backend/app/Http/Requests/Api/V1/CreateTaskRequest.php` (CREADO)
+- `backend/app/Services/TaskService.php` (CREADO)
+- `backend/app/Http/Controllers/Api/V1/TaskController.php` (CREADO)
+- `backend/routes/api.php` (MODIFICADO)
+- `backend/database/seeders/TestTasksSeeder.php` (CREADO)
+- `backend/tests/Unit/Services/TaskServiceTest.php` (CREADO)
+- `backend/tests/Feature/Api/V1/TaskControllerTest.php` (CREADO)
+
+**Frontend:**
+- `frontend/src/shared/utils/dateUtils.ts` (CREADO)
+- `frontend/src/features/tasks/services/task.service.ts` (CREADO)
+- `frontend/src/features/tasks/services/index.ts` (CREADO)
+- `frontend/src/features/tasks/components/TaskForm.tsx` (CREADO)
+- `frontend/src/features/tasks/components/TaskForm.css` (CREADO)
+- `frontend/src/features/tasks/components/ClientSelector.tsx` (CREADO)
+- `frontend/src/features/tasks/components/TaskTypeSelector.tsx` (CREADO)
+- `frontend/src/features/tasks/components/EmployeeSelector.tsx` (CREADO)
+- `frontend/src/features/tasks/components/index.ts` (CREADO)
+- `frontend/src/features/tasks/index.ts` (CREADO)
+- `frontend/src/app/App.tsx` (MODIFICADO)
+- `frontend/src/app/Dashboard.tsx` (MODIFICADO)
+- `frontend/tests/e2e/task-create.spec.ts` (CREADO)
+
+**Docs:**
+- `docs/backend/tareas.md` (CREADO)
+- `docs/ia-log.md` (MODIFICADO) - Agregada Entrada #14
+
+### Referencias
+
+- `docs/hu-tareas/TR-028(MH)-carga-de-tarea-diaria.md` - TR completo implementado
+- `docs/backend/tareas.md` - Documentación de API de tareas

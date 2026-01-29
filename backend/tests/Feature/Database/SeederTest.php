@@ -169,6 +169,16 @@ class SeederTest extends TestCase
      */
     public function seeders_create_minimum_required_data(): void
     {
+        // Limpiar tablas antes de ejecutar el seeder para asegurar un estado limpio
+        // Orden: primero tablas dependientes, luego tablas base (respetando foreign keys)
+        \DB::table('PQ_PARTES_REGISTRO_TAREA')->delete();
+        \DB::table('PQ_PARTES_CLIENTE_TIPO_TAREA')->delete();
+        \DB::table('PQ_PARTES_CLIENTES')->delete();
+        \DB::table('PQ_PARTES_USUARIOS')->delete();
+        \DB::table('USERS')->delete();
+        \DB::table('PQ_PARTES_TIPOS_TAREA')->delete();
+        \DB::table('PQ_PARTES_TIPOS_CLIENTE')->delete();
+
         $this->artisan('db:seed');
 
         // Verificar USERS

@@ -8,6 +8,14 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e',
   
+  /* Timeout global para cada test */
+  timeout: 60000, // 60 segundos
+  
+  /* Timeout para expect assertions */
+  expect: {
+    timeout: 10000, // 10 segundos
+  },
+  
   /* Ejecutar tests en archivos en paralelo */
   fullyParallel: true,
   
@@ -17,8 +25,8 @@ export default defineConfig({
   /* Reintentar en CI solo si falla */
   retries: process.env.CI ? 2 : 0,
   
-  /* Limitar el número de workers en CI, usar por defecto en local */
-  workers: process.env.CI ? 1 : undefined,
+  /* Limitar el número de workers para evitar sobrecarga del servidor */
+  workers: process.env.CI ? 1 : 4, // Reducir de 8 a 4 workers en local
   
   /* Reporter a usar */
   reporter: [

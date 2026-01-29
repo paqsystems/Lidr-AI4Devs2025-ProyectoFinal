@@ -382,5 +382,58 @@ Cada especificación debe incluir:
 
 ---
 
-**Última actualización:** 2025-01-20
+---
+
+## Formato de Fechas
+
+### Prompt 10: Ajuste de Formato de Fechas en TR-028
+
+**Prompt utilizado:**
+```
+analizando el archivo resultante hago una observación importante con respecto al formato de fechas. Para todo el tratamiento de la base de datos, quedamos en normalizar el formato en YMD, pero para interacción con el usuario (FrontEnd), SIEMPRE debe ser DMY.. puedes ajustar este documento, y las reglas que consideres necesarias?
+```
+
+**Herramienta:** Cursor IDE
+
+**Resultado:**
+- Actualización del TR-028 para reflejar formato DMY en frontend (interacción con usuario) y YMD en backend/BD
+- Reglas de negocio actualizadas con especificación de formatos
+- Criterios de aceptación ajustados
+- Plan de tareas actualizado para incluir conversión DMY ↔ YMD
+- Estrategia de tests actualizada para verificar conversión
+
+**Ajustes humanos:**
+- Se especificó claramente que frontend muestra/captura DMY pero convierte a YMD antes de enviar al API
+- Se documentó la responsabilidad del frontend en la conversión de formatos
+
+**Referencia:** `docs/hu-tareas/TR-028(MH)-carga-de-tarea-diaria.md`
+
+---
+
+### Prompt 11: Refinamiento de Manejo de Fechas - Formato Interno YMD
+
+**Prompt utilizado:**
+```
+consulta, los controles que manejan fecha, no tienen la posibilidad de formatear la presentación? quizás convenga que internamente siempre se maneje las fechas como YMD, sólo en el control de fecha que se despliega al usuario para visualizar o editar se cambia el formato.
+```
+
+**Herramienta:** Cursor IDE
+
+**Resultado:**
+- Refinamiento del TR-028 para reflejar que los componentes de fecha manejan internamente YMD
+- Solo la visualización se formatea a DMY usando funciones de formato o configuración del componente
+- Eliminación de conversiones innecesarias en el código
+- Actualización de plan de tareas para usar formateo de visualización en lugar de conversión
+- Actualización de estrategia de tests para verificar formateo de visualización
+
+**Ajustes humanos:**
+- Se simplificó la implementación: no se requiere conversión, solo formateo de visualización
+- Se documentó que los componentes de fecha (`<input type="date">` o librerías) manejan internamente YMD
+- Se recomendaron opciones de componentes de fecha (HTML5 nativo, react-datepicker, date-fns/dayjs)
+
+**Referencia:** `docs/hu-tareas/TR-028(MH)-carga-de-tarea-diaria.md`
+
+---
+
+**Última actualización:** 2026-01-28
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Usuario;
+use App\Models\Cliente;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -15,11 +16,12 @@ use Illuminate\Support\Facades\Hash;
  * 1. Buscar usuario en USERS por code
  * 2. Validar que usuario esté activo y no inhabilitado en USERS
  * 3. Validar contraseña con Hash::check()
- * 4. Buscar usuario en PQ_PARTES_USUARIOS por code
- * 5. Validar que usuario esté activo y no inhabilitado en PQ_PARTES_USUARIOS
- * 6. Determinar tipo_usuario y es_supervisor
- * 7. Generar token Sanctum
- * 8. Retornar respuesta con todos los campos requeridos
+ * 4. Buscar usuario en PQ_PARTES_USUARIOS por code (empleado)
+ * 5. Si no es empleado, buscar en PQ_PARTES_CLIENTES por code (cliente)
+ * 6. Validar que esté activo y no inhabilitado en la tabla correspondiente
+ * 7. Determinar tipo_usuario y es_supervisor
+ * 8. Generar token Sanctum
+ * 9. Retornar respuesta con todos los campos requeridos
  * 
  * Flujo de logout:
  * 1. Obtener token actual del usuario
@@ -33,6 +35,7 @@ use Illuminate\Support\Facades\Hash;
  * - 4203: Usuario inactivo
  * 
  * @see TR-001(MH)-login-de-empleado.md
+ * @see TR-002(SH)-login-de-cliente.md
  * @see TR-003(MH)-logout.md
  */
 class AuthService
@@ -47,7 +50,7 @@ class AuthService
     public const ERROR_USER_INACTIVE = 4203;
 
     /**
-     * Intentar login de usuario
+     * Intentar login de usuario (empleado o cliente)
      *
      * @param string $usuario Código de usuario
      * @param string $password Contraseña
@@ -84,20 +87,41 @@ class AuthService
             );
         }
 
-        // 4. Buscar usuario en PQ_PARTES_USUARIOS por code
+        // 4. Buscar usuario en PQ_PARTES_USUARIOS por code (empleado)
         $empleado = Usuario::where('code', $usuario)->first();
         
-        if (!$empleado) {
-            // El usuario existe en USERS pero no en PQ_PARTES_USUARIOS
-            // Esto podría significar que es un cliente, no un empleado
-            // Para esta HU (login de empleado), retornar error genérico
-            throw new AuthException(
-                'Credenciales inválidas',
-                self::ERROR_INVALID_CREDENTIALS
-            );
+        if ($empleado) {
+            // Es un empleado - validar estado y retornar datos de empleado
+            return $this->loginEmpleado($user, $empleado);
         }
 
-        // 5. Validar que usuario esté activo y no inhabilitado en PQ_PARTES_USUARIOS
+        // 5. Si no es empleado, buscar en PQ_PARTES_CLIENTES por code (cliente)
+        $cliente = Cliente::where('code', $usuario)->first();
+        
+        if ($cliente) {
+            // Es un cliente - validar estado y retornar datos de cliente
+            return $this->loginCliente($user, $cliente);
+        }
+
+        // Usuario existe en USERS pero no tiene perfil en ninguna tabla
+        // Retornar error genérico por seguridad
+        throw new AuthException(
+            'Credenciales inválidas',
+            self::ERROR_INVALID_CREDENTIALS
+        );
+    }
+
+    /**
+     * Procesar login de empleado
+     *
+     * @param User $user Datos de autenticación
+     * @param Usuario $empleado Datos del empleado
+     * @return array Token y datos del usuario
+     * @throws AuthException Si el empleado está inactivo
+     */
+    private function loginEmpleado(User $user, Usuario $empleado): array
+    {
+        // Validar que empleado esté activo y no inhabilitado
         if (!$empleado->activo || $empleado->inhabilitado) {
             throw new AuthException(
                 'Usuario inactivo',
@@ -105,10 +129,10 @@ class AuthService
             );
         }
 
-        // 6. Generar token Sanctum asociado al User
+        // Generar token Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // 7. Preparar respuesta con todos los campos requeridos
+        // Retornar respuesta de empleado
         return [
             'token' => $token,
             'user_data' => [
@@ -120,6 +144,45 @@ class AuthService
                 'es_supervisor' => (bool) $empleado->supervisor,
                 'nombre' => $empleado->nombre,
                 'email' => $empleado->email,
+            ]
+        ];
+    }
+
+    /**
+     * Procesar login de cliente
+     *
+     * @param User $user Datos de autenticación
+     * @param Cliente $cliente Datos del cliente
+     * @return array Token y datos del usuario
+     * @throws AuthException Si el cliente está inactivo
+     * 
+     * @see TR-002(SH)-login-de-cliente.md
+     */
+    private function loginCliente(User $user, Cliente $cliente): array
+    {
+        // Validar que cliente esté activo y no inhabilitado
+        if (!$cliente->activo || $cliente->inhabilitado) {
+            throw new AuthException(
+                'Usuario inactivo',
+                self::ERROR_USER_INACTIVE
+            );
+        }
+
+        // Generar token Sanctum
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Retornar respuesta de cliente
+        return [
+            'token' => $token,
+            'user_data' => [
+                'user_id' => $user->id,
+                'user_code' => $user->code,
+                'tipo_usuario' => 'cliente', // Cliente
+                'usuario_id' => null, // No es empleado
+                'cliente_id' => $cliente->id,
+                'es_supervisor' => false, // Clientes nunca son supervisores
+                'nombre' => $cliente->nombre,
+                'email' => $cliente->email,
             ]
         ];
     }

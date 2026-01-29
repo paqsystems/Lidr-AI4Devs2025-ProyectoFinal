@@ -427,7 +427,7 @@ Este checklist está basado en el proceso seguido en este proyecto. Para más de
 
   FrontEnd : 
   cd frontend
-  npx playwright test auth-login.spec.ts
+  npm run dev
 
   Test E2E:
   cd frontend

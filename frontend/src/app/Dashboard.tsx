@@ -6,6 +6,7 @@
  * 
  * @see TR-001(MH)-login-de-empleado.md
  * @see TR-003(MH)-logout.md
+ * @see TR-006(MH)-visualización-de-perfil-de-usuario.md
  */
 
 import React, { useState } from 'react';
@@ -75,6 +76,27 @@ export function Dashboard(): React.ReactElement {
           {user.esSupervisor && (
             <p className="supervisor-text">Tiene permisos de supervisor</p>
           )}
+          <div className="welcome-card-actions">
+            <button
+              onClick={() => navigate('/perfil')}
+              className="profile-link-button"
+              data-testid="app.profileLink"
+              aria-label="Ver mi perfil"
+            >
+              Ver Mi Perfil
+            </button>
+            {/* Solo mostrar botón de cargar tarea para empleados */}
+            {user.tipoUsuario === 'usuario' && (
+              <button
+                onClick={() => navigate('/tareas/nueva')}
+                className="profile-link-button"
+                data-testid="app.createTaskLink"
+                aria-label="Cargar nueva tarea"
+              >
+                Cargar Tarea
+              </button>
+            )}
+          </div>
         </div>
         
         <div className="dashboard-placeholder">

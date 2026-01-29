@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\UserProfileController;
+use App\Http\Controllers\Api\V1\TaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,9 +37,34 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout'])
             ->name('api.v1.auth.logout');
             
-        // GET /api/v1/user - Obtener usuario actual
+        // GET /api/v1/user - Obtener usuario actual (legacy)
         Route::get('/user', function (Request $request) {
             return $request->user();
         })->name('api.v1.user');
+        
+        // GET /api/v1/user/profile - Obtener perfil del usuario autenticado
+        // @see TR-006(MH)-visualización-de-perfil-de-usuario.md
+        Route::get('/user/profile', [UserProfileController::class, 'show'])
+            ->name('api.v1.user.profile');
+        
+        // Rutas de tareas
+        // @see TR-028(MH)-carga-de-tarea-diaria.md
+        Route::prefix('tasks')->group(function () {
+            // POST /api/v1/tasks - Crear nuevo registro de tarea
+            Route::post('/', [TaskController::class, 'store'])
+                ->name('api.v1.tasks.store');
+            
+            // GET /api/v1/tasks/clients - Obtener lista de clientes activos
+            Route::get('/clients', [TaskController::class, 'getClients'])
+                ->name('api.v1.tasks.clients');
+            
+            // GET /api/v1/tasks/task-types - Obtener tipos de tarea disponibles
+            Route::get('/task-types', [TaskController::class, 'getTaskTypes'])
+                ->name('api.v1.tasks.task-types');
+            
+            // GET /api/v1/tasks/employees - Obtener lista de empleados (solo supervisores)
+            Route::get('/employees', [TaskController::class, 'getEmployees'])
+                ->name('api.v1.tasks.employees');
+        });
     });
 });

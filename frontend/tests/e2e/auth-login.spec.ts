@@ -10,6 +10,7 @@
  * - Verifica almacenamiento de token en localStorage
  * 
  * @see TR-001(MH)-login-de-empleado.md
+ * @see TR-002(SH)-login-de-cliente.md
  */
 
 import { test, expect } from '@playwright/test';
@@ -25,6 +26,13 @@ const SUPERVISOR_USER = {
   code: 'MGARCIA',
   password: 'password456',
   name: 'María García',
+};
+
+// Datos de prueba para cliente (TR-002)
+const CLIENT_USER = {
+  code: 'CLI001',
+  password: 'cliente123',
+  name: 'Empresa ABC S.A.',
 };
 
 test.describe('Login de Empleado', () => {
@@ -302,5 +310,122 @@ test.describe('Login de Empleado', () => {
     // Debe redirigir a login porque no hay sesión
     await expect(page).toHaveURL('/login', { timeout: 10000 });
     await expect(page.locator('[data-testid="auth.login.form"]')).toBeVisible();
+  });
+});
+
+// ========================================
+// Tests de Login Cliente (TR-002)
+// ========================================
+
+test.describe('Login de Cliente', () => {
+  test.beforeEach(async ({ page }) => {
+    // Limpiar localStorage antes de cada test
+    await page.goto('/login');
+    await page.evaluate(() => localStorage.clear());
+  });
+
+  test('debe autenticar cliente y redirigir al dashboard', async ({ page }) => {
+    // Arrange: Navegar a login
+    await page.goto('/login');
+    await expect(page.locator('[data-testid="auth.login.form"]')).toBeVisible();
+
+    // Act: Llenar formulario con credenciales de cliente y enviar
+    await page.fill('[data-testid="auth.login.usuarioInput"]', CLIENT_USER.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', CLIENT_USER.password);
+    
+    // Esperar la respuesta del API antes de verificar redirección
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/login') && resp.status() === 200),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+
+    // Assert: Verificar redirección al dashboard
+    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page.locator('[data-testid="app.dashboard"]')).toBeVisible();
+
+    // Verificar que el token está en localStorage
+    const token = await page.evaluate(() => localStorage.getItem('auth_token'));
+    expect(token).toBeTruthy();
+    expect(token).toContain('|');
+  });
+
+  test('debe almacenar tipo_usuario cliente en localStorage', async ({ page }) => {
+    // Arrange
+    await page.goto('/login');
+    await expect(page.locator('[data-testid="auth.login.form"]')).toBeVisible();
+
+    // Act
+    await page.fill('[data-testid="auth.login.usuarioInput"]', CLIENT_USER.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', CLIENT_USER.password);
+    
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/login') && resp.status() === 200),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+
+    // Assert
+    await expect(page).toHaveURL('/', { timeout: 10000 });
+
+    // Verificar datos del usuario en localStorage
+    const userData = await page.evaluate(() => {
+      const data = localStorage.getItem('auth_user');
+      return data ? JSON.parse(data) : null;
+    });
+    expect(userData).toBeTruthy();
+    expect(userData.tipoUsuario).toBe('cliente');
+    expect(userData.esSupervisor).toBe(false);
+    expect(userData.usuarioId).toBeNull();
+    expect(userData.clienteId).not.toBeNull();
+  });
+
+  test('cliente NO debe tener badge de supervisor', async ({ page }) => {
+    // Arrange
+    await page.goto('/login');
+
+    // Act
+    await page.fill('[data-testid="auth.login.usuarioInput"]', CLIENT_USER.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', CLIENT_USER.password);
+    
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/login') && resp.status() === 200),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+
+    // Assert
+    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page.locator('[data-testid="app.dashboard"]')).toBeVisible();
+
+    // Verificar que el badge de supervisor NO está visible
+    await expect(page.locator('[data-testid="app.supervisorBadge"]')).not.toBeVisible();
+  });
+
+  test('cliente puede hacer logout igual que empleado', async ({ page }) => {
+    // Autenticar como cliente
+    await page.goto('/login');
+    await page.fill('[data-testid="auth.login.usuarioInput"]', CLIENT_USER.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', CLIENT_USER.password);
+    
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/login') && resp.status() === 200),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+    await expect(page).toHaveURL('/', { timeout: 10000 });
+
+    // Verificar que el token existe
+    let token = await page.evaluate(() => localStorage.getItem('auth_token'));
+    expect(token).toBeTruthy();
+
+    // Click en cerrar sesión
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/v1/auth/logout') && resp.status() === 200),
+      page.click('[data-testid="app.logoutButton"]'),
+    ]);
+
+    // Verificar redirección a login
+    await expect(page).toHaveURL('/login', { timeout: 10000 });
+
+    // Verificar que el token fue eliminado
+    token = await page.evaluate(() => localStorage.getItem('auth_token'));
+    expect(token).toBeNull();
   });
 });

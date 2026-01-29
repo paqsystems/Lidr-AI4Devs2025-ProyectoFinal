@@ -10,7 +10,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LoginForm } from '../features/auth';
+import { ProfileView } from '../features/user';
+import { TaskForm } from '../features/tasks';
 import { ProtectedRoute, PublicRoute } from '../routes';
+import { EmployeeRoute } from '../routes/EmployeeRoute';
 import { Dashboard } from './Dashboard';
 import './App.css';
 
@@ -38,6 +41,26 @@ export function App(): React.ReactElement {
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
+          } 
+        />
+        
+        {/* Perfil de usuario (protegida) */}
+        <Route 
+          path="/perfil" 
+          element={
+            <ProtectedRoute>
+              <ProfileView />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Cargar tarea diaria (solo para empleados) */}
+        <Route 
+          path="/tareas/nueva" 
+          element={
+            <EmployeeRoute>
+              <TaskForm />
+            </EmployeeRoute>
           } 
         />
         

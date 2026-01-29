@@ -30,4 +30,19 @@
         "MSSQL_PASSWORD": "f30CuP217zHau0pKCNpAgEpv3O",
         "MSSQL_TRUST_SERVER_CERTIFICATE": "true"
       },
-    
+    // Tec-Ser
+    "mssql": {
+        "command": "C:\\Users\\Pabloq\\toolbox.exe",
+        "args": [
+          "--prebuilt",
+          "mssql",
+          "--stdio"
+        ],
+        "env": {
+          "MSSQL_HOST": "192.168.41.2",
+          "MSSQL_PORT": "1433",
+          "MSSQL_DATABASE": "Lidr",
+          "MSSQL_USER": "Axoft",
+          "MSSQL_PASSWORD": "Axoft"
+        }      
+    }   
