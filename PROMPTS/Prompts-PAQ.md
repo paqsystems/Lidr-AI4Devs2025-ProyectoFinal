@@ -221,3 +221,22 @@ Cierre obligatorio (trazabilidad):
 Restricción:
 - No ejecutar tareas fuera del alcance de esta TR.
 
+---
+
+## Prompt 10 - TR-033 Update (correcciones tras pruebas)
+
+Cuando se detecten errores o mejoras probando el proceso TR-033:
+
+1. Documentarlos en un archivo con el mismo nombre de la tarea TR-033 más el agregado **"-update"** (ej.: `docs/hu-tareas/TR-033(MH)-visualización-de-lista-de-tareas-propias-update.md`).
+2. Resolver en la programación cada punto documentado.
+3. Cuando pasen todos los testings (automáticos y manuales) y el usuario dé confirmación, actualizar el documento TR original y eliminar el archivo "-update".
+
+**Consignas típicas TR-033 Update (ejemplo):**
+1. Los datos para filtrar no están bien alineados.
+2. Se repiten los títulos "Clientes" y "Tipo de tarea".
+3. En la lista de Clientes: considerar la opción "Todos".
+4. Si se elige en cliente la opción "Todos", que en la lista de tipo de tareas aparezca todos los registros (genéricos y no genéricos).
+5. En la lista de tipos de tareas: considerar la opción "Todos".
+6. Si el usuario es de nivel supervisor, agregar el filtro "Empleado".
+7. Si aparece el filtro "Empleado", que también admita la opción "Todos".
+

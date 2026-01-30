@@ -47,7 +47,9 @@ class TaskControllerTest extends TestCase
             DB::table('PQ_PARTES_REGISTRO_TAREA')->whereIn('cliente_id', $clienteIds)->delete();
             DB::table('PQ_PARTES_CLIENTE_TIPO_TAREA')->whereIn('cliente_id', $clienteIds)->delete();
         }
-        
+        if ($usuarioIds->isNotEmpty()) {
+            DB::table('PQ_PARTES_REGISTRO_TAREA')->whereIn('usuario_id', $usuarioIds)->delete();
+        }
         DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->delete();
         DB::table('PQ_PARTES_CLIENTES')->whereIn('code', $testCodes)->delete();
         
@@ -458,6 +460,107 @@ class TaskControllerTest extends TestCase
     }
 
     // ========================================
+    // Tests GET /api/v1/tasks (index - lista de tareas propias)
+    // @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
+    // ========================================
+
+    /** @test */
+    public function index_retorna_lista_paginada()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea de prueba',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->getJson('/api/v1/tasks');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Tareas obtenidas correctamente',
+            ])
+            ->assertJsonStructure([
+                'error',
+                'respuesta',
+                'resultado' => [
+                    'data' => [
+                        '*' => [
+                            'id',
+                            'fecha',
+                            'cliente' => ['id', 'nombre'],
+                            'tipo_tarea' => ['id', 'nombre'],
+                            'duracion_minutos',
+                            'duracion_horas',
+                            'sin_cargo',
+                            'presencial',
+                            'observacion',
+                            'cerrado',
+                        ],
+                    ],
+                    'pagination' => ['current_page', 'per_page', 'total', 'last_page'],
+                    'totales' => ['cantidad_tareas', 'total_horas'],
+                ],
+            ]);
+
+        $this->assertGreaterThanOrEqual(1, count($response->json('resultado.data')));
+    }
+
+    /** @test */
+    public function index_aplica_filtro_fecha()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-15',
+            'duracion_minutos' => 60,
+            'observacion' => 'Enero',
+            'cerrado' => false,
+        ]);
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-02-01',
+            'duracion_minutos' => 60,
+            'observacion' => 'Febrero',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->getJson('/api/v1/tasks?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(200);
+        $data = $response->json('resultado.data');
+        $this->assertCount(1, $data);
+        $this->assertEquals('2026-01-15', $data[0]['fecha']);
+    }
+
+    /** @test */
+    public function index_requires_authentication()
+    {
+        $response = $this->getJson('/api/v1/tasks');
+
+        $response->assertStatus(401);
+    }
+
+    // ========================================
     // Tests GET /api/v1/tasks/clients
     // ========================================
 
@@ -521,10 +624,13 @@ class TaskControllerTest extends TestCase
 
         $tipos = $response->json('resultado');
         $this->assertNotEmpty($tipos);
-        
-        // Verificar que todos son genéricos cuando no se especifica cliente
+
+        // Sin cliente_id (TR-033 UPDATE): retorna todos los tipos activos (genéricos y no genéricos)
         foreach ($tipos as $tipo) {
-            $this->assertTrue($tipo['is_generico']);
+            $this->assertArrayHasKey('id', $tipo);
+            $this->assertArrayHasKey('code', $tipo);
+            $this->assertArrayHasKey('descripcion', $tipo);
+            $this->assertArrayHasKey('is_generico', $tipo);
         }
     }
 

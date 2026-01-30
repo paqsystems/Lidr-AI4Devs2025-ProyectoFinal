@@ -49,7 +49,12 @@ Route::prefix('v1')->group(function () {
         
         // Rutas de tareas
         // @see TR-028(MH)-carga-de-tarea-diaria.md
+        // @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
         Route::prefix('tasks')->group(function () {
+            // GET /api/v1/tasks - Listar tareas propias (paginado, filtros)
+            Route::get('/', [TaskController::class, 'index'])
+                ->name('api.v1.tasks.index');
+            
             // POST /api/v1/tasks - Crear nuevo registro de tarea
             Route::post('/', [TaskController::class, 'store'])
                 ->name('api.v1.tasks.store');

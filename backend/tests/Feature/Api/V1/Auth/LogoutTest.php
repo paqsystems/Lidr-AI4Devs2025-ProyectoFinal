@@ -37,7 +37,11 @@ class LogoutTest extends TestCase
         // Limpiar usuarios existentes que podrían causar conflictos
         $testCodes = ['JPEREZ'];
         
-        // Eliminar de PQ_PARTES_USUARIOS primero (por FK)
+        // Eliminar registros de tarea que referencian a este usuario (FK fk_registro_usuario)
+        $usuarioIds = DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->pluck('id');
+        if ($usuarioIds->isNotEmpty()) {
+            DB::table('PQ_PARTES_REGISTRO_TAREA')->whereIn('usuario_id', $usuarioIds)->delete();
+        }
         DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->delete();
         
         // Eliminar tokens asociados a usuarios de prueba

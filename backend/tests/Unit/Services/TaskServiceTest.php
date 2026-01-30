@@ -51,7 +51,9 @@ class TaskServiceTest extends TestCase
             DB::table('PQ_PARTES_REGISTRO_TAREA')->whereIn('cliente_id', $clienteIds)->delete();
             DB::table('PQ_PARTES_CLIENTE_TIPO_TAREA')->whereIn('cliente_id', $clienteIds)->delete();
         }
-        
+        if ($usuarioIds->isNotEmpty()) {
+            DB::table('PQ_PARTES_REGISTRO_TAREA')->whereIn('usuario_id', $usuarioIds)->delete();
+        }
         DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->delete();
         DB::table('PQ_PARTES_CLIENTES')->whereIn('code', $testCodes)->delete();
         
@@ -457,5 +459,115 @@ class TaskServiceTest extends TestCase
         $this->expectExceptionCode(TaskService::ERROR_FORBIDDEN);
         
         $this->taskService->createTask($datos, $user);
+    }
+
+    /**
+     * Test: listTasks retorna solo tareas del usuario autenticado
+     * @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
+     */
+    public function test_list_tasks_retorna_tareas_del_usuario(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea uno',
+            'cerrado' => false,
+        ]);
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-27',
+            'duracion_minutos' => 60,
+            'observacion' => 'Tarea dos',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listTasks($user, ['per_page' => 15]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('pagination', $result);
+        $this->assertArrayHasKey('totales', $result);
+        $this->assertCount(2, $result['data']);
+        $this->assertEquals(2, $result['totales']['cantidad_tareas']);
+        $this->assertEquals(3.0, $result['totales']['total_horas']); // 120+60 = 180 min = 3h
+    }
+
+    /**
+     * Test: listTasks filtra por rango de fechas
+     */
+    public function test_list_tasks_filtra_por_rango_fechas(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Enero',
+            'cerrado' => false,
+        ]);
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-02-01',
+            'duracion_minutos' => 60,
+            'observacion' => 'Febrero',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listTasks($user, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+            'per_page' => 15,
+        ]);
+
+        $this->assertCount(1, $result['data']);
+        $this->assertEquals('2026-01-28', $result['data'][0]['fecha']);
+    }
+
+    /**
+     * Test: listTasks pagina correctamente (per_page mínimo 10 según TR-033)
+     */
+    public function test_list_tasks_pagina_correctamente(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        for ($i = 0; $i < 15; $i++) {
+            RegistroTarea::create([
+                'usuario_id' => $empleado->id,
+                'cliente_id' => $cliente->id,
+                'tipo_tarea_id' => $tipoTarea->id,
+                'fecha' => '2026-01-' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT),
+                'duracion_minutos' => 60,
+                'observacion' => "Tarea $i",
+                'cerrado' => false,
+            ]);
+        }
+
+        $result = $this->taskService->listTasks($user, ['page' => 1, 'per_page' => 10]);
+
+        $this->assertCount(10, $result['data']);
+        $this->assertEquals(1, $result['pagination']['current_page']);
+        $this->assertEquals(2, $result['pagination']['last_page']);
+        $this->assertEquals(15, $result['pagination']['total']);
     }
 }

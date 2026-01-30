@@ -18,12 +18,14 @@ use Illuminate\Http\Request;
  * Controlador para endpoints de gestión de tareas.
  * 
  * Endpoints:
+ * - GET /api/v1/tasks - Listar tareas propias (paginado, filtros)
  * - POST /api/v1/tasks - Crear nuevo registro de tarea
  * - GET /api/v1/tasks/clients - Obtener lista de clientes activos
  * - GET /api/v1/tasks/task-types - Obtener tipos de tarea disponibles
  * - GET /api/v1/tasks/employees - Obtener lista de empleados (solo supervisores)
  * 
  * @see TR-028(MH)-carga-de-tarea-diaria.md
+ * @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
  */
 class TaskController extends Controller
 {
@@ -40,6 +42,47 @@ class TaskController extends Controller
     public function __construct(TaskService $taskService)
     {
         $this->taskService = $taskService;
+    }
+
+    /**
+     * Listar tareas del usuario autenticado
+     *
+     * GET /api/v1/tasks?page=1&per_page=15&fecha_desde=...&fecha_hasta=...&cliente_id=...&tipo_tarea_id=...&busqueda=...&ordenar_por=fecha&orden=desc
+     *
+     * @param Request $request Request con query params y usuario autenticado
+     * @return JsonResponse Respuesta con data, pagination y totales
+     */
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            $filters = [
+                'page' => $request->query('page', 1),
+                'per_page' => $request->query('per_page', 15),
+                'fecha_desde' => $request->query('fecha_desde'),
+                'fecha_hasta' => $request->query('fecha_hasta'),
+                'cliente_id' => $request->query('cliente_id'),
+                'tipo_tarea_id' => $request->query('tipo_tarea_id'),
+                'usuario_id' => $request->query('usuario_id'),
+                'busqueda' => $request->query('busqueda'),
+                'ordenar_por' => $request->query('ordenar_por', 'fecha'),
+                'orden' => $request->query('orden', 'desc'),
+            ];
+
+            $result = $this->taskService->listTasks($user, $filters);
+
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Tareas obtenidas correctamente',
+                'resultado' => $result,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 9999,
+                'respuesta' => 'Error inesperado del servidor',
+                'resultado' => (object) [],
+            ], 500);
+        }
     }
 
     /**
@@ -207,17 +250,21 @@ class TaskController extends Controller
         try {
             $clienteId = $request->query('cliente_id');
 
-            // Obtener tipos genéricos activos
-            $tiposGenericos = TipoTarea::where('is_generico', true)
-                ->where('activo', true)
-                ->where('inhabilitado', false)
-                ->get();
+            // Sin cliente_id (ej. filtro "Todos"): retornar todos los tipos activos (genéricos y no genéricos)
+            if (!$clienteId || $clienteId === '' || $clienteId === 'all') {
+                $tiposDisponibles = TipoTarea::where('activo', true)
+                    ->where('inhabilitado', false)
+                    ->orderBy('is_generico', 'desc')
+                    ->orderBy('descripcion')
+                    ->get();
+            } else {
+                // Con cliente_id: genéricos + tipos asignados al cliente
+                $tiposGenericos = TipoTarea::where('is_generico', true)
+                    ->where('activo', true)
+                    ->where('inhabilitado', false)
+                    ->get();
 
-            $tiposDisponibles = $tiposGenericos;
-
-            // Si se proporciona cliente_id, agregar tipos asignados al cliente
-            if ($clienteId) {
-                $tiposAsignadosIds = ClienteTipoTarea::where('cliente_id', $clienteId)
+                $tiposAsignadosIds = ClienteTipoTarea::where('cliente_id', (int) $clienteId)
                     ->pluck('tipo_tarea_id')
                     ->toArray();
 
@@ -226,7 +273,6 @@ class TaskController extends Controller
                     ->where('inhabilitado', false)
                     ->get();
 
-                // Combinar tipos genéricos y asignados, eliminar duplicados
                 $tiposDisponibles = $tiposGenericos->merge($tiposAsignados)->unique('id');
             }
 

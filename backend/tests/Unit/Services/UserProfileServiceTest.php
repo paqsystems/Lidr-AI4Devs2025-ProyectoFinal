@@ -40,6 +40,10 @@ class UserProfileServiceTest extends TestCase
         // Limpiar usuarios existentes
         $testCodes = ['JPEREZ', 'MGARCIA', 'CLI001', 'SINPERFIL'];
         
+        $usuarioIds = DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->pluck('id');
+        if ($usuarioIds->isNotEmpty()) {
+            DB::table('PQ_PARTES_REGISTRO_TAREA')->whereIn('usuario_id', $usuarioIds)->delete();
+        }
         DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->delete();
         DB::table('PQ_PARTES_CLIENTES')->whereIn('code', $testCodes)->delete();
         

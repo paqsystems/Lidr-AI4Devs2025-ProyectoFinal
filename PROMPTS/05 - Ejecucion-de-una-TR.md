@@ -16,6 +16,7 @@ Implementación:
 
 Tests:
 - Implementar unit tests, integration tests y E2E Playwright si la TR lo indica.
+- Si la TR incluye cambios en frontend (servicios, componentes, utilidades): añadir también tests unitarios con Vitest en `frontend/src/` (p. ej. `*.test.ts` o `*.spec.ts` junto al código). Cubrir al menos servicios (llamadas API, transformación de datos) y, cuando aplique, utilidades o componentes aislados.
 - En E2E:
   - Interacciones reales del usuario.
   - Assertions con expect sobre estado visible.

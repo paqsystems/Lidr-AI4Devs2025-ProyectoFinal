@@ -17,9 +17,13 @@ export interface EmployeeSelectorProps {
   onChange: (empleadoId: number | null) => void;
   error?: string;
   disabled?: boolean;
+  /** Si true, no muestra el label (para usar dentro de filtros con label externo). */
+  showLabel?: boolean;
+  /** Si true, añade opción "Todos" como primera opción. */
+  allowAll?: boolean;
 }
 
-export function EmployeeSelector({ value, onChange, error, disabled }: EmployeeSelectorProps): React.ReactElement {
+export function EmployeeSelector({ value, onChange, error, disabled, showLabel = true, allowAll = false }: EmployeeSelectorProps): React.ReactElement {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -66,15 +70,11 @@ export function EmployeeSelector({ value, onChange, error, disabled }: EmployeeS
     return <></>;
   }
 
-  return (
-    <div className="form-group">
-      <label htmlFor="empleado-select" className="form-label">
-        {t('tasks.form.fields.empleado.label', 'Empleado')}
-      </label>
-      <select
+  const selectEl = (
+    <select
         id="empleado-select"
         data-testid="task.form.employeeSelect"
-        value={value || ''}
+        value={value ?? ''}
         onChange={handleChange}
         disabled={disabled || loading}
         className={`form-input form-select ${error ? 'input-error' : ''}`}
@@ -82,25 +82,46 @@ export function EmployeeSelector({ value, onChange, error, disabled }: EmployeeS
         aria-invalid={!!error}
         aria-describedby={error ? 'empleado-error' : undefined}
       >
-        <option value="">{t('tasks.form.selectors.employees.placeholder.current', '-- Usuario actual --')}</option>
+        <option value="">{allowAll ? t('tasks.list.filters.todos', 'Todos') : t('tasks.form.selectors.employees.placeholder.current', '-- Usuario actual --')}</option>
         {employees.map((employee) => (
           <option key={employee.id} value={employee.id}>
             {employee.nombre} ({employee.code})
           </option>
         ))}
-      </select>
+    </select>
+  );
+
+  if (!showLabel) {
+    return (
+      <div className="form-group">
+        {selectEl}
+        {loading && (
+          <div className="field-loading" data-testid="task.form.employeeSelect.loading">
+            {t('tasks.form.selectors.employees.loading', 'Cargando empleados...')}
+          </div>
+        )}
+        {(error || errorMessage) && (
+          <span id="empleado-error" className="field-error" role="alert" data-testid="task.form.employeeSelect.error">
+            {error || errorMessage}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="form-group">
+      <label htmlFor="empleado-select" className="form-label">
+        {t('tasks.form.fields.empleado.label', 'Empleado')}
+      </label>
+      {selectEl}
       {loading && (
         <div className="field-loading" data-testid="task.form.employeeSelect.loading">
           {t('tasks.form.selectors.employees.loading', 'Cargando empleados...')}
         </div>
       )}
       {(error || errorMessage) && (
-        <span 
-          id="empleado-error" 
-          className="field-error" 
-          role="alert"
-          data-testid="task.form.employeeSelect.error"
-        >
+        <span id="empleado-error" className="field-error" role="alert" data-testid="task.form.employeeSelect.error">
           {error || errorMessage}
         </span>
       )}

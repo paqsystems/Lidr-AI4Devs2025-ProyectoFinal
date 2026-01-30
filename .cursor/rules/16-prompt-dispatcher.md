@@ -76,18 +76,49 @@ El asistente debe:
 2. Indicar la ejecución de los siguientes comandos,
    **en terminales separadas**:
 
-### Backend
+1) Backend
 en nueva terminal
 ```bash
 cd backend
 php artisan serve
 ```
-### Frontend
+2) Frontend
 en otra terminal
 ```bash 
 cd frontend
 npm run dev
 ```
+--- 
+## PARTE D – Ejecución de tests (backend + unitarios + E2E)
+
+### Comando: "Ejecutá los tests" / "Corré los tests"
+
+Cuando el usuario escriba algo como:
+> Ejecutá los tests
+> Corré los tests
+> Ejecutá tests unitarios y E2E
+
+el asistente debe:
+
+1. Asumir que el proyecto tiene:
+   - `Backend` en backend/ (Laravel, PHPUnit).
+   - `Frontend` en frontend/ (Vitest para unitarios, Playwright para E2E).
+
+2. Indicar la ejecución de los siguientes comandos,
+   **en terminales separadas** , en este orden:
+
+1) Tests backend
+En una terminal:
+cd backend
+php artisan test
+2) Tests unitarios (frontend)
+En otra terminal:
+cd frontend
+npm run test:run
+3) Tests E2E (frontend)
+En otra terminal:
+cd frontend
+npm run test:e2e
 --- 
 
 ## Reglas generales (aplican a todos los comandos)
@@ -104,6 +135,11 @@ npm run dev
 Esta regla habilita un flujo completo y consistente:
 - HU → TR (planificación)
 - TR → Código, tests y documentación (ejecución)
+- Ejecución de tests: backend, unitarios y E2E en terminales separadas con una frase (PARTE D).
 
 Permite usar comandos cortos, claros y sin copy/paste,
 reduciendo errores humanos y mejorando la productividad.
+
+### Invocaciones combinadas
+
+Si el usuario escribe en un mismo mensaje ambas frases (por ejemplo: **Iniciá el entorno de desarrollo** y **ejecutá los tests**), el asistente debe aplicar primero la PARTE C (abrir terminales con backend y frontend en ejecución) y luego la PARTE D (abrir las tres terminales de tests: backend, unitarios, E2E). Las invocaciones son acumulables en el orden C → D.

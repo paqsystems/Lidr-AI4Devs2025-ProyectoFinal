@@ -6,6 +6,24 @@ de negocio básica sea confiable, sin sobre–dimensionar la estrategia de testi
 
 ---
 
+## Convención: dos tipos de test por tarea/historia
+
+**Cada vez que se implemente una tarea o historia (TR/HU), se deben añadir los dos tipos de test en frontend:**
+
+| Tipo | Herramienta | Ubicación | Qué valida |
+|------|-------------|-----------|------------|
+| **Unitarios** | Vitest | `frontend/src/**/*.{test,spec}.{ts,tsx}` | Lógica, servicios, utilidades, componentes aislados. |
+| **E2E** | Playwright | `frontend/tests/e2e/*.spec.ts` | Flujo de usuario en navegador (login, pantallas, formularios). |
+
+**Ejecución recomendada al cerrar una tarea:** correr ambos con un solo comando (ver más abajo).
+
+**Checklist al programar próximos tests (por tarea/historia):**
+1. ¿Hay lógica o servicio en frontend? → Añadir o ampliar tests en `src/` (Vitest).
+2. ¿Hay pantalla o flujo que el usuario recorre? → Añadir o ampliar spec en `tests/e2e/` (Playwright).
+3. Al terminar la tarea → Ejecutar `npm run test:all` en `frontend/` (y `php artisan test` en backend si aplica).
+
+---
+
 ## Tipos de Tests
 
 ### Tests Unitarios
@@ -44,12 +62,29 @@ Login → Registro de tarea → Visualización de tareas.
 - Tests ubicados en: `frontend/tests/e2e/`
 - Documentación: `docs/frontend/testing.md` y `.cursor/rules/11-playwright-testing-rules.md`
 
-**Ejecutar tests E2E:**
+**Ejecutar tests en frontend:**
 ```bash
 cd frontend
-npm run test:e2e          # Todos los tests
-npm run test:e2e:ui      # Con UI interactiva
-npm run test:e2e:headed # Ver navegador
+# Opción recomendada al cerrar una tarea: unitarios + E2E
+npm run test:all             # Vitest (run) + Playwright E2E
+
+# Por separado
+npm run test                 # Vitest (modo watch)
+npm run test:run             # Vitest una sola vez
+npm run test:e2e             # Solo Playwright E2E
+npm run test:e2e:ui          # E2E con UI interactiva
+npm run test:e2e:headed      # E2E con navegador visible
+```
+
+**Ejecutar tests en backend:**
+```bash
+cd backend
+php artisan test
+```
+
+**Ejecutar todo (backend + frontend unitarios + frontend E2E):**
+```bash
+cd backend && php artisan test && cd ../frontend && npm run test:all
 ```
 
 ---

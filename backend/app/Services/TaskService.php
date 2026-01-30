@@ -14,8 +14,13 @@ use Illuminate\Support\Facades\Log;
 /**
  * Service: TaskService
  * 
- * Servicio para gestionar la creación de registros de tarea.
- * Implementa la lógica de negocio para crear tareas diarias.
+ * Servicio para gestionar la creación y listado de registros de tarea.
+ * Implementa la lógica de negocio para crear tareas diarias y listar tareas propias.
+ * 
+ * Flujo de listado (TR-033):
+ * - Solo tareas del usuario autenticado (usuario_id = empleado del user).
+ * - Filtros: fecha, cliente, tipo, búsqueda en observación.
+ * - Paginación y totales (cantidad, horas).
  * 
  * Flujo de creación de tarea:
  * 1. Validar que el cliente existe y está activo/no inhabilitado
@@ -33,6 +38,7 @@ use Illuminate\Support\Facades\Log;
  * - 4204: Tipo de tarea no disponible para el cliente
  * 
  * @see TR-028(MH)-carga-de-tarea-diaria.md
+ * @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
  */
 class TaskService
 {
@@ -44,6 +50,140 @@ class TaskService
     public const ERROR_TIPO_TAREA_INACTIVO = 4202;
     public const ERROR_EMPLEADO_INACTIVO = 4203;
     public const ERROR_TIPO_TAREA_NO_DISPONIBLE = 4204;
+
+    /**
+     * Listar tareas del usuario autenticado con filtros y paginación
+     *
+     * @param User $user Usuario autenticado
+     * @param array $filters page, per_page, fecha_desde, fecha_hasta, cliente_id, tipo_tarea_id, busqueda, ordenar_por, orden
+     * @return array ['data' => [...], 'pagination' => [...], 'totales' => [...]]
+     */
+    public function listTasks(User $user, array $filters): array
+    {
+        $empleado = Usuario::where('user_id', $user->id)->first();
+        if (!$empleado) {
+            return [
+                'data' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'per_page' => (int) ($filters['per_page'] ?? 15),
+                    'total' => 0,
+                    'last_page' => 1,
+                ],
+                'totales' => [
+                    'cantidad_tareas' => 0,
+                    'total_horas' => 0,
+                ],
+            ];
+        }
+
+        $perPage = max(10, min(20, (int) ($filters['per_page'] ?? 15)));
+        $ordenarPor = $filters['ordenar_por'] ?? 'fecha';
+        $orden = strtolower($filters['orden'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+
+        $esSupervisor = (bool) $empleado->supervisor;
+        $filtrarPorEmpleado = isset($filters['usuario_id']) && $filters['usuario_id'] !== '' && $filters['usuario_id'] !== null;
+        $empleadoIdFiltro = $filtrarPorEmpleado && $esSupervisor ? (int) $filters['usuario_id'] : $empleado->id;
+
+        $query = RegistroTarea::with(['cliente', 'tipoTarea']);
+        if ($esSupervisor && !$filtrarPorEmpleado) {
+            // Supervisor sin filtro empleado: todas las tareas
+        } else {
+            $query->where('usuario_id', $empleadoIdFiltro);
+        }
+
+        if (!empty($filters['fecha_desde'])) {
+            $query->where('fecha', '>=', $filters['fecha_desde']);
+        }
+        if (!empty($filters['fecha_hasta'])) {
+            $query->where('fecha', '<=', $filters['fecha_hasta']);
+        }
+        if (isset($filters['cliente_id']) && $filters['cliente_id'] !== '' && $filters['cliente_id'] !== null) {
+            $query->where('cliente_id', (int) $filters['cliente_id']);
+        }
+        if (isset($filters['tipo_tarea_id']) && $filters['tipo_tarea_id'] !== '' && $filters['tipo_tarea_id'] !== null) {
+            $query->where('tipo_tarea_id', (int) $filters['tipo_tarea_id']);
+        }
+        if (!empty($filters['busqueda'])) {
+            $busqueda = trim($filters['busqueda']);
+            $query->where('observacion', 'like', '%' . $busqueda . '%');
+        }
+
+        $totalesQuery = RegistroTarea::query();
+        if ($esSupervisor && !$filtrarPorEmpleado) {
+            // Todas las tareas para totales
+        } else {
+            $totalesQuery->where('usuario_id', $empleadoIdFiltro);
+        }
+        if (!empty($filters['fecha_desde'])) {
+            $totalesQuery->where('fecha', '>=', $filters['fecha_desde']);
+        }
+        if (!empty($filters['fecha_hasta'])) {
+            $totalesQuery->where('fecha', '<=', $filters['fecha_hasta']);
+        }
+        if (isset($filters['cliente_id']) && $filters['cliente_id'] !== '' && $filters['cliente_id'] !== null) {
+            $totalesQuery->where('cliente_id', (int) $filters['cliente_id']);
+        }
+        if (isset($filters['tipo_tarea_id']) && $filters['tipo_tarea_id'] !== '' && $filters['tipo_tarea_id'] !== null) {
+            $totalesQuery->where('tipo_tarea_id', (int) $filters['tipo_tarea_id']);
+        }
+        if (!empty($filters['busqueda'])) {
+            $totalesQuery->where('observacion', 'like', '%' . trim($filters['busqueda']) . '%');
+        }
+        $cantidadTareas = $totalesQuery->count();
+        $totalHoras = $totalesQuery->sum('duracion_minutos') / 60;
+
+        $allowedOrder = ['fecha', 'created_at'];
+        if (!in_array($ordenarPor, $allowedOrder)) {
+            $ordenarPor = 'fecha';
+        }
+        $query->orderBy($ordenarPor, $orden);
+
+        $paginator = $query->paginate($perPage);
+
+        $data = $paginator->getCollection()->map(function (RegistroTarea $t) {
+            $observacionTruncada = mb_strlen($t->observacion) > 50
+                ? mb_substr($t->observacion, 0, 50) . '...'
+                : $t->observacion;
+            $horas = intdiv($t->duracion_minutos, 60);
+            $minutos = $t->duracion_minutos % 60;
+            $duracionHoras = sprintf('%d:%02d', $horas, $minutos);
+
+            return [
+                'id' => $t->id,
+                'fecha' => $t->fecha->format('Y-m-d'),
+                'cliente' => [
+                    'id' => $t->cliente->id,
+                    'nombre' => $t->cliente->nombre,
+                ],
+                'tipo_tarea' => [
+                    'id' => $t->tipoTarea->id,
+                    'nombre' => $t->tipoTarea->descripcion,
+                ],
+                'duracion_minutos' => $t->duracion_minutos,
+                'duracion_horas' => $duracionHoras,
+                'sin_cargo' => $t->sin_cargo,
+                'presencial' => $t->presencial,
+                'observacion' => $observacionTruncada,
+                'cerrado' => $t->cerrado,
+                'created_at' => $t->created_at->toIso8601String(),
+            ];
+        })->values()->all();
+
+        return [
+            'data' => $data,
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+            ],
+            'totales' => [
+                'cantidad_tareas' => $cantidadTareas,
+                'total_horas' => round($totalHoras, 2),
+            ],
+        ];
+    }
 
     /**
      * Crear un nuevo registro de tarea

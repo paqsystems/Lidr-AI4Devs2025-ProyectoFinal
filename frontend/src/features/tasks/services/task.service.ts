@@ -48,6 +48,56 @@ export interface Task {
 }
 
 /**
+ * Item de tarea en la lista (con cliente/tipo anidados y observación truncada)
+ */
+export interface TaskListItem {
+  id: number;
+  fecha: string;
+  cliente: { id: number; nombre: string };
+  tipo_tarea: { id: number; nombre: string };
+  duracion_minutos: number;
+  duracion_horas: string;
+  sin_cargo: boolean;
+  presencial: boolean;
+  observacion: string;
+  cerrado: boolean;
+  created_at: string;
+}
+
+/**
+ * Parámetros de filtro para listar tareas
+ */
+export interface TaskListParams {
+  page?: number;
+  per_page?: number;
+  fecha_desde?: string;
+  fecha_hasta?: string;
+  cliente_id?: number | null;
+  tipo_tarea_id?: number | null;
+  usuario_id?: number | null;
+  busqueda?: string;
+  ordenar_por?: string;
+  orden?: 'asc' | 'desc';
+}
+
+/**
+ * Respuesta paginada del API de lista de tareas
+ */
+export interface TaskListResult {
+  data: TaskListItem[];
+  pagination: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+  totales: {
+    cantidad_tareas: number;
+    total_horas: number;
+  };
+}
+
+/**
  * Datos de un cliente para selector
  */
 export interface Client {
@@ -336,6 +386,78 @@ export async function getEmployees(): Promise<GetListResult<Employee>> {
 
   } catch (error) {
     console.error('Error en getEmployees:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene la lista paginada de tareas del usuario con filtros
+ *
+ * @param params Parámetros de paginación y filtros
+ * @returns Resultado con data, pagination, totales o error
+ */
+export async function getTasks(params: TaskListParams = {}): Promise<GetTasksResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.page != null) searchParams.set('page', String(params.page));
+  if (params.per_page != null) searchParams.set('per_page', String(params.per_page));
+  if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
+  if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
+  if (params.cliente_id != null && params.cliente_id !== '' && params.cliente_id !== undefined) searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.tipo_tarea_id != null && params.tipo_tarea_id !== '' && params.tipo_tarea_id !== undefined) searchParams.set('tipo_tarea_id', String(params.tipo_tarea_id));
+  if (params.usuario_id != null && params.usuario_id !== '' && params.usuario_id !== undefined) searchParams.set('usuario_id', String(params.usuario_id));
+  if (params.busqueda) searchParams.set('busqueda', params.busqueda);
+  if (params.ordenar_por) searchParams.set('ordenar_por', params.ordenar_por);
+  if (params.orden) searchParams.set('orden', params.orden);
+
+  const queryString = searchParams.toString();
+  const url = `${API_BASE_URL}/v1/tasks${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const result = data as ApiResponse<TaskListResult>;
+    const r = result.resultado;
+
+    return {
+      success: true,
+      data: r.data,
+      pagination: r.pagination,
+      totales: r.totales,
+    };
+  } catch (error) {
+    console.error('Error en getTasks:', error);
     return {
       success: false,
       errorCode: 9999,

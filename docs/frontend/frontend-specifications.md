@@ -247,6 +247,18 @@ Cada componente debe mantener separación clara:
 
 ---
 
+## Layout general y navegación
+
+### Header de la aplicación
+
+**Definición general:** El header de la aplicación (barra superior con título del sistema, nombre del usuario, rol y botón de cerrar sesión) **debe permanecer visible en todas las pantallas** una vez que el usuario está autenticado. No se debe ocultar ni reemplazar el header al navegar entre dashboard, lista de tareas, perfil, etc.
+
+- **Alcance:** Todas las rutas protegidas (dentro del layout autenticado).
+- **Contenido típico:** Título de la aplicación, nombre del usuario logueado, indicador de rol (ej. "Supervisor"), botón "Cerrar sesión".
+- **Objetivo:** Consistencia visual y acceso permanente a la identidad de sesión y cierre.
+
+---
+
 ## Páginas Principales
 
 ### 1. Login

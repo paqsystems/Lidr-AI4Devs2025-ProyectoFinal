@@ -1224,3 +1224,113 @@ Asegurar que la implementación cumpla estrictamente con el TR, respete las regl
 
 - `docs/hu-tareas/TR-028(MH)-carga-de-tarea-diaria.md` - TR completo implementado
 - `docs/backend/tareas.md` - Documentación de API de tareas
+
+---
+
+## Entrada #15
+
+### Fecha
+2026-01-28
+
+### Etapa del proyecto
+Planificación - Generación masiva de TRs desde HU (HU-029 a HU-038)
+
+### Herramientas de IA utilizadas
+- Cursor IDE (Claude) - Generación masiva controlada
+
+### Prompt o instrucción utilizada
+```
+Aplicá el flujo definido para conversión de Historias de Usuario a tareas
+sobre las Historias de Usuario numeradas del 29 al 38 inclusive,
+ubicadas en la carpeta docs/hu-historias/.
+
+[... ver prompt completo en PROMPTS/07 - Generaciòn HU a TR masivo.md ...]
+```
+
+### Resultado generado por IA
+Procesamiento masivo de 10 Historias de Usuario (HU-029 a HU-038) para generar los TRs correspondientes:
+
+**HU procesadas:**
+- HU-029: Edición de tarea propia
+- HU-030: Eliminación de tarea propia
+- HU-031: Edición de tarea (supervisor)
+- HU-032: Eliminación de tarea (supervisor)
+- HU-033: Visualización de lista de tareas propias
+- HU-034: Visualización de lista de todas las tareas (supervisor)
+- HU-035: Validación de duración en tramos de 15 minutos
+- HU-036: Advertencia de fecha futura
+- HU-037: Filtrado de tipos de tarea por cliente
+- HU-038: Selección de empleado propietario (supervisor)
+
+**Proceso aplicado:**
+1. Determinación automática de complejidad (SIMPLE vs COMPLEJA) para cada HU
+2. Generación de TRs completos siguiendo la estructura estándar del proyecto
+3. Clasificación de tareas por capa (Backend, Frontend, DB, Testing)
+4. Identificación de dependencias entre tareas
+5. Verificación de coherencia con MVP y entregables
+6. Documentación consolidada en archivo de resumen
+
+### Ajustes humanos realizados
+- Revisión de clasificación SIMPLE/COMPLEJA según criterios del proyecto
+- Validación de coherencia con TRs ya implementadas (especialmente TR-028)
+- Verificación de dependencias entre HU y TRs
+- Control de calidad sobre la estructura y completitud de cada TR generado
+
+### Motivo del ajuste
+Asegurar que la generación masiva mantenga la calidad y consistencia con el resto del proyecto, validando que cada TR sea ejecutable y completo según los estándares establecidos.
+
+### Decisiones técnicas
+1. **Criterio conservador:** En caso de duda sobre complejidad, se trató la HU como COMPLEJA para asegurar refinamiento adecuado.
+2. **Reutilización:** Se identificaron funcionalidades ya implementadas parcialmente en TR-028 (HU-035, HU-036, HU-037, HU-038) para evitar duplicación.
+3. **Dependencias explícitas:** Se documentaron claramente las dependencias entre HU y TRs para facilitar la planificación de implementación.
+
+### Archivos creados/modificados
+
+**Docs:**
+- `docs/hu-tareas/TR-029(MH)-edición-de-tarea-propia.md` (GENERADO)
+- `docs/hu-tareas/TR-030(MH)-eliminación-de-tarea-propia.md` (GENERADO)
+- `docs/hu-tareas/TR-031(MH)-edición-de-tarea-supervisor.md` (GENERADO)
+- `docs/hu-tareas/TR-032(MH)-eliminación-de-tarea-supervisor.md` (GENERADO)
+- `docs/hu-tareas/TR-033(MH)-visualización-de-lista-de-tareas-propias.md` (GENERADO)
+- `docs/hu-tareas/TR-034(MH)-visualización-de-lista-de-todas-las-tareas-supervisor.md` (GENERADO)
+- `docs/hu-tareas/TR-035(MH)-validación-de-duración-en-tramos-de-15-minutos.md` (GENERADO)
+- `docs/hu-tareas/TR-036(MH)-advertencia-de-fecha-futura.md` (GENERADO)
+- `docs/hu-tareas/TR-037(MH)-filtrado-de-tipos-de-tarea-por-cliente.md` (GENERADO)
+- `docs/hu-tareas/TR-038(MH)-selección-de-empleado-propietario-supervisor.md` (GENERADO)
+- `docs/tareas-generadas-hu-29-a-38.md` (GENERADO) - Resumen consolidado
+
+### Referencias
+- `PROMPTS/07 - Generaciòn HU a TR masivo.md` - Prompt utilizado
+- `prompts.md` - Prompt 12 documentado
+
+---
+
+## Entrada — Implementación TR-033 (Visualización de Lista de Tareas Propias)
+
+### Fecha
+2026-01-29
+
+### Etapa del proyecto
+Implementación de TR-033(MH): Visualización de Lista de Tareas Propias (empleado ve sus tareas con filtros, paginación y totales).
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+“Ejecutá la TR TR-033(MH)-visualización-de-lista-de-tareas-propias.md” — siguiendo PROMPTS/05 - Ejecucion-de-una-TR.md (implementar backend, frontend, tests y documentación según la TR).
+
+### Resultado generado por IA
+- **Backend:** TaskService::listTasks() con filtros (fecha, cliente, tipo, búsqueda), paginación y totales; TaskController::index() GET /api/v1/tasks; ruta registrada.
+- **Frontend:** getTasks() en task.service.ts; TaskList, TaskFilters, TaskPagination, TaskTotals; ruta /tareas; enlace “Mis Tareas” en Dashboard; data-testid según TR.
+- **Tests:** Unit (TaskServiceTest::test_list_tasks_*), integration (TaskControllerTest::index_*), E2E Playwright (task-list.spec.ts).
+- **Docs:** TR actualizada con archivos creados/modificados, comandos, notas y pendientes; ia-log actualizado.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración (implementación directa según TR).
+
+### Motivo del ajuste
+Implementación completa de la TR dentro del alcance definido; editar/eliminar quedan como placeholders hasta TR-029/TR-030.
+
+### Referencias
+- `docs/hu-tareas/TR-033(MH)-visualización-de-lista-de-tareas-propias.md`
+- `PROMPTS/05 - Ejecucion-de-una-TR.md`

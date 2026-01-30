@@ -44,7 +44,12 @@ class AuthServiceTest extends TestCase
         // Limpiar usuarios existentes que podrían causar conflictos
         $testCodes = ['JPEREZ', 'MGARCIA', 'INACTIVO', 'INHABILITADO', 'USUINACTIVO', 'CLI001', 'CLIINACTIVO', 'SINPERFIL'];
         
-        // Eliminar de PQ_PARTES_USUARIOS y PQ_PARTES_CLIENTES primero (por FK)
+        // Eliminar registros de tarea que referencian a estos usuarios (FK fk_registro_usuario)
+        $usuarioIds = DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->pluck('id');
+        if ($usuarioIds->isNotEmpty()) {
+            DB::table('PQ_PARTES_REGISTRO_TAREA')->whereIn('usuario_id', $usuarioIds)->delete();
+        }
+        // Eliminar de PQ_PARTES_USUARIOS y PQ_PARTES_CLIENTES
         DB::table('PQ_PARTES_USUARIOS')->whereIn('code', $testCodes)->delete();
         DB::table('PQ_PARTES_CLIENTES')->whereIn('code', $testCodes)->delete();
         
