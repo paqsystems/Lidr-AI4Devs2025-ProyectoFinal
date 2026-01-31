@@ -1,14 +1,14 @@
 # Checkpoint del Proyecto - Sistema de Registro de Tareas
 
-**Fecha:** 2025-01-20  
-**Estado:** Documentación de especificaciones completada  
-**Última actualización:** Agregado Tipo de Cliente (TipoCliente)
+**Fecha:** 2026-01-31  
+**Estado:** Entrega 2 — Dashboard, informes y tareas implementados  
+**Última actualización:** TR-051/052 Dashboard + Dedicación por Cliente; fix bucle useEffect Dashboard
 
 ---
 
 ## 📋 Resumen Ejecutivo
 
-El proyecto está en fase de **especificación completa**. Se ha definido toda la documentación técnica necesaria para el MVP del Sistema de Registro de Tareas, incluyendo endpoints, validaciones, flujos E2E, y mapeo API-DB.
+El proyecto tiene **implementado** el flujo E2E de tareas, informes y dashboard: login, registro/edición/eliminación de tareas (propia y supervisor), consulta detallada, tareas por cliente, dashboard principal con KPIs y sección "Dedicación por Cliente" con enlace a detalle. Backend (Laravel/Sanctum) y frontend (React/Vite) operativos con tests unitarios, de integración y E2E.
 
 ---
 
@@ -56,6 +56,21 @@ El proyecto está en fase de **especificación completa**. Se ha definido toda l
 ---
 
 ## 🔄 Cambios Recientes Implementados
+
+### Entrega 2 — Dashboard, informes y tareas (2026-01-31)
+
+**Implementado:**
+- **TR-051 Dashboard principal:** GET /api/v1/dashboard, KPIs (total horas, cantidad tareas, promedio), selector de período (mes actual por defecto), Top clientes, Top empleados (supervisor), Distribución por tipo (cliente). Frontend: getDashboard, Dashboard.tsx con loading/error/vacío. Fix: dependencia useEffect `user?.userId` y `loadingRef` para evitar bucle infinito y UI lenta.
+- **TR-052 Dedicación por Cliente:** Sección en Dashboard con lista, total general y enlace "Ver detalle" por cliente a Tareas por Cliente (query params cliente_id, fecha_desde, fecha_hasta). TareasPorClientePage lee params para prellenar filtros.
+- **TR-044 Consulta detallada:** GET /api/v1/reports/detail, ConsultaDetalladaPage, E2E.
+- **TR-046 Tareas por cliente:** GET /api/v1/reports/by-client, TareasPorClientePage, E2E.
+- **TR-050 Estado vacío:** Mensaje único en consultas e informes (HU-050).
+- **TR-029/030 Edición y eliminación tarea propia:** PUT/DELETE /tasks/{id}, TaskEditPage, DeleteTaskModal, E2E.
+- **TR-031/032 Edición y eliminación supervisor:** TaskListAll, SupervisorRoute, E2E.
+
+**Archivos clave:** DashboardController, ReportController, TaskService (getDashboardData, listDetailReport, listByClientReport), Dashboard.tsx, ConsultaDetalladaPage, TareasPorClientePage, task.service.ts (getDashboard, getDetailReport, getReportByClient), E2E dashboard.spec.ts, consulta-detallada.spec.ts, tareas-por-cliente.spec.ts.
+
+---
 
 ### 1. Autenticación por Código de Usuario (2025-01-20)
 
@@ -184,10 +199,10 @@ El proyecto está en fase de **especificación completa**. Se ha definido toda l
 - **Mapeo API-DB:** 1/1 (100%)
 
 ### Implementación
-- **Backend:** 0% (no iniciado)
-- **Frontend:** 0% (no iniciado)
-- **Tests:** 0% (no iniciado)
-- **Deploy:** 0% (no iniciado)
+- **Backend:** En uso (auth, tareas CRUD, informes, dashboard)
+- **Frontend:** En uso (login, tareas, informes, dashboard)
+- **Tests:** Unitarios e integración backend; unitarios frontend (task.service); E2E Playwright (login, tareas, informes, dashboard)
+- **Deploy:** Pendiente
 
 ---
 
@@ -235,12 +250,8 @@ El proyecto está en fase de **especificación completa**. Se ha definido toda l
 
 ---
 
-**Última actualización:** 2025-01-20  
+**Última actualización:** 2026-01-31  
 **Cambios recientes:** 
-- Agregado campo `inhabilitado` a Usuario, Cliente, TipoTarea y TipoCliente
-- Homogeneización de extensiones: conversión de archivos `.mdc` a `.md` en `.cursor/rules/`
-- Eliminación de archivos duplicados en reglas de Cursor
-- Actualización de reglas de documentación de código: obligatoriedad de documentar TODAS las clases, métodos y propiedades
-- Actualización de checklist de documentación y manual del programador
-- **Estandarización de nomenclatura:** Reemplazo de "asistente" y "agente" por "empleado" en toda la documentación. Renombrados endpoints y archivos de especificación (`asistentes-*.md` → `empleados-*.md`, rutas API actualizadas)
+- **Entrega 2:** TR-051 Dashboard principal, TR-052 Dedicación por Cliente, TR-044/046/050 informes, TR-029/030/031/032 edición/eliminación tareas. Fix Dashboard: useEffect con `user?.userId` y loadingRef para evitar bucle y UI lenta.
+- Commit + push: feature-entrega2-PAQ (922bc08)
 
