@@ -6,7 +6,7 @@
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero asignar tipos de tarea específicos a un cliente para que solo ese cliente pueda usar esos tipos al registrar tareas.
+**Historia:** Como supervisor quiero asignar tipos de tarea específicos a un cliente para que ese cliente solo use esos tipos de tareas, además de los genéricos, al registrar tareas.
 
 **Criterios de aceptación:**
 - El supervisor puede acceder a la gestión de tipos de tarea de un cliente (desde la edición o detalle del cliente).

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\UserProfileController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\ClienteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +62,24 @@ Route::prefix('v1')->group(function () {
                 ->name('api.v1.reports.byClient');
         });
         
+        // Rutas de clientes (solo supervisores) @see TR-008(MH), TR-009(MH), TR-010(MH)
+        Route::get('/clientes', [ClienteController::class, 'index'])
+            ->name('api.v1.clientes.index');
+        Route::post('/clientes', [ClienteController::class, 'store'])
+            ->name('api.v1.clientes.store');
+        Route::get('/tipos-cliente', [ClienteController::class, 'tiposCliente'])
+            ->name('api.v1.tipos-cliente.index');
+        Route::get('/clientes/{id}', [ClienteController::class, 'show'])
+            ->name('api.v1.clientes.show');
+        Route::get('/clientes/{id}/tipos-tarea', [ClienteController::class, 'tiposTarea'])
+            ->name('api.v1.clientes.tipos-tarea.index');
+        Route::put('/clientes/{id}/tipos-tarea', [ClienteController::class, 'updateTiposTarea'])
+            ->name('api.v1.clientes.tipos-tarea.update');
+        Route::put('/clientes/{id}', [ClienteController::class, 'update'])
+            ->name('api.v1.clientes.update');
+        Route::delete('/clientes/{id}', [ClienteController::class, 'destroy'])
+            ->name('api.v1.clientes.destroy');
+
         // Rutas de tareas
         // @see TR-028(MH)-carga-de-tarea-diaria.md
         // @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md

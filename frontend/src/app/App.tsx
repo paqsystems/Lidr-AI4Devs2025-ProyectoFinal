@@ -14,6 +14,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginForm } from '../features/auth';
 import { ProfileView } from '../features/user';
 import { TaskForm, TaskList, TaskListAll, TaskEditPage, ConsultaDetalladaPage, TareasPorClientePage } from '../features/tasks';
+import { ClientesPage, ClientesNuevaPage, ClientesEditarPage } from '../features/clients';
 import { ProtectedRoute, PublicRoute } from '../routes';
 import { EmployeeRoute } from '../routes/EmployeeRoute';
 import { SupervisorRoute } from '../routes/SupervisorRoute';
@@ -56,6 +57,30 @@ export function App(): React.ReactElement {
           <Route
             path="informes/tareas-por-cliente"
             element={<TareasPorClientePage />}
+          />
+          <Route
+            path="clientes"
+            element={
+              <SupervisorRoute>
+                <ClientesPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="clientes/nueva"
+            element={
+              <SupervisorRoute>
+                <ClientesNuevaPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="clientes/:id/editar"
+            element={
+              <SupervisorRoute>
+                <ClientesEditarPage />
+              </SupervisorRoute>
+            }
           />
           <Route
             path="tareas"

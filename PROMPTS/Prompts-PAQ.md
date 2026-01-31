@@ -240,3 +240,31 @@ Cuando se detecten errores o mejoras probando el proceso TR-033:
 6. Si el usuario es de nivel supervisor, agregar el filtro "Empleado".
 7. Si aparece el filtro "Empleado", que también admita la opción "Todos".
 
+---
+
+## Prompts recientes (TR-008 a TR-012 – Clientes)
+
+### Aplicar prompt HU → TR (04 - Prompts-HU-a-Tareas.md)
+
+- **HU Simple:** Usar el bloque "HU Simple": regla `.cursor/rules/13-user-story-to-task-breakdown.md`, generar TR en `docs/hu-tareas/` con nombre HU reemplazando "HU" por "TR", secciones de trazabilidad al final vacías.
+- **HU Compleja:** Usar "HU Complejas" en dos pasos: (1) Refinar HU, criterios, reglas, permisos, supuestos, sin generar tareas; (2) Con el refinamiento validado, generar el plan de tareas en `docs/hu-tareas/TR-[TITULO].md` con cobertura mínima (datos, backend, frontend, tests unit/integration/E2E Playwright, docs, ia-log).
+
+Historias aplicadas: HU-008 (listado clientes – compleja), HU-009 a HU-012 (creación, edición, eliminación, asignación tipos de tarea – simples).
+
+### Ejecutar una TR (05 - Ejecucion-de-una-TR / Prompt 9)
+
+- Implementar la TR en `docs/hu-tareas/TR-XXX.md` como fuente de verdad.
+- Backend, frontend, tests y documentación según la TR.
+- Cierre: actualizar en la TR las secciones Archivos creados/modificados, Comandos ejecutados, Notas y decisiones, Pendientes; registrar en `docs/ia-log.md`.
+- Listar archivos afectados en el chat para revisión (paths relativos al repo).
+
+### Tests E2E (Playwright)
+
+- Para que los E2E pasen hace falta **entorno en ejecución**: backend (`php artisan serve`) y frontend (`npm run dev`). Sin ellos, los E2E fallan por timeout/conexión.
+- Ejecutar con un worker y timeout amplio cuando sea necesario: `npx playwright test tests/e2e/... --project=chromium --workers=1 --timeout=90000`.
+
+### Aclaraciones de producto
+
+- **HU-012 (asignación tipos de tarea a cliente):** La narrativa correcta es "… para que **ese cliente sólo use esos tipos de tarea, además de los genéricos**" (un tipo no genérico puede usarlo más de un cliente; no "solo ese cliente pueda usar esos tipos").
+- **Eliminación de cliente (TR-011):** Al eliminar un cliente, los registros en `PQ_PARTES_CLIENTE_TIPO_TAREA` se eliminan automáticamente por **CASCADE** en la FK `fk_ctt_cliente`; no hace falta borrarlos en código.
+
