@@ -9,7 +9,7 @@
 | Dependencias       | HU-028 (Carga de Tarea Diaria), HU-019 (Gestión de Usuarios) |
 | Clasificación      | HU SIMPLE                                  |
 | Última actualización | 2026-01-28                               |
-| Estado             | 📋 PENDIENTE                               |
+| Estado             | ✅ IMPLEMENTADO                            |
 
 ---
 
@@ -288,37 +288,48 @@ Feature: Edición de Tarea (Supervisor)
 
 ## 10) Checklist Final
 
-- [ ] AC cumplidos
-- [ ] Backend: TaskService::update() extendido para supervisores
-- [ ] Backend: Validación de cambio de propietario implementada
-- [ ] Backend: Endpoint PUT con permisos supervisor implementado
-- [ ] Frontend: TaskForm modo edición supervisor implementado
-- [ ] Frontend: Selector de empleado habilitado para supervisores
-- [ ] Frontend: Manejo de errores implementado
-- [ ] Unit tests TaskService ok
-- [ ] Integration tests TaskController ok
-- [ ] Frontend unit tests (Vitest) ok cuando aplique
-- [ ] ≥1 E2E Playwright ok (sin waits ciegos)
-- [ ] Docs actualizadas
-- [ ] IA log actualizado
+- [x] AC cumplidos
+- [x] Backend: TaskService::update() extendido para supervisores
+- [x] Backend: Validación de cambio de propietario implementada
+- [x] Backend: Endpoint PUT con permisos supervisor implementado
+- [x] Frontend: TaskForm modo edición supervisor implementado
+- [x] Frontend: Selector de empleado habilitado para supervisores
+- [x] Frontend: Manejo de errores implementado
+- [x] Unit tests TaskService ok
+- [x] Integration tests TaskController ok
+- [x] Frontend unit tests (Vitest) ok
+- [x] ≥1 E2E Playwright ok (task-edit-supervisor.spec.ts)
+- [x] Docs actualizadas
+- [ ] IA log actualizado (pendiente registro manual)
 
 ---
 
 ## Archivos creados/modificados
 
-*(Se completará durante la implementación)*
+### Backend
+- `backend/app/Services/TaskService.php` – updateTask(): usuario_id opcional; solo supervisor puede cambiar propietario; validación empleado activo.
+- `backend/app/Http/Requests/Api/V1/UpdateTaskRequest.php` – usuario_id opcional; withValidator empleado activo.
+- `backend/app/Http/Controllers/Api/V1/TaskController.php` – handleTaskException 422 con resultado.errors.usuario_id.
+- `backend/tests/Unit/Services/TaskServiceTest.php` – tests supervisor cambio propietario, empleado inactivo, empleado no puede enviar usuario_id.
+- `backend/tests/Feature/Api/V1/TaskControllerTest.php` – update_supervisor_exitoso_con_cambio_propietario, update_supervisor_falla_empleado_inactivo_retorna_422.
 
-### Tests unitarios frontend (Vitest) (al implementar)
-- `frontend/src/features/tasks/services/task.service.test.ts` – Tests para updateTask() con usuario_id (supervisor).
+### Frontend
+- `frontend/src/features/tasks/services/task.service.ts` – UpdateTaskData.usuario_id; updateTask envía usuario_id.
+- `frontend/src/features/tasks/components/TaskForm.tsx` – isSupervisor en edición; EmployeeSelector para supervisor; payload usuario_id.
+- `frontend/src/features/tasks/services/task.service.test.ts` – tests updateTask con usuario_id.
+- `frontend/tests/e2e/task-edit-supervisor.spec.ts` – E2E edición supervisor.
 
 ## Comandos ejecutados
 
-*(Se completará durante la implementación)*
+- `php artisan test --filter="update_supervisor|update_empleado_no_puede|update_falla_tarea_cerrada"`
+- `npm run test:run -- src/features/tasks/services/task.service.test.ts`
+- `npx playwright test task-edit-supervisor.spec.ts --project=chromium`
 
 ## Notas y decisiones
 
-*(Se completará durante la implementación)*
+- Solo supervisores pueden enviar usuario_id en PUT; empleado recibe 4030.
+- En edición, supervisor ve EmployeeSelector; empleado ve campo solo lectura.
 
 ## Pendientes / follow-ups
 
-*(Se completará durante la implementación)*
+- Registrar en docs/ia-log.md. TR-032: eliminación por supervisor (ya soportado en DELETE).

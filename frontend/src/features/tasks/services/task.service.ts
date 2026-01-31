@@ -48,7 +48,8 @@ export interface Task {
 }
 
 /**
- * Item de tarea en la lista (con cliente/tipo anidados y observación truncada)
+ * Item de tarea en la lista (con cliente/tipo anidados y observación truncada).
+ * empleado presente cuando el listado incluye propietario (TR-032 modal supervisor).
  */
 export interface TaskListItem {
   id: number;
@@ -62,6 +63,8 @@ export interface TaskListItem {
   observacion: string;
   cerrado: boolean;
   created_at: string;
+  /** Propietario de la tarea (incluido en listado para modal eliminación supervisor) */
+  empleado?: { id: number; code: string; nombre: string };
 }
 
 /**
@@ -95,6 +98,97 @@ export interface TaskListResult {
     cantidad_tareas: number;
     total_horas: number;
   };
+}
+
+/**
+ * Item de consulta detallada (TR-044): empleado solo si supervisor
+ */
+export interface DetailReportItem {
+  id: number;
+  empleado?: { id: number; nombre: string; code: string };
+  cliente: { id: number; nombre: string; tipo_cliente?: string | null };
+  fecha: string;
+  tipo_tarea: { id: number; descripcion: string };
+  horas: number;
+  sin_cargo: boolean;
+  presencial: boolean;
+  descripcion: string;
+}
+
+/**
+ * Parámetros para GET /reports/detail
+ */
+export interface DetailReportParams {
+  page?: number;
+  per_page?: number;
+  fecha_desde?: string;
+  fecha_hasta?: string;
+  tipo_cliente_id?: number | null;
+  cliente_id?: number | null;
+  usuario_id?: number | null;
+  ordenar_por?: string;
+  orden?: 'asc' | 'desc';
+}
+
+/**
+ * Resultado de getDetailReport
+ */
+export interface GetDetailReportResult {
+  success: boolean;
+  data?: DetailReportItem[];
+  pagination?: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+  totalHoras?: number;
+  errorCode?: number;
+  errorMessage?: string;
+}
+
+/**
+ * Parámetros para GET /reports/by-client (TR-046)
+ */
+export interface ByClientReportParams {
+  fecha_desde?: string;
+  fecha_hasta?: string;
+}
+
+/**
+ * Tarea dentro de un grupo por cliente (TR-046)
+ */
+export interface ByClientTaskItem {
+  id: number;
+  fecha: string;
+  tipo_tarea: { id: number; descripcion: string };
+  horas: number;
+  empleado?: { id: number; nombre: string; code: string };
+  descripcion: string;
+}
+
+/**
+ * Grupo por cliente en reporte TR-046
+ */
+export interface ByClientGroup {
+  cliente_id: number;
+  nombre: string;
+  tipo_cliente: { id: number; descripcion: string } | null;
+  total_horas: number;
+  cantidad_tareas: number;
+  tareas: ByClientTaskItem[];
+}
+
+/**
+ * Resultado de getReportByClient (TR-046)
+ */
+export interface GetByClientReportResult {
+  success: boolean;
+  grupos?: ByClientGroup[];
+  totalGeneralHoras?: number;
+  totalGeneralTareas?: number;
+  errorCode?: number;
+  errorMessage?: string;
 }
 
 /**
@@ -154,6 +248,130 @@ export interface CreateTaskResult {
   errorCode?: number;
   errorMessage?: string;
   validationErrors?: Record<string, string[]>;
+}
+
+/**
+ * Datos de tarea para edición (GET /tasks/{id})
+ */
+export interface TaskForEdit {
+  id: number;
+  usuario_id: number;
+  usuario_nombre?: string;
+  cliente_id: number;
+  tipo_tarea_id: number;
+  fecha: string;
+  duracion_minutos: number;
+  sin_cargo: boolean;
+  presencial: boolean;
+  observacion: string;
+  cerrado: boolean;
+}
+
+/**
+ * Resultado de obtener tarea para edición
+ */
+export interface GetTaskResult {
+  success: boolean;
+  task?: TaskForEdit;
+  errorCode?: number;
+  errorMessage?: string;
+}
+
+/**
+ * Datos para actualizar tarea (PUT /tasks/{id}).
+ * usuario_id es opcional y solo para supervisores (TR-031).
+ */
+export interface UpdateTaskData {
+  fecha: string;
+  cliente_id: number;
+  tipo_tarea_id: number;
+  duracion_minutos: number;
+  sin_cargo?: boolean;
+  presencial?: boolean;
+  observacion: string;
+  usuario_id?: number | null;
+}
+
+/**
+ * Resultado de actualizar tarea
+ */
+export interface UpdateTaskResult {
+  success: boolean;
+  task?: Task;
+  errorCode?: number;
+  errorMessage?: string;
+  validationErrors?: Record<string, string[]>;
+}
+
+/**
+ * Resultado de eliminar tarea (TR-030)
+ */
+export interface DeleteTaskResult {
+  success: boolean;
+  errorCode?: number;
+  errorMessage?: string;
+}
+
+/**
+ * Item top cliente en dashboard (TR-051)
+ */
+export interface DashboardTopCliente {
+  cliente_id: number;
+  nombre: string;
+  total_horas: number;
+  cantidad_tareas: number;
+  porcentaje?: number;
+}
+
+/**
+ * Item top empleado en dashboard (TR-051, solo supervisor)
+ */
+export interface DashboardTopEmpleado {
+  usuario_id: number;
+  nombre: string;
+  code: string;
+  total_horas: number;
+  cantidad_tareas: number;
+}
+
+/**
+ * Item distribución por tipo en dashboard (TR-051, solo cliente)
+ */
+export interface DashboardDistribucionTipo {
+  tipo_tarea_id: number;
+  descripcion: string;
+  total_horas: number;
+  cantidad_tareas: number;
+}
+
+/**
+ * Datos del dashboard (TR-051)
+ */
+export interface DashboardData {
+  total_horas: number;
+  cantidad_tareas: number;
+  promedio_horas_por_dia: number;
+  top_clientes: DashboardTopCliente[];
+  top_empleados: DashboardTopEmpleado[];
+  distribucion_por_tipo: DashboardDistribucionTipo[];
+}
+
+/**
+ * Parámetros para GET /dashboard (TR-051)
+ */
+export interface DashboardParams {
+  fecha_desde: string;
+  fecha_hasta: string;
+}
+
+/**
+ * Resultado de getDashboard (TR-051)
+ */
+export interface GetDashboardResult {
+  success: boolean;
+  data?: DashboardData;
+  errorCode?: number;
+  errorMessage?: string;
 }
 
 /**
@@ -462,6 +680,446 @@ export async function getTasks(params: TaskListParams = {}): Promise<GetTasksRes
       success: false,
       errorCode: 9999,
       errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene la lista paginada de todas las tareas (solo supervisores) – TR-034
+ *
+ * @param params Parámetros de paginación y filtros (misma estructura que getTasks)
+ * @returns Resultado con data, pagination, totales o error (403 si no es supervisor)
+ */
+export async function getAllTasks(params: TaskListParams = {}): Promise<GetTasksResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.page != null) searchParams.set('page', String(params.page));
+  if (params.per_page != null) searchParams.set('per_page', String(params.per_page));
+  if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
+  if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
+  if (params.cliente_id != null && params.cliente_id !== '' && params.cliente_id !== undefined) searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.tipo_tarea_id != null && params.tipo_tarea_id !== '' && params.tipo_tarea_id !== undefined) searchParams.set('tipo_tarea_id', String(params.tipo_tarea_id));
+  if (params.usuario_id != null && params.usuario_id !== '' && params.usuario_id !== undefined) searchParams.set('usuario_id', String(params.usuario_id));
+  if (params.busqueda) searchParams.set('busqueda', params.busqueda);
+  if (params.ordenar_por) searchParams.set('ordenar_por', params.ordenar_por);
+  if (params.orden) searchParams.set('orden', params.orden);
+
+  const queryString = searchParams.toString();
+  const url = `${API_BASE_URL}/v1/tasks/all${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const result = data as ApiResponse<TaskListResult>;
+    const r = result.resultado;
+
+    return {
+      success: true,
+      data: r.data,
+      pagination: r.pagination,
+      totales: r.totales,
+    };
+  } catch (error) {
+    console.error('Error en getAllTasks:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene la consulta detallada de tareas (TR-044)
+ *
+ * @param params Parámetros de paginación y filtros (fecha_desde, fecha_hasta, tipo_cliente_id, cliente_id, usuario_id, ordenar_por, orden)
+ * @returns Resultado con data, pagination, totalHoras o error (1305 período inválido)
+ */
+export async function getDetailReport(params: DetailReportParams = {}): Promise<GetDetailReportResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.page != null) searchParams.set('page', String(params.page));
+  if (params.per_page != null) searchParams.set('per_page', String(params.per_page));
+  if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
+  if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
+  if (params.tipo_cliente_id != null && params.tipo_cliente_id !== '' && params.tipo_cliente_id !== undefined) searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
+  if (params.cliente_id != null && params.cliente_id !== '' && params.cliente_id !== undefined) searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.usuario_id != null && params.usuario_id !== '' && params.usuario_id !== undefined) searchParams.set('usuario_id', String(params.usuario_id));
+  if (params.ordenar_por) searchParams.set('ordenar_por', params.ordenar_por);
+  if (params.orden) searchParams.set('orden', params.orden);
+
+  const queryString = searchParams.toString();
+  const url = `${API_BASE_URL}/v1/reports/detail${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const result = data as ApiResponse<{ data: DetailReportItem[]; pagination: { current_page: number; per_page: number; total: number; last_page: number }; total_horas: number }>;
+    const r = result.resultado;
+
+    return {
+      success: true,
+      data: r.data,
+      pagination: r.pagination,
+      totalHoras: r.total_horas,
+    };
+  } catch (error) {
+    console.error('Error en getDetailReport:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene reporte agrupado por cliente (TR-046)
+ *
+ * @param params fecha_desde, fecha_hasta
+ * @returns grupos, totalGeneralHoras, totalGeneralTareas o error (1305 período inválido)
+ */
+export async function getReportByClient(
+  params: ByClientReportParams = {}
+): Promise<GetByClientReportResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
+  if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
+
+  const queryString = searchParams.toString();
+  const url = `${API_BASE_URL}/v1/reports/by-client${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const result = data as ApiResponse<{
+      grupos: ByClientGroup[];
+      total_general_horas: number;
+      total_general_tareas: number;
+    }>;
+    const r = result.resultado;
+
+    return {
+      success: true,
+      grupos: r.grupos,
+      totalGeneralHoras: r.total_general_horas,
+      totalGeneralTareas: r.total_general_tareas,
+    };
+  } catch (error) {
+    console.error('Error en getReportByClient:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene una tarea por ID para edición (TR-029)
+ *
+ * @param id ID de la tarea
+ * @returns Resultado con datos de la tarea o error (404, 2110, 4030)
+ */
+export async function getTask(id: number): Promise<GetTaskResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/tasks/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const taskResponse = data as ApiResponse<TaskForEdit>;
+    return {
+      success: true,
+      task: taskResponse.resultado,
+    };
+  } catch (error) {
+    console.error('Error en getTask:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Actualiza una tarea existente (TR-029)
+ *
+ * @param id ID de la tarea
+ * @param payload Datos a actualizar (sin usuario_id)
+ * @returns Resultado con tarea actualizada o error (2110, 4030, 4220)
+ */
+export async function updateTask(id: number, payload: UpdateTaskData): Promise<UpdateTaskResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/tasks/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+        validationErrors: errorData.resultado?.errors,
+      };
+    }
+
+    const taskResponse = data as ApiResponse<Task>;
+    return {
+      success: true,
+      task: taskResponse.resultado,
+    };
+  } catch (error) {
+    console.error('Error en updateTask:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Elimina una tarea existente (TR-030)
+ *
+ * @param id ID de la tarea
+ * @returns Resultado o error (2111 cerrada, 4030 sin permisos, 4040 no encontrada)
+ */
+export async function deleteTask(id: number): Promise<DeleteTaskResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/tasks/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error en deleteTask:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene datos del dashboard (TR-051)
+ *
+ * @param params fecha_desde, fecha_hasta (YYYY-MM-DD)
+ * @returns Datos del dashboard o error (1305 período inválido)
+ */
+export async function getDashboard(
+  params: DashboardParams
+): Promise<GetDashboardResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  const searchParams = new URLSearchParams();
+  searchParams.set('fecha_desde', params.fecha_desde);
+  searchParams.set('fecha_hasta', params.fecha_hasta);
+  const url = `${API_BASE_URL}/v1/dashboard?${searchParams.toString()}`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const result = data as ApiResponse<DashboardData>;
+    return {
+      success: true,
+      data: result.resultado,
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    const isAbort = error instanceof Error && error.name === 'AbortError';
+    console.error('Error en getDashboard:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: isAbort
+        ? 'Tiempo de espera agotado. Compruebe que el backend esté en marcha.'
+        : t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
     };
   }
 }

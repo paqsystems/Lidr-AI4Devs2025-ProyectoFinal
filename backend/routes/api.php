@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\UserProfileController;
 use App\Http\Controllers\Api\V1\TaskController;
+use App\Http\Controllers\Api\V1\ReportController;
+use App\Http\Controllers\Api\V1\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +48,18 @@ Route::prefix('v1')->group(function () {
         // @see TR-006(MH)-visualización-de-perfil-de-usuario.md
         Route::get('/user/profile', [UserProfileController::class, 'show'])
             ->name('api.v1.user.profile');
+
+        // Dashboard (TR-051)
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('api.v1.dashboard');
+
+        // Rutas de informes (TR-044 Consulta detallada, TR-046 Agrupada por cliente)
+        Route::prefix('reports')->group(function () {
+            Route::get('/detail', [ReportController::class, 'detail'])
+                ->name('api.v1.reports.detail');
+            Route::get('/by-client', [ReportController::class, 'byClient'])
+                ->name('api.v1.reports.byClient');
+        });
         
         // Rutas de tareas
         // @see TR-028(MH)-carga-de-tarea-diaria.md
@@ -54,6 +68,10 @@ Route::prefix('v1')->group(function () {
             // GET /api/v1/tasks - Listar tareas propias (paginado, filtros)
             Route::get('/', [TaskController::class, 'index'])
                 ->name('api.v1.tasks.index');
+
+            // GET /api/v1/tasks/all - Listar todas las tareas (solo supervisores) @see TR-034
+            Route::get('/all', [TaskController::class, 'indexAll'])
+                ->name('api.v1.tasks.indexAll');
             
             // POST /api/v1/tasks - Crear nuevo registro de tarea
             Route::post('/', [TaskController::class, 'store'])
@@ -70,6 +88,16 @@ Route::prefix('v1')->group(function () {
             // GET /api/v1/tasks/employees - Obtener lista de empleados (solo supervisores)
             Route::get('/employees', [TaskController::class, 'getEmployees'])
                 ->name('api.v1.tasks.employees');
+
+            // GET /api/v1/tasks/{id} - Obtener tarea para edición (TR-029)
+            Route::get('/{id}', [TaskController::class, 'show'])
+                ->name('api.v1.tasks.show');
+            // PUT /api/v1/tasks/{id} - Actualizar tarea (TR-029)
+            Route::put('/{id}', [TaskController::class, 'update'])
+                ->name('api.v1.tasks.update');
+            // DELETE /api/v1/tasks/{id} - Eliminar tarea (TR-030)
+            Route::delete('/{id}', [TaskController::class, 'destroy'])
+                ->name('api.v1.tasks.destroy');
         });
     });
 });

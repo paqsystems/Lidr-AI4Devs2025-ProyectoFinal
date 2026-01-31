@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CreateTaskRequest;
+use App\Http\Requests\Api\V1\UpdateTaskRequest;
 use App\Services\TaskService;
 use App\Models\Cliente;
 use App\Models\TipoTarea;
@@ -23,9 +24,15 @@ use Illuminate\Http\Request;
  * - GET /api/v1/tasks/clients - Obtener lista de clientes activos
  * - GET /api/v1/tasks/task-types - Obtener tipos de tarea disponibles
  * - GET /api/v1/tasks/employees - Obtener lista de empleados (solo supervisores)
- * 
+ * - GET /api/v1/tasks/{id} - Obtener tarea para edición (TR-029)
+ * - PUT /api/v1/tasks/{id} - Actualizar tarea (TR-029)
+ * - DELETE /api/v1/tasks/{id} - Eliminar tarea (TR-030)
+ * - GET /api/v1/tasks/all - Listar todas las tareas (solo supervisores, TR-034)
+ *
  * @see TR-028(MH)-carga-de-tarea-diaria.md
+ * @see TR-029(MH)-edición-de-tarea-propia.md
  * @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
+ * @see TR-034(MH)-visualización-de-lista-de-todas-las-tareas-supervisor.md
  */
 class TaskController extends Controller
 {
@@ -56,6 +63,55 @@ class TaskController extends Controller
     {
         try {
             $user = $request->user();
+            $filters = [
+                'page' => $request->query('page', 1),
+                'per_page' => $request->query('per_page', 15),
+                'fecha_desde' => $request->query('fecha_desde'),
+                'fecha_hasta' => $request->query('fecha_hasta'),
+                'cliente_id' => $request->query('cliente_id'),
+                'tipo_tarea_id' => $request->query('tipo_tarea_id'),
+                'usuario_id' => $request->query('usuario_id'),
+                'busqueda' => $request->query('busqueda'),
+                'ordenar_por' => $request->query('ordenar_por', 'fecha'),
+                'orden' => $request->query('orden', 'desc'),
+            ];
+
+            $result = $this->taskService->listTasks($user, $filters);
+
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Tareas obtenidas correctamente',
+                'resultado' => $result,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 9999,
+                'respuesta' => 'Error inesperado del servidor',
+                'resultado' => (object) [],
+            ], 500);
+        }
+    }
+
+    /**
+     * Listar todas las tareas (solo supervisores) – TR-034
+     *
+     * GET /api/v1/tasks/all?page=1&per_page=15&fecha_desde=...&fecha_hasta=...&usuario_id=...&cliente_id=...&tipo_tarea_id=...&busqueda=...&ordenar_por=fecha|empleado|cliente&orden=desc
+     * Retorna 403 si el usuario no es supervisor.
+     */
+    public function indexAll(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $empleado = Usuario::where('user_id', $user->id)->first();
+
+        if (!$empleado || !$empleado->supervisor) {
+            return response()->json([
+                'error' => 4030,
+                'respuesta' => 'Solo los supervisores pueden acceder a todas las tareas',
+                'resultado' => null,
+            ], 403);
+        }
+
+        try {
             $filters = [
                 'page' => $request->query('page', 1),
                 'per_page' => $request->query('per_page', 15),
@@ -146,30 +202,120 @@ class TaskController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            // Determinar código HTTP según el código de error
-            $httpCode = 500;
-            $errorCode = 9999;
-            
-            if ($e->getCode() === TaskService::ERROR_FORBIDDEN) {
-                $httpCode = 403;
-                $errorCode = TaskService::ERROR_FORBIDDEN;
-            } elseif ($e->getCode() === TaskService::ERROR_CLIENTE_INACTIVO || 
-                      $e->getCode() === TaskService::ERROR_TIPO_TAREA_INACTIVO ||
-                      $e->getCode() === TaskService::ERROR_EMPLEADO_INACTIVO ||
-                      $e->getCode() === TaskService::ERROR_TIPO_TAREA_NO_DISPONIBLE) {
-                $httpCode = 422;
-                $errorCode = $e->getCode();
-            } elseif ($e->getCode() === 404) {
-                $httpCode = 404;
-                $errorCode = 4004;
-            }
-
-            return response()->json([
-                'error' => $errorCode,
-                'respuesta' => $e->getMessage(),
-                'resultado' => (object) []
-            ], $httpCode);
+            return $this->handleTaskException($e);
         }
+    }
+
+    /**
+     * Obtener una tarea por ID para edición (TR-029)
+     *
+     * GET /api/v1/tasks/{id}
+     * Empleado: solo sus tareas. Supervisor: cualquier tarea.
+     * Retorna 404 si no existe, 400 con error 2110 si está cerrada, 403 con 4030 si sin permisos.
+     */
+    public function show(Request $request, int $id): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            $task = $this->taskService->getTask($id, $user);
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Tarea obtenida correctamente',
+                'resultado' => $task,
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->handleTaskException($e);
+        }
+    }
+
+    /**
+     * Actualizar una tarea existente (TR-029)
+     *
+     * PUT /api/v1/tasks/{id}
+     * Empleado: solo sus tareas no cerradas. Supervisor: cualquier tarea no cerrada.
+     */
+    public function update(UpdateTaskRequest $request, int $id): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            $task = $this->taskService->updateTask($id, $request->validated(), $user);
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Tarea actualizada correctamente',
+                'resultado' => $task,
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->handleTaskException($e);
+        }
+    }
+
+    /**
+     * Eliminar una tarea existente (TR-030)
+     *
+     * DELETE /api/v1/tasks/{id}
+     * Empleado: solo sus tareas no cerradas. Supervisor: cualquier tarea no cerrada.
+     * Retorna 404 si no existe, 400 con error 2111 si está cerrada, 403 con 4030 si sin permisos.
+     */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            $this->taskService->deleteTask($id, $user);
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Tarea eliminada correctamente',
+                'resultado' => (object) [],
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->handleTaskException($e);
+        }
+    }
+
+    /**
+     * Mapear excepciones del TaskService a respuestas JSON
+     */
+    private function handleTaskException(\Exception $e): JsonResponse
+    {
+        $httpCode = 500;
+        $errorCode = 9999;
+
+        if ($e->getCode() === TaskService::ERROR_FORBIDDEN) {
+            $httpCode = 403;
+            $errorCode = TaskService::ERROR_FORBIDDEN;
+        } elseif ($e->getCode() === TaskService::ERROR_CLOSED) {
+            $httpCode = 400;
+            $errorCode = TaskService::ERROR_CLOSED;
+        } elseif ($e->getCode() === TaskService::ERROR_FORBIDDEN_EDIT ||
+                  $e->getCode() === TaskService::ERROR_FORBIDDEN_DELETE) {
+            $httpCode = 403;
+            $errorCode = $e->getCode();
+        } elseif ($e->getCode() === TaskService::ERROR_CLOSED_DELETE) {
+            $httpCode = 400;
+            $errorCode = TaskService::ERROR_CLOSED_DELETE;
+        } elseif ($e->getCode() === TaskService::ERROR_CLIENTE_INACTIVO ||
+                  $e->getCode() === TaskService::ERROR_TIPO_TAREA_INACTIVO ||
+                  $e->getCode() === TaskService::ERROR_EMPLEADO_INACTIVO ||
+                  $e->getCode() === TaskService::ERROR_TIPO_TAREA_NO_DISPONIBLE) {
+            $httpCode = 422;
+            $errorCode = $e->getCode();
+            // TR-031: para ERROR_EMPLEADO_INACTIVO devolver resultado con errors para usuario_id
+            if ($e->getCode() === TaskService::ERROR_EMPLEADO_INACTIVO) {
+                return response()->json([
+                    'error' => $errorCode,
+                    'respuesta' => $e->getMessage(),
+                    'resultado' => ['errors' => ['usuario_id' => [$e->getMessage()]]],
+                ], 422);
+            }
+        } elseif ($e->getCode() === 404) {
+            $httpCode = 404;
+            $errorCode = 4040;
+        }
+
+        return response()->json([
+            'error' => $errorCode,
+            'respuesta' => $e->getMessage(),
+            'resultado' => (object) []
+        ], $httpCode);
     }
 
     /**

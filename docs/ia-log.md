@@ -1334,3 +1334,254 @@ Implementación completa de la TR dentro del alcance definido; editar/eliminar q
 ### Referencias
 - `docs/hu-tareas/TR-033(MH)-visualización-de-lista-de-tareas-propias.md`
 - `PROMPTS/05 - Ejecucion-de-una-TR.md`
+
+---
+
+## Entrada — Implementación TR-029 (Edición de Tarea Propia)
+
+### Fecha
+2026-01-29
+
+### Etapa del proyecto
+Implementación de TR-029(MH): Edición de Tarea Propia (empleado edita sus tareas no cerradas; permisos y validaciones según TR).
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+“Ejecutar la tarea TR-029(MH) – Edición de Tarea Propia” — siguiendo la TR (backend GET/PUT, frontend formulario modo edición, ruta /tareas/:id/editar, tests).
+
+### Resultado generado por IA
+- **Backend:** TaskService::getTask(id, user) y updateTask(id, datos, user); constantes ERROR_CLOSED (2110), ERROR_FORBIDDEN_EDIT (4030); UpdateTaskRequest; TaskController::show() y update(); rutas GET/PUT /api/v1/tasks/{id}; tests unitarios e integración.
+- **Frontend:** getTask(id) y updateTask(id, payload) en task.service.ts; TaskForm con prop taskId (modo edición, carga con getTask, empleado solo lectura, submit updateTask); TaskEditPage; ruta /tareas/:id/editar; estilos .form-input-readonly.
+- **Tests:** Vitest getTask/updateTask (mock API, 200/404/2110/4030/422); E2E task-edit.spec.ts (navegar a editar, título Editar Tarea).
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración.
+
+### Referencias
+- `docs/hu-tareas/TR-029(MH)-edición-de-tarea-propia.md`
+
+---
+
+## Entrada — Implementación TR-030 (Eliminación de Tarea Propia)
+
+### Fecha
+2026-01-29
+
+### Etapa del proyecto
+Implementación de TR-030(MH): Eliminación de Tarea Propia (empleado elimina sus tareas no cerradas; diálogo de confirmación; errores 2111/4030/4040).
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+“Ejecutà la tarea TR-030(MH)-eliminación-de-tarea-propia.md” — siguiendo la TR (backend DELETE, frontend DeleteTaskModal, TaskList integrado, tests).
+
+### Resultado generado por IA
+- **Backend:** TaskService::deleteTask(id, user); constantes ERROR_CLOSED_DELETE (2111), ERROR_FORBIDDEN_DELETE (4030); TaskController::destroy(); ruta DELETE /api/v1/tasks/{id}; handleTaskException para 2111 y 4030; tests unitarios (4) e integración (4).
+- **Frontend:** deleteTask(id) y DeleteTaskResult en task.service.ts; DeleteTaskModal (fecha, cliente, tipo, duración; Confirmar/Cancelar); TaskList con taskToDelete, deleteLoading, deleteError, successMessage; mensaje “Tarea eliminada correctamente” y recarga de lista.
+- **Tests:** Vitest deleteTask (200, 404, 2111, 4030); E2E task-delete.spec.ts (modal visible, cancelar, confirmar eliminación).
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración.
+
+### Referencias
+- `docs/hu-tareas/TR-030(MH)-eliminación-de-tarea-propia.md`
+
+---
+
+## Entrada — Implementación TR-034 (Visualización de Lista de Todas las Tareas — Supervisor)
+
+### Fecha
+2026-01-29
+
+### Etapa del proyecto
+Implementación de TR-034(MH): Visualización de Lista de Todas las Tareas (supervisor ve todas las tareas en tabla paginada con filtros por empleado/cliente y ordenamiento).
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+“Ejecutar la tarea TR-034(MH) – Visualización de Lista de Todas las Tareas (Supervisor)” — backend GET /api/v1/tasks/all, frontend ruta /tareas/todas, TaskListAll, SupervisorRoute, tests E2E.
+
+### Resultado generado por IA
+- **Backend:** Ruta GET /api/v1/tasks/all; TaskController::indexAll() (solo supervisor, 403 empleado); TaskService::listTasks() extendido con ordenamiento por empleado/cliente y soporte para listar todas las tareas; tests de integración indexAll_supervisor e indexAll_empleado_403.
+- **Frontend:** getAllTasks() en task.service.ts; SupervisorRoute (protege rutas solo supervisor); TaskListAll (tabla con columna Empleado, filtros, paginación); ruta /tareas/todas; botón “Todas las Tareas” en Dashboard (solo supervisores); returnPath en edición para volver a /tareas/todas.
+- **Tests:** E2E task-list-all.spec.ts (supervisor accede a lista, ve columna Empleado y filtros; empleado redirigido a /).
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración.
+
+### Referencias
+- `docs/hu-tareas/TR-034(MH)-visualización-de-lista-de-todas-las-tareas-supervisor.md`
+
+---
+
+## Entrada — Implementación TR-044 (Consulta Detallada de Tareas)
+
+### Fecha
+2026-01-30
+
+### Etapa del proyecto
+Implementación de TR-044(MH): Consulta Detallada de Tareas (empleado, supervisor y cliente consultan tareas con filtros por rol; período, total horas, ordenamiento, paginación; error 1305 período inválido).
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+“Generá la tarea tr-044(MH)” — implementar backend (listDetailReport, ReportController, GET /reports/detail), frontend (getDetailReport, ConsultaDetalladaPage, filtros según rol, tabla, paginación, total horas), rutas y navegación.
+
+### Resultado generado por IA
+- **Backend:** TaskService::listDetailReport(user, filters) con filtros por rol (empleado solo sus tareas, supervisor todas con opcionales tipo_cliente_id/cliente_id/usuario_id, cliente solo su cliente_id); validación período 1305; constante ERROR_PERIODO_INVALIDO; ReportController::detail(); ruta GET /api/v1/reports/detail; respuesta data[], pagination, total_horas (decimal).
+- **Frontend:** getDetailReport(params), DetailReportItem, DetailReportParams, GetDetailReportResult en task.service.ts; ConsultaDetalladaPage (filtros período y para supervisor cliente/empleado, tabla con columnas empleado/cliente/fecha/tipo/horas/sin_cargo/presencial/descripción, ordenamiento por cabeceras, paginación, total horas, estado vacío); ruta /informes/consulta-detallada; enlace “Consulta Detallada” en Dashboard (todos los usuarios).
+- **Estilos:** ConsultaDetalladaPage.css.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración.
+
+### Referencias
+- `docs/hu-tareas/TR-044(MH)-consulta-detallada-de-tareas.md`
+
+---
+
+## Entrada — Corrección TR-044: filtro por cliente para empleado
+
+### Fecha
+2026-01-30
+
+### Etapa del proyecto
+Corrección en TR-044: que el empleado (no supervisor) pueda filtrar por cliente en Consulta Detallada de Tareas.
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+Corregir en el documento de la tarea y en la programación que cuando el empleado NO supervisor procesa "Consulta detallada de tareas" también pueda filtrar por cliente.
+
+### Resultado generado por IA
+- **Documento TR-044:** ya contemplaba filtro cliente para empleado (AC-06, RN-06, RN-07, Permisos por Rol).
+- **Frontend ConsultaDetalladaPage.tsx:** filtro "Cliente" visible para todo usuario no cliente (`!isCliente`), no solo supervisor; `buildParams` envía `cliente_id` cuando `!isCliente` y hay valor; carga de lista de clientes cuando `!isCliente`; filtro "Empleado" sigue solo para supervisor.
+- **E2E:** aserción en test de empleado para comprobar que ve el combobox Cliente.
+- **Docs:** actualización de `.cursor/Docs/ConsultaDetalladaPage.tsx.md`.
+
+### Ajustes humanos realizados
+- Ninguno.
+
+### Referencias
+- `docs/hu-tareas/TR-044(MH)-consulta-detallada-de-tareas.md`
+
+---
+
+## Entrada — Implementación TR-046 (Consulta Agrupada por Cliente)
+
+### Fecha
+2026-01-30
+
+### Etapa del proyecto
+Implementación de TR-046(MH): Consulta Agrupada por Cliente (empleado, supervisor y cliente consultan tareas agrupadas por cliente; filtros por período; accordion con detalle; total general; error 1305 período inválido).
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecuta la tarea tr-046" — implementar backend (listByClientReport, ReportController::byClient, GET /reports/by-client), frontend (getReportByClient, TareasPorClientePage con filtros período, accordion por cliente, total general), ruta, Dashboard, tests y documentación.
+
+### Resultado generado por IA
+- **Backend:** TaskService::listByClientReport(user, filters) con filtros por rol; validación período 1305; agregación por cliente_id; grupos con nombre, tipo_cliente, total_horas, cantidad_tareas, tareas[]; orden por total_horas desc. ReportController::byClient(); ruta GET /api/v1/reports/by-client.
+- **Frontend:** getReportByClient(params), TareasPorClientePage (filtros período, accordion por cliente, total general); ruta /informes/tareas-por-cliente; botón "Tareas por Cliente" en Dashboard.
+- **Tests:** Unit listByClientReport; Feature by_client; Vitest getReportByClient; E2E tareas-por-cliente.spec.ts.
+- **Docs:** docs/backend/tareas.md GET /reports/by-client; .cursor/Docs/TareasPorClientePage.tsx.md; TR-046 Archivos y Comandos.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración.
+
+### Referencias
+- `docs/hu-tareas/TR-046(MH)-consulta-agrupada-por-cliente.md`
+
+---
+
+## Entrada — Implementación TR-050 (Manejo de resultados vacíos en consultas)
+
+### Fecha
+2026-01-31
+
+### Etapa del proyecto
+Implementación de TR-050(MH): Manejo de resultados vacíos en consultas (HU-050). Mensaje único cuando no hay resultados; no tabla/lista vacía; accesibilidad; E2E estado vacío.
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecutá la tarea TR-050(MH)" — implementar según TR: revisar ConsultaDetalladaPage y TareasPorClientePage estado vacío, unificar mensaje, role="status", E2E estado vacío, docs y ia-log.
+
+### Resultado generado por IA
+- **Frontend ConsultaDetalladaPage:** Añadido `role="status"` al bloque de estado vacío (data-testid report.detail.empty). Mensaje ya correcto.
+- **Frontend TareasPorClientePage:** Mensaje unificado a "No se encontraron tareas para los filtros seleccionados" (clave report.detail.empty); añadido `role="status"` (data-testid report.byClient.empty).
+- **T3 Exportar:** No existe botón Exportar en Consulta Detallada ni Tareas por Cliente; N/A.
+- **E2E:** consulta-detallada.spec.ts: test TR-050 con período 2030, verifica report.detail.empty y texto. tareas-por-cliente.spec.ts: test TR-050 con período 2030, verifica report.byClient.empty y texto.
+- **Docs:** docs/testing.md — subsección "Estado vacío en consultas (HU-050 / TR-050)".
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración.
+
+### Referencias
+- `docs/hu-tareas/TR-050(MH)-manejo-de-resultados-vacíos-en-consultas.md`
+
+---
+
+## Entrada — Implementación TR-051 (Dashboard principal)
+
+### Fecha
+2026-01-31
+
+### Etapa del proyecto
+Implementación de TR-051(MH): Dashboard principal. Backend ya existía (GET /api/v1/dashboard, TaskService::getDashboardData). Frontend: servicio getDashboard, componente Dashboard con selector de período (mes actual por defecto), KPIs (total horas, cantidad tareas, promedio horas/día), Top clientes (empleado/supervisor), Top empleados (solo supervisor), Distribución por tipo (solo cliente). Estados loading/error/vacío (HU-050). E2E dashboard.spec.ts por rol.
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecutá la TR TR-051(MH) y si pasa todos los tests Ejecutá la TR TR-052(MH)".
+
+### Resultado generado por IA
+- **Frontend task.service.ts:** Interfaces DashboardData, DashboardTopCliente, DashboardTopEmpleado, DashboardDistribucionTipo, DashboardParams, GetDashboardResult; función getDashboard(fecha_desde, fecha_hasta).
+- **Frontend Dashboard.tsx:** Selector de período (fecha desde/hasta, botón "Mes actual"); llamada a getDashboard al montar y al cambiar período; KPIs; bloques Top clientes (empleado/supervisor), Top empleados (supervisor), Distribución por tipo (cliente); loading/error/empty; data-testid según TR-051.
+- **Frontend Dashboard.css:** Estilos para secciones, período, KPIs, listas, estado vacío, error, responsive.
+- **E2E dashboard.spec.ts:** Empleado (KPIs + Top clientes, sin Top empleados); Supervisor (Top clientes + Top empleados); Cliente (Distribución por tipo, sin Top empleados); cambio de período; botón Mes actual.
+- **Docs:** .cursor/Docs/Dashboard.tsx.md; ia-log.md entrada TR-051.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración.
+
+### Referencias
+- `docs/hu-tareas/TR-051(MH)-dashboard-principal.md`
+
+---
+
+## Entrada — Implementación TR-052 (Resumen de dedicación por cliente en dashboard)
+
+### Fecha
+2026-01-31
+
+### Etapa del proyecto
+Implementación de TR-052(MH): Resumen de dedicación por cliente en dashboard. Sección "Dedicación por Cliente" en el Dashboard que reutiliza top_clientes del mismo endpoint; total general; enlace "Ver detalle" por cliente a Tareas por Cliente con query params (cliente_id, fecha_desde, fecha_hasta). TareasPorClientePage lee esos params para prellenar filtros y expandir el cliente. E2E en dashboard.spec.ts.
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecutá la TR TR-051(MH) y si pasa todos los tests Ejecutá la TR TR-052(MH)".
+
+### Resultado generado por IA
+- **Dashboard.tsx:** Sección "Dedicación por Cliente" con lista (nombre, horas, cantidad, porcentaje), total general, enlace "Ver detalle" por fila a /informes/tareas-por-cliente?cliente_id=X&fecha_desde=...&fecha_hasta=...
+- **Dashboard.css:** Estilos dashboard-list-item-with-action, dashboard-link-detalle, dashboard-total-general, responsive.
+- **TareasPorClientePage.tsx:** useSearchParams para leer cliente_id, fecha_desde, fecha_hasta; inicializar filtros y expandedClienteId desde URL.
+- **dashboard.spec.ts:** Test E2E TR-052 (sección dedicación, total general, clic Ver detalle).
+- **Docs:** .cursor/Docs/TR-052(MH)-resumen-de-dedicación-por-cliente-en-dashboard.md; actualización TR-052 y ia-log.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración.
+
+### Referencias
+- `docs/hu-tareas/TR-052(MH)-resumen-de-dedicación-por-cliente-en-dashboard.md`

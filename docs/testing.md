@@ -95,6 +95,12 @@ cd backend && php artisan test && cd ../frontend && npm run test:all
 - No se incluyen pruebas de seguridad avanzadas.
 - No se automatiza visual regression.
 
+### Estado vacío en consultas (HU-050 / TR-050)
+En las pantallas de consulta (Consulta Detallada, Tareas por Cliente), cuando no hay resultados se muestra un mensaje informativo ("No se encontraron tareas para los filtros seleccionados") en lugar de tabla o lista vacía. Los E2E en `consulta-detallada.spec.ts` y `tareas-por-cliente.spec.ts` incluyen escenarios que verifican este mensaje cuando el período no tiene datos (p. ej. período 2030).
+
+### Dashboard (TR-051)
+Los E2E en `dashboard.spec.ts` requieren que el **backend esté en marcha** (`php artisan serve` en `backend/`) para que las pruebas que consumen GET /api/v1/dashboard pasen. Si el backend no está disponible, el dashboard mostrará mensaje de error y los tests que exigen KPIs fallarán.
+
 ---
 
 ## Estructura de Tests (Ejemplo)

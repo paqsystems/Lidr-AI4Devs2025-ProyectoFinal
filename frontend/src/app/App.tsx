@@ -13,9 +13,10 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginForm } from '../features/auth';
 import { ProfileView } from '../features/user';
-import { TaskForm, TaskList } from '../features/tasks';
+import { TaskForm, TaskList, TaskListAll, TaskEditPage, ConsultaDetalladaPage, TareasPorClientePage } from '../features/tasks';
 import { ProtectedRoute, PublicRoute } from '../routes';
 import { EmployeeRoute } from '../routes/EmployeeRoute';
+import { SupervisorRoute } from '../routes/SupervisorRoute';
 import { AppLayout } from './AppLayout';
 import { Dashboard } from './Dashboard';
 import './App.css';
@@ -49,6 +50,14 @@ export function App(): React.ReactElement {
           <Route index element={<Dashboard />} />
           <Route path="perfil" element={<ProfileView />} />
           <Route
+            path="informes/consulta-detallada"
+            element={<ConsultaDetalladaPage />}
+          />
+          <Route
+            path="informes/tareas-por-cliente"
+            element={<TareasPorClientePage />}
+          />
+          <Route
             path="tareas"
             element={
               <EmployeeRoute>
@@ -57,10 +66,26 @@ export function App(): React.ReactElement {
             }
           />
           <Route
+            path="tareas/todas"
+            element={
+              <SupervisorRoute>
+                <TaskListAll />
+              </SupervisorRoute>
+            }
+          />
+          <Route
             path="tareas/nueva"
             element={
               <EmployeeRoute>
                 <TaskForm />
+              </EmployeeRoute>
+            }
+          />
+          <Route
+            path="tareas/:id/editar"
+            element={
+              <EmployeeRoute>
+                <TaskEditPage />
               </EmployeeRoute>
             }
           />

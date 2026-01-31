@@ -560,6 +560,80 @@ class TaskControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
+    /** @test @see TR-034(MH)-visualización-de-lista-de-todas-las-tareas-supervisor */
+    public function indexAll_supervisor_retorna_todas_las_tareas()
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($supervisor);
+        $empleadoJ = Usuario::where('code', 'JPEREZ')->first();
+        $empleadoM = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleadoJ->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea JPEREZ',
+            'cerrado' => false,
+        ]);
+        RegistroTarea::create([
+            'usuario_id' => $empleadoM->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-27',
+            'duracion_minutos' => 60,
+            'observacion' => 'Tarea MGARCIA',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->getJson('/api/v1/tasks/all');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Tareas obtenidas correctamente',
+            ])
+            ->assertJsonStructure([
+                'resultado' => [
+                    'data' => [
+                        '*' => [
+                            'id',
+                            'fecha',
+                            'empleado' => ['id', 'code', 'nombre'],
+                            'cliente' => ['id', 'nombre'],
+                            'tipo_tarea' => ['id', 'nombre'],
+                            'duracion_minutos',
+                            'duracion_horas',
+                            'observacion',
+                            'cerrado',
+                        ],
+                    ],
+                    'pagination' => ['current_page', 'per_page', 'total', 'last_page'],
+                    'totales' => ['cantidad_tareas', 'total_horas'],
+                ],
+            ]);
+        $this->assertGreaterThanOrEqual(2, count($response->json('resultado.data')));
+    }
+
+    /** @test @see TR-034: empleado no puede acceder a /tasks/all */
+    public function indexAll_empleado_retorna_403()
+    {
+        $empleado = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($empleado);
+
+        $response = $this->getJson('/api/v1/tasks/all');
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'error' => 4030,
+                'respuesta' => 'Solo los supervisores pueden acceder a todas las tareas',
+                'resultado' => null,
+            ]);
+    }
+
     // ========================================
     // Tests GET /api/v1/tasks/clients
     // ========================================
@@ -713,5 +787,476 @@ class TaskControllerTest extends TestCase
         $response = $this->getJson('/api/v1/tasks/employees');
 
         $response->assertStatus(401);
+    }
+
+    // ========================================
+    // TR-029: GET /api/v1/tasks/{id} y PUT /api/v1/tasks/{id}
+    // ========================================
+
+    /** @test */
+    public function show_retorna_tarea_existente()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea para editar',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->getJson("/api/v1/tasks/{$tarea->id}");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Tarea obtenida correctamente',
+                'resultado' => [
+                    'id' => $tarea->id,
+                    'fecha' => '2026-01-28',
+                    'duracion_minutos' => 120,
+                    'observacion' => 'Tarea para editar',
+                ],
+            ]);
+    }
+
+    /** @test */
+    public function show_falla_tarea_no_encontrada_retorna_404()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/tasks/999999');
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'error' => 4040,
+                'respuesta' => 'Tarea no encontrada',
+            ]);
+    }
+
+    /** @test */
+    public function show_falla_sin_permisos_retorna_403()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $otroEmpleado = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $otroEmpleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'De MGARCIA',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->getJson("/api/v1/tasks/{$tarea->id}");
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'error' => 4030,
+                'respuesta' => 'No tiene permisos para acceder a esta tarea',
+            ]);
+    }
+
+    /** @test */
+    public function show_falla_tarea_cerrada_retorna_400_2110()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Cerrada',
+            'cerrado' => true,
+        ]);
+
+        $response = $this->getJson("/api/v1/tasks/{$tarea->id}");
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 2110,
+                'respuesta' => 'No se puede modificar una tarea cerrada',
+            ]);
+    }
+
+    /** @test */
+    public function update_exitoso_actualiza_tarea()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Original',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->putJson("/api/v1/tasks/{$tarea->id}", [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 180,
+            'sin_cargo' => true,
+            'presencial' => false,
+            'observacion' => 'Actualizado',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Tarea actualizada correctamente',
+                'resultado' => [
+                    'id' => $tarea->id,
+                    'fecha' => '2026-01-29',
+                    'duracion_minutos' => 180,
+                    'observacion' => 'Actualizado',
+                    'sin_cargo' => true,
+                    'presencial' => false,
+                ],
+            ]);
+    }
+
+    /** @test */
+    public function update_falla_tarea_cerrada_retorna_2110()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Cerrada',
+            'cerrado' => true,
+        ]);
+
+        $response = $this->putJson("/api/v1/tasks/{$tarea->id}", [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 120,
+            'observacion' => 'Intentar editar',
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 2110,
+                'respuesta' => 'No se puede modificar una tarea cerrada',
+            ]);
+    }
+
+    /** @test */
+    public function update_falla_sin_permisos_retorna_403()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $otroEmpleado = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $otroEmpleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'De MGARCIA',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->putJson("/api/v1/tasks/{$tarea->id}", [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 120,
+            'observacion' => 'Intentar editar',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'error' => 4030,
+                'respuesta' => 'No tiene permisos para editar esta tarea',
+            ]);
+    }
+
+    /** @test */
+    public function update_valida_campos_igual_que_creacion()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Original',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->putJson("/api/v1/tasks/{$tarea->id}", [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 25, // No múltiplo de 15
+            'observacion' => 'Actualizado',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'error' => 4220,
+                'respuesta' => 'Errores de validación',
+            ]);
+        $this->assertArrayHasKey('duracion_minutos', $response->json('resultado.errors'));
+    }
+
+    /** @test @see TR-031(MH)-edición-de-tarea-supervisor: supervisor puede cambiar propietario */
+    public function update_supervisor_exitoso_con_cambio_propietario()
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+        $empleadoOrigen = Usuario::where('code', 'JPEREZ')->first();
+        $empleadoDestino = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleadoOrigen->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea de JPEREZ',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->putJson("/api/v1/tasks/{$tarea->id}", [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 180,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Reasignada a MGARCIA',
+            'usuario_id' => $empleadoDestino->id,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Tarea actualizada correctamente',
+                'resultado' => [
+                    'id' => $tarea->id,
+                    'usuario_id' => $empleadoDestino->id,
+                    'fecha' => '2026-01-29',
+                    'duracion_minutos' => 180,
+                ],
+            ]);
+        $tarea->refresh();
+        $this->assertEquals($empleadoDestino->id, $tarea->usuario_id);
+    }
+
+    /** @test @see TR-031: supervisor asigna empleado inactivo -> 422 */
+    public function update_supervisor_falla_empleado_inactivo_retorna_422()
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+        $empleadoOrigen = Usuario::where('code', 'JPEREZ')->first();
+        $empleadoInactivo = Usuario::where('code', 'USUINACTIVO')->first();
+        if (!$empleadoInactivo) {
+            $this->markTestSkipped('USUINACTIVO no existe en PQ_PARTES_USUARIOS');
+        }
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleadoOrigen->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Original',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->putJson("/api/v1/tasks/{$tarea->id}", [
+            'fecha' => '2026-01-28',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 120,
+            'observacion' => 'Asignar a inactivo',
+            'usuario_id' => $empleadoInactivo->id,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'error' => 4220,
+                'respuesta' => 'Errores de validación',
+            ]);
+        $this->assertArrayHasKey('usuario_id', $response->json('resultado.errors'));
+    }
+
+    /** @test @see TR-030(MH)-eliminación-de-tarea-propia.md */
+    public function destroy_exitoso_elimina_tarea()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'A eliminar',
+            'cerrado' => false,
+        ]);
+
+        $id = $tarea->id;
+        $response = $this->deleteJson("/api/v1/tasks/{$id}");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Tarea eliminada correctamente',
+                'resultado' => [],
+            ]);
+        $this->assertNull(RegistroTarea::find($id));
+    }
+
+    /** @test */
+    public function destroy_falla_tarea_no_encontrada_retorna_404()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $response = $this->deleteJson('/api/v1/tasks/999999');
+        $response->assertStatus(404)
+            ->assertJson([
+                'error' => 4040,
+                'respuesta' => 'Tarea no encontrada',
+            ]);
+    }
+
+    /** @test */
+    public function destroy_falla_tarea_cerrada_retorna_2111()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Cerrada',
+            'cerrado' => true,
+        ]);
+
+        $response = $this->deleteJson("/api/v1/tasks/{$tarea->id}");
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 2111,
+                'respuesta' => 'No se puede eliminar una tarea cerrada',
+            ]);
+    }
+
+    /** @test */
+    public function destroy_falla_sin_permisos_retorna_403()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+        $otroEmpleado = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $otroEmpleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'De MGARCIA',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->deleteJson("/api/v1/tasks/{$tarea->id}");
+        $response->assertStatus(403)
+            ->assertJson([
+                'error' => 4030,
+                'respuesta' => 'No tiene permisos para eliminar esta tarea',
+            ]);
+    }
+
+    /** @test @see TR-032(MH)-eliminación-de-tarea-supervisor: supervisor puede eliminar cualquier tarea */
+    public function destroy_supervisor_exitoso_elimina_cualquier_tarea()
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+        $empleadoOrigen = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleadoOrigen->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea de JPEREZ a eliminar por supervisor',
+            'cerrado' => false,
+        ]);
+
+        $id = $tarea->id;
+        $response = $this->deleteJson("/api/v1/tasks/{$id}");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Tarea eliminada correctamente',
+                'resultado' => [],
+            ]);
+        $this->assertNull(RegistroTarea::find($id));
     }
 }

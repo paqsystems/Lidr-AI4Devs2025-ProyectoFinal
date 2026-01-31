@@ -1,23 +1,19 @@
 /**
  * Component: TaskForm
- * 
- * Formulario completo de carga de tarea diaria.
- * Incluye todos los campos requeridos, validaciones y manejo de estados.
- * 
- * Estados:
- * - initial: Formulario vacío, listo para input
- * - loading: Enviando datos al servidor
- * - error: Error de validación o servidor
- * - success: Tarea creada exitosamente
- * 
+ *
+ * Formulario completo de carga o edición de tarea diaria.
+ * Modo creación (sin taskId) o edición (taskId) – TR-029.
+ *
  * @see TR-028(MH)-carga-de-tarea-diaria.md
+ * @see TR-029(MH)-edición-de-tarea-propia.md
  */
 
-import React, { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createTask, CreateTaskData } from '../services/task.service';
+import React, { useState, useEffect, FormEvent } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { createTask, getTask, updateTask, CreateTaskData, UpdateTaskData } from '../services/task.service';
 import { getTodayYMD, isFutureDate, formatDateDMY, parseDMYtoYMD } from '../../../shared/utils/dateUtils';
-import { minutesToTime, timeToMinutes, formatMinutesForInput } from '../../../shared/utils/durationUtils';
+import { minutesToTime, timeToMinutes } from '../../../shared/utils/durationUtils';
+import { getUserData } from '../../../shared/utils/tokenStorage';
 import { t } from '../../../shared/i18n';
 import { ClientSelector } from './ClientSelector';
 import { TaskTypeSelector } from './TaskTypeSelector';
@@ -25,6 +21,7 @@ import { EmployeeSelector } from './EmployeeSelector';
 import './TaskForm.css';
 
 type FormState = 'initial' | 'loading' | 'error' | 'success';
+type LoadState = 'idle' | 'loading' | 'loaded' | 'error';
 
 interface ValidationErrors {
   fecha?: string;
@@ -35,8 +32,15 @@ interface ValidationErrors {
   usuario_id?: string;
 }
 
-export function TaskForm(): React.ReactElement {
+interface TaskFormProps {
+  /** Si se proporciona, modo edición: carga tarea y actualiza en submit */
+  taskId?: number;
+}
+
+export function TaskForm({ taskId }: TaskFormProps): React.ReactElement {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isEditMode = taskId != null && taskId > 0;
 
   // Estados del formulario
   const [fechaYMD, setFechaYMD] = useState<string>(getTodayYMD()); // Formato YMD interno
@@ -54,6 +58,39 @@ export function TaskForm(): React.ReactElement {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [dateWarning, setDateWarning] = useState<string>('');
+  const [loadState, setLoadState] = useState<LoadState>(isEditMode ? 'loading' : 'loaded');
+  const [usuarioNombre, setUsuarioNombre] = useState<string>('');
+  const isSupervisor = (getUserData()?.esSupervisor ?? false) && isEditMode;
+
+  // Cargar tarea en modo edición
+  useEffect(() => {
+    if (!isEditMode || !taskId) return;
+    let cancelled = false;
+    setLoadState('loading');
+    setErrorMessage('');
+    getTask(taskId).then((result) => {
+      if (cancelled) return;
+      if (result.success && result.task) {
+        const task = result.task;
+        setFechaYMD(task.fecha);
+        setFechaDisplay(formatDateDMY(task.fecha));
+        setClienteId(task.cliente_id);
+        setTipoTareaId(task.tipo_tarea_id);
+        setDuracionTime(minutesToTime(task.duracion_minutos));
+        setDuracionMinutos(task.duracion_minutos);
+        setSinCargo(task.sin_cargo);
+        setPresencial(task.presencial);
+        setObservacion(task.observacion);
+        setUsuarioNombre(task.usuario_nombre ?? '');
+        setUsuarioId(task.usuario_id ?? null);
+        setLoadState('loaded');
+      } else {
+        setLoadState('error');
+        setErrorMessage(result.errorMessage ?? t('tasks.form.errors.loadFailed', 'Error al cargar la tarea'));
+      }
+    });
+    return () => { cancelled = true; };
+  }, [taskId, isEditMode]);
 
   // Resetear tipo de tarea cuando cambia el cliente
   const handleClienteChange = (newClienteId: number | null) => {
@@ -182,66 +219,91 @@ export function TaskForm(): React.ReactElement {
     return Object.keys(errors).length === 0;
   };
 
-  // Manejar envío del formulario
+  // Manejar envío del formulario (crear o actualizar)
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     setErrorMessage('');
     setValidationErrors({});
-    
+
     if (!validateForm()) {
       setFormState('error');
       return;
     }
-    
+
     setFormState('loading');
-    
+
     try {
-      const taskData: CreateTaskData = {
-        fecha: fechaYMD,
-        cliente_id: clienteId!,
-        tipo_tarea_id: tipoTareaId!,
-        duracion_minutos: duracionMinutos!,
-        sin_cargo: sinCargo,
-        presencial: presencial,
-        observacion: observacion.trim(),
-        usuario_id: usuarioId || undefined,
-      };
-      
-      const result = await createTask(taskData);
-      
-      if (result.success) {
-        setFormState('success');
-        // Limpiar formulario después de guardar exitosamente
-        setTimeout(() => {
-          const todayYMD = getTodayYMD();
-          setFechaYMD(todayYMD);
-          setFechaDisplay(formatDateDMY(todayYMD));
-          setClienteId(null);
-          setTipoTareaId(null);
-          setDuracionTime('');
-          setDuracionMinutos(null);
-          setSinCargo(false);
-          setPresencial(false);
-          setObservacion('');
-          setUsuarioId(null);
-          setFormState('initial');
-          setDateWarning('');
-          // Opcional: redirigir a dashboard o lista de tareas
-          // navigate('/');
-        }, 2000);
+      if (isEditMode && taskId) {
+        const payload: UpdateTaskData = {
+          fecha: fechaYMD,
+          cliente_id: clienteId!,
+          tipo_tarea_id: tipoTareaId!,
+          duracion_minutos: duracionMinutos!,
+          sin_cargo: sinCargo,
+          presencial: presencial,
+          observacion: observacion.trim(),
+        };
+        if (isSupervisor && usuarioId != null) {
+          payload.usuario_id = usuarioId;
+        }
+        const result = await updateTask(taskId, payload);
+        if (result.success) {
+          setFormState('success');
+          const returnPath = (location.state as { returnPath?: string } | null)?.returnPath || '/tareas';
+          setTimeout(() => navigate(returnPath, { state: location.state }), 1500);
+        } else {
+          setFormState('error');
+          setErrorMessage(result.errorMessage ?? t('tasks.form.errors.updateFailed', 'Error al actualizar la tarea'));
+          if (result.validationErrors) {
+            const serverErrors: ValidationErrors = {};
+            Object.keys(result.validationErrors).forEach((key) => {
+              const fieldKey = key as keyof ValidationErrors;
+              serverErrors[fieldKey] = result.validationErrors![key][0];
+            });
+            setValidationErrors(serverErrors);
+          }
+        }
       } else {
-        setFormState('error');
-        setErrorMessage(result.errorMessage || t('tasks.form.errors.createFailed', 'Error al crear la tarea'));
-        
-        // Si hay errores de validación del servidor, agregarlos
-        if (result.validationErrors) {
-          const serverErrors: ValidationErrors = {};
-          Object.keys(result.validationErrors).forEach((key) => {
-            const fieldKey = key as keyof ValidationErrors;
-            serverErrors[fieldKey] = result.validationErrors![key][0];
-          });
-          setValidationErrors(serverErrors);
+        const taskData: CreateTaskData = {
+          fecha: fechaYMD,
+          cliente_id: clienteId!,
+          tipo_tarea_id: tipoTareaId!,
+          duracion_minutos: duracionMinutos!,
+          sin_cargo: sinCargo,
+          presencial: presencial,
+          observacion: observacion.trim(),
+          usuario_id: usuarioId || undefined,
+        };
+        const result = await createTask(taskData);
+        if (result.success) {
+          setFormState('success');
+          setTimeout(() => {
+            const todayYMD = getTodayYMD();
+            setFechaYMD(todayYMD);
+            setFechaDisplay(formatDateDMY(todayYMD));
+            setClienteId(null);
+            setTipoTareaId(null);
+            setDuracionTime('');
+            setDuracionMinutos(null);
+            setSinCargo(false);
+            setPresencial(false);
+            setObservacion('');
+            setUsuarioId(null);
+            setFormState('initial');
+            setDateWarning('');
+          }, 2000);
+        } else {
+          setFormState('error');
+          setErrorMessage(result.errorMessage ?? t('tasks.form.errors.createFailed', 'Error al crear la tarea'));
+          if (result.validationErrors) {
+            const serverErrors: ValidationErrors = {};
+            Object.keys(result.validationErrors).forEach((key) => {
+              const fieldKey = key as keyof ValidationErrors;
+              serverErrors[fieldKey] = result.validationErrors![key][0];
+            });
+            setValidationErrors(serverErrors);
+          }
         }
       }
     } catch {
@@ -251,21 +313,78 @@ export function TaskForm(): React.ReactElement {
   };
 
   const isLoading = formState === 'loading';
+  const isLoadingTask = loadState === 'loading';
+  const loadError = loadState === 'error';
+
+  if (isEditMode && loadState === 'loading') {
+    return (
+      <div className="task-form-container" data-testid="task.form.container" lang="es">
+        <p data-testid="task.edit.loading">{t('tasks.form.loading', 'Cargando tarea...')}</p>
+      </div>
+    );
+  }
+
+  if (isEditMode && loadError) {
+    return (
+      <div className="task-form-container" data-testid="task.form.container" lang="es">
+        <div className="task-form-error" data-testid="task.edit.errorMessage" role="alert">
+          {errorMessage}
+        </div>
+        <button
+          type="button"
+          className="form-button form-button-secondary"
+          onClick={() => navigate((location.state as { returnPath?: string } | null)?.returnPath || '/tareas', { state: location.state })}
+        >
+          {t('tasks.form.actions.backToList', 'Volver a la lista')}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="task-form-container" data-testid="task.form.container" lang="es">
-      <h1 className="task-form-title">{t('tasks.form.title', 'Cargar Tarea Diaria')}</h1>
-      
-      <form onSubmit={handleSubmit} className="task-form" aria-busy={isLoading} lang="es" noValidate>
+      <h1 className="task-form-title">
+        {isEditMode ? t('tasks.form.titleEdit', 'Editar Tarea') : t('tasks.form.title', 'Cargar Tarea Diaria')}
+      </h1>
+
+      {isEditMode && isSupervisor && (
+        <div className="form-group" data-testid="task.edit.employeeSelector">
+          <EmployeeSelector
+            value={usuarioId}
+            onChange={setUsuarioId}
+            error={validationErrors.usuario_id}
+            disabled={isLoading || isLoadingTask}
+            showLabel={true}
+            allowAll={false}
+          />
+        </div>
+      )}
+      {isEditMode && !isSupervisor && usuarioNombre && (
+        <div className="form-group" data-testid="task.edit.usuarioId">
+          <label className="form-label">{t('tasks.form.fields.empleado.label', 'Empleado')}</label>
+          <input
+            type="text"
+            readOnly
+            disabled
+            value={usuarioNombre}
+            className="form-input form-input-readonly"
+            aria-label={t('tasks.form.fields.empleado.ariaLabel', 'Empleado (solo lectura)')}
+          />
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="task-form" aria-busy={isLoading} lang="es" noValidate data-testid={isEditMode ? 'task.edit.form' : 'task.form'}>
         {/* Mensaje de éxito */}
         {formState === 'success' && (
-          <div 
+          <div
             className="task-form-success"
             data-testid="task.form.successMessage"
             role="alert"
             aria-live="polite"
           >
-            {t('tasks.form.success.message', '✓ Tarea registrada correctamente')}
+            {isEditMode
+              ? t('tasks.form.success.updated', '✓ Tarea actualizada correctamente')
+              : t('tasks.form.success.message', '✓ Tarea registrada correctamente')}
           </div>
         )}
         
@@ -429,20 +548,22 @@ export function TaskForm(): React.ReactElement {
           )}
         </div>
         
-        {/* Selector de empleado (solo para supervisores) */}
-        <EmployeeSelector
-          value={usuarioId}
-          onChange={setUsuarioId}
-          error={validationErrors.usuario_id}
-          disabled={isLoading}
-        />
+        {/* Selector de empleado solo en modo creación (no editable en edición) */}
+        {!isEditMode && (
+          <EmployeeSelector
+            value={usuarioId}
+            onChange={setUsuarioId}
+            error={validationErrors.usuario_id}
+            disabled={isLoading}
+          />
+        )}
         
         {/* Botones de acción */}
         <div className="form-actions">
           <button
             type="button"
             data-testid="task.form.cancelButton"
-            onClick={() => navigate('/')}
+            onClick={() => navigate(isEditMode ? ((location.state as { returnPath?: string } | null)?.returnPath || '/tareas') : '/', { ...(isEditMode && { state: location.state }) })}
             disabled={isLoading}
             className="form-button form-button-secondary"
           >

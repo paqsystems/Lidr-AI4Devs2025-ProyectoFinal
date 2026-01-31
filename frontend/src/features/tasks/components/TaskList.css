@@ -215,6 +215,15 @@
   color: #dc2626;
 }
 
+.task-list-success {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: #ecfdf5;
+  color: #059669;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
 .task-list-pagination {
   display: flex;
   justify-content: space-between;

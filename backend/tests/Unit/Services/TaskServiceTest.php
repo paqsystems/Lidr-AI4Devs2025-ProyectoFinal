@@ -570,4 +570,754 @@ class TaskServiceTest extends TestCase
         $this->assertEquals(2, $result['pagination']['last_page']);
         $this->assertEquals(15, $result['pagination']['total']);
     }
+
+    // ========================================
+    // TR-029: getTask / updateTask
+    // ========================================
+
+    /** @see TR-029(MH)-edición-de-tarea-propia.md */
+    public function test_get_task_retorna_tarea_propia(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea editable',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->getTask($tarea->id, $user);
+
+        $this->assertIsArray($result);
+        $this->assertEquals($tarea->id, $result['id']);
+        $this->assertEquals('2026-01-28', $result['fecha']);
+        $this->assertEquals(120, $result['duracion_minutos']);
+        $this->assertEquals('Tarea editable', $result['observacion']);
+    }
+
+    public function test_get_task_falla_si_no_existe(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(404);
+        $this->taskService->getTask(999999, $user);
+    }
+
+    public function test_get_task_falla_si_cerrada(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Cerrada',
+            'cerrado' => true,
+        ]);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_CLOSED);
+        $this->taskService->getTask($tarea->id, $user);
+    }
+
+    public function test_get_task_falla_si_otro_usuario_y_no_supervisor(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $otroEmpleado = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $otroEmpleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'De MGARCIA',
+            'cerrado' => false,
+        ]);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_FORBIDDEN_EDIT);
+        $this->taskService->getTask($tarea->id, $user);
+    }
+
+    public function test_update_task_exitoso(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Original',
+            'cerrado' => false,
+        ]);
+
+        $datos = [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 180,
+            'sin_cargo' => true,
+            'presencial' => false,
+            'observacion' => 'Actualizado',
+        ];
+
+        $result = $this->taskService->updateTask($tarea->id, $datos, $user);
+
+        $this->assertEquals($tarea->id, $result['id']);
+        $this->assertEquals('2026-01-29', $result['fecha']);
+        $this->assertEquals(180, $result['duracion_minutos']);
+        $this->assertEquals('Actualizado', $result['observacion']);
+        $this->assertTrue($result['sin_cargo']);
+        $this->assertFalse($result['presencial']);
+
+        $tarea->refresh();
+        $this->assertEquals('2026-01-29', $tarea->fecha->format('Y-m-d'));
+        $this->assertEquals(180, $tarea->duracion_minutos);
+    }
+
+    public function test_update_task_falla_si_cerrada(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Cerrada',
+            'cerrado' => true,
+        ]);
+
+        $datos = [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 120,
+            'observacion' => 'Intentar editar',
+        ];
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_CLOSED);
+        $this->taskService->updateTask($tarea->id, $datos, $user);
+    }
+
+    public function test_update_task_falla_sin_permisos(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $otroEmpleado = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $otroEmpleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'De MGARCIA',
+            'cerrado' => false,
+        ]);
+
+        $datos = [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 120,
+            'observacion' => 'Intentar editar',
+        ];
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_FORBIDDEN_EDIT);
+        $this->taskService->updateTask($tarea->id, $datos, $user);
+    }
+
+    /** @see TR-031(MH)-edición-de-tarea-supervisor.md: supervisor puede cambiar propietario */
+    public function test_update_supervisor_puede_cambiar_propietario(): void
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        $empleadoOrigen = Usuario::where('code', 'JPEREZ')->first();
+        $empleadoDestino = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleadoOrigen->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea de JPEREZ',
+            'cerrado' => false,
+        ]);
+
+        $datos = [
+            'fecha' => '2026-01-29',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 180,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Reasignada a MGARCIA',
+            'usuario_id' => $empleadoDestino->id,
+        ];
+
+        $result = $this->taskService->updateTask($tarea->id, $datos, $supervisor);
+
+        $this->assertEquals($tarea->id, $result['id']);
+        $this->assertEquals($empleadoDestino->id, $result['usuario_id']);
+        $this->assertEquals('2026-01-29', $result['fecha']);
+        $this->assertEquals(180, $result['duracion_minutos']);
+        $tarea->refresh();
+        $this->assertEquals($empleadoDestino->id, $tarea->usuario_id);
+    }
+
+    /** @see TR-031: supervisor intenta asignar a empleado inactivo -> 4203 */
+    public function test_update_supervisor_valida_empleado_activo(): void
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        $empleadoOrigen = Usuario::where('code', 'JPEREZ')->first();
+        $empleadoInactivo = Usuario::where('code', 'USUINACTIVO')->first();
+        if (!$empleadoInactivo) {
+            $this->markTestSkipped('USUINACTIVO no existe en PQ_PARTES_USUARIOS');
+        }
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleadoOrigen->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Original',
+            'cerrado' => false,
+        ]);
+
+        $datos = [
+            'fecha' => '2026-01-28',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 120,
+            'observacion' => 'Intentar asignar a inactivo',
+            'usuario_id' => $empleadoInactivo->id,
+        ];
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_EMPLEADO_INACTIVO);
+        $this->taskService->updateTask($tarea->id, $datos, $supervisor);
+    }
+
+    /** @see TR-031: empleado no puede enviar usuario_id -> 4030 */
+    public function test_update_empleado_no_puede_enviar_usuario_id_retorna_4030(): void
+    {
+        $empleado = User::where('code', 'JPEREZ')->first();
+        $otroEmpleado = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => Usuario::where('code', 'JPEREZ')->first()->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Propia',
+            'cerrado' => false,
+        ]);
+
+        $datos = [
+            'fecha' => '2026-01-28',
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'duracion_minutos' => 120,
+            'observacion' => 'Intentar cambiar propietario',
+            'usuario_id' => $otroEmpleado->id,
+        ];
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_FORBIDDEN_EDIT);
+        $this->taskService->updateTask($tarea->id, $datos, $empleado);
+    }
+
+    /** @see TR-030(MH)-eliminación-de-tarea-propia.md */
+    public function test_delete_task_exitoso_elimina_tarea(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'A eliminar',
+            'cerrado' => false,
+        ]);
+
+        $id = $tarea->id;
+        $this->taskService->deleteTask($id, $user);
+
+        $this->assertNull(RegistroTarea::find($id));
+    }
+
+    public function test_delete_task_falla_tarea_no_encontrada(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(404);
+        $this->taskService->deleteTask(999999, $user);
+    }
+
+    public function test_delete_task_falla_si_cerrada_retorna_error_2111(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Cerrada',
+            'cerrado' => true,
+        ]);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_CLOSED_DELETE);
+        $this->taskService->deleteTask($tarea->id, $user);
+    }
+
+    public function test_delete_task_falla_sin_permisos_retorna_error_4030(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $otroEmpleado = Usuario::where('code', 'MGARCIA')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $otroEmpleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'De MGARCIA',
+            'cerrado' => false,
+        ]);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_FORBIDDEN_DELETE);
+        $this->taskService->deleteTask($tarea->id, $user);
+    }
+
+    /** @see TR-032(MH)-eliminación-de-tarea-supervisor: supervisor puede eliminar cualquier tarea */
+    public function test_delete_supervisor_puede_eliminar_cualquier_tarea(): void
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        $empleadoOrigen = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleadoOrigen->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'observacion' => 'Tarea de JPEREZ',
+            'cerrado' => false,
+        ]);
+
+        $id = $tarea->id;
+        $this->taskService->deleteTask($id, $supervisor);
+
+        $this->assertNull(RegistroTarea::find($id));
+    }
+
+    // ========================================
+    // TR-044: listDetailReport (Consulta detallada)
+    // ========================================
+
+    /** @see TR-044(MH)-consulta-detallada-de-tareas.md */
+    public function test_list_detail_report_empleado_solo_sus_tareas(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Tarea empleado',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listDetailReport($user, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+            'per_page' => 15,
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('pagination', $result);
+        $this->assertArrayHasKey('total_horas', $result);
+        $this->assertCount(1, $result['data']);
+        $this->assertEquals(2.0, $result['total_horas']); // 120 min = 2h
+        $this->assertArrayNotHasKey('empleado', $result['data'][0]); // Empleado no supervisor: no incluye empleado
+    }
+
+    /** @see TR-044(MH)-consulta-detallada-de-tareas.md */
+    public function test_list_detail_report_supervisor_ve_todas_las_tareas(): void
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 90,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Tarea de JPEREZ',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listDetailReport($supervisor, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+            'per_page' => 15,
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertGreaterThanOrEqual(1, count($result['data']));
+        $this->assertArrayHasKey('empleado', $result['data'][0]); // Supervisor: incluye empleado
+        $this->assertEquals('Juan Pérez', $result['data'][0]['empleado']['nombre']);
+        $this->assertArrayHasKey('total_horas', $result);
+    }
+
+    /** @see TR-044(MH)-consulta-detallada-de-tareas.md */
+    public function test_list_detail_report_cliente_solo_su_cliente(): void
+    {
+        $userCliente = User::where('code', 'CLI001')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 60,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Tarea para CLI001',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listDetailReport($userCliente, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+            'per_page' => 15,
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertCount(1, $result['data']);
+        $this->assertEquals($cliente->id, $result['data'][0]['cliente']['id']);
+        $this->assertEquals(1.0, $result['total_horas']);
+    }
+
+    /** @see TR-044(MH)-consulta-detallada-de-tareas.md - Validación período 1305 */
+    public function test_list_detail_report_periodo_invalido_lanza_1305(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_PERIODO_INVALIDO);
+
+        $this->taskService->listDetailReport($user, [
+            'fecha_desde' => '2026-01-31',
+            'fecha_hasta' => '2026-01-01',
+            'per_page' => 15,
+        ]);
+    }
+
+    /** @see TR-044(MH)-consulta-detallada-de-tareas.md - Horas en decimal */
+    public function test_list_detail_report_total_horas_decimal(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 90, // 1.5 h
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Test',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listDetailReport($user, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+            'per_page' => 15,
+        ]);
+
+        $this->assertEquals(1.5, $result['total_horas']);
+        $this->assertEquals(1.5, $result['data'][0]['horas']);
+    }
+
+    // ========================================
+    // TR-046: listByClientReport (Consulta agrupada por cliente)
+    // ========================================
+
+    /** @see TR-046(MH)-consulta-agrupada-por-cliente.md */
+    public function test_list_by_client_report_empleado_solo_sus_tareas_agrupadas(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 120,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Tarea empleado',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listByClientReport($user, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('grupos', $result);
+        $this->assertArrayHasKey('total_general_horas', $result);
+        $this->assertArrayHasKey('total_general_tareas', $result);
+        $this->assertCount(1, $result['grupos']);
+        $this->assertEquals($cliente->id, $result['grupos'][0]['cliente_id']);
+        $this->assertEquals(2.0, $result['grupos'][0]['total_horas']);
+        $this->assertEquals(1, $result['grupos'][0]['cantidad_tareas']);
+        $this->assertCount(1, $result['grupos'][0]['tareas']);
+        $this->assertArrayNotHasKey('empleado', $result['grupos'][0]['tareas'][0]);
+    }
+
+    /** @see TR-046(MH)-consulta-agrupada-por-cliente.md */
+    public function test_list_by_client_report_supervisor_ve_todos_los_grupos(): void
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 90,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Tarea JPEREZ',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listByClientReport($supervisor, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertGreaterThanOrEqual(1, count($result['grupos']));
+        $this->assertArrayHasKey('empleado', $result['grupos'][0]['tareas'][0]);
+        $this->assertEquals('Juan Pérez', $result['grupos'][0]['tareas'][0]['empleado']['nombre']);
+    }
+
+    /** @see TR-046(MH)-consulta-agrupada-por-cliente.md */
+    public function test_list_by_client_report_cliente_solo_su_grupo(): void
+    {
+        $userCliente = User::where('code', 'CLI001')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 60,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Tarea para CLI001',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->listByClientReport($userCliente, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertCount(1, $result['grupos']);
+        $this->assertEquals($cliente->id, $result['grupos'][0]['cliente_id']);
+        $this->assertEquals(1.0, $result['total_general_horas']);
+        $this->assertEquals(1, $result['total_general_tareas']);
+    }
+
+    /** @see TR-046(MH)-consulta-agrupada-por-cliente.md - Período inválido 1305 */
+    public function test_list_by_client_report_periodo_invalido_lanza_1305(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_PERIODO_INVALIDO);
+
+        $this->taskService->listByClientReport($user, [
+            'fecha_desde' => '2026-01-31',
+            'fecha_hasta' => '2026-01-01',
+        ]);
+    }
+
+    // ========================================
+    // TR-051: getDashboardData (Dashboard principal)
+    // ========================================
+
+    /** @see TR-051(MH)-dashboard-principal.md */
+    public function test_get_dashboard_data_empleado_retorna_kpis_y_top_clientes(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-15',
+            'duracion_minutos' => 120,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Tarea',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->getDashboardData($user, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('total_horas', $result);
+        $this->assertArrayHasKey('cantidad_tareas', $result);
+        $this->assertArrayHasKey('promedio_horas_por_dia', $result);
+        $this->assertArrayHasKey('top_clientes', $result);
+        $this->assertArrayHasKey('top_empleados', $result);
+        $this->assertArrayHasKey('distribucion_por_tipo', $result);
+        $this->assertEquals(2.0, $result['total_horas']);
+        $this->assertEquals(1, $result['cantidad_tareas']);
+        $this->assertCount(1, $result['top_clientes']);
+        $this->assertEmpty($result['top_empleados']);
+        $this->assertEmpty($result['distribucion_por_tipo']);
+    }
+
+    /** @see TR-051(MH)-dashboard-principal.md */
+    public function test_get_dashboard_data_supervisor_retorna_top_empleados(): void
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-20',
+            'duracion_minutos' => 90,
+            'sin_cargo' => false,
+            'presencial' => true,
+            'observacion' => 'Tarea JPEREZ',
+            'cerrado' => false,
+        ]);
+
+        $result = $this->taskService->getDashboardData($supervisor, [
+            'fecha_desde' => '2026-01-01',
+            'fecha_hasta' => '2026-01-31',
+        ]);
+
+        $this->assertIsArray($result);
+        $this->assertGreaterThanOrEqual(0, count($result['top_empleados']));
+        if (count($result['top_clientes']) > 0) {
+            $this->assertArrayHasKey('porcentaje', $result['top_clientes'][0]);
+        }
+    }
+
+    /** @see TR-051(MH)-dashboard-principal.md - Período inválido 1305 */
+    public function test_get_dashboard_data_periodo_invalido_lanza_1305(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(TaskService::ERROR_PERIODO_INVALIDO);
+
+        $this->taskService->getDashboardData($user, [
+            'fecha_desde' => '2026-01-31',
+            'fecha_hasta' => '2026-01-01',
+        ]);
+    }
 }

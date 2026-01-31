@@ -226,6 +226,152 @@ GET /api/v1/tasks/employees
 
 ---
 
+### Consulta Detallada de Tareas (TR-044)
+
+```
+GET /api/v1/reports/detail
+```
+
+**Autenticación:** Requerida (Bearer token de Sanctum)
+
+**Autorización:** Empleado, Supervisor y Cliente pueden acceder. El backend aplica filtros automáticos por rol (reglas 8.1 y 8.2):
+- **Empleado (no supervisor):** Solo sus tareas (`usuario_id` = su empleado).
+- **Supervisor:** Todas las tareas; filtros opcionales tipo_cliente_id, cliente_id, usuario_id.
+- **Cliente:** Solo tareas donde `cliente_id` = su cliente.
+
+#### Query Parameters
+
+| Parámetro       | Tipo   | Descripción |
+|----------------|--------|-------------|
+| page           | int    | Página (default 1) |
+| per_page       | int    | Por página (10-20, default 15) |
+| fecha_desde    | string | Fecha inicio período (YMD) |
+| fecha_hasta    | string | Fecha fin período (YMD) |
+| tipo_cliente_id| int    | Opcional; solo supervisor |
+| cliente_id     | int    | Opcional; supervisor; automático para cliente |
+| usuario_id     | int    | Opcional; solo supervisor; automático para empleado |
+| ordenar_por    | string | fecha \| cliente \| empleado \| tipo_tarea \| horas (default fecha) |
+| orden          | string | asc \| desc (default desc) |
+
+#### Response 200 OK
+
+```json
+{
+  "error": 0,
+  "respuesta": "Consulta obtenida correctamente",
+  "resultado": {
+    "data": [
+      {
+        "id": 1,
+        "empleado": { "id": 1, "nombre": "Juan Pérez", "code": "JPEREZ" },
+        "cliente": { "id": 1, "nombre": "Cliente A", "tipo_cliente": "Corp" },
+        "fecha": "2026-01-28",
+        "tipo_tarea": { "id": 2, "descripcion": "Desarrollo" },
+        "horas": 2.5,
+        "sin_cargo": false,
+        "presencial": true,
+        "descripcion": "Observación de la tarea"
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "per_page": 15,
+      "total": 100,
+      "last_page": 7
+    },
+    "total_horas": 125.75
+  }
+}
+```
+
+**Nota:** La clave `empleado` solo se incluye cuando el usuario es supervisor.
+
+#### Response 422 Unprocessable Entity (período inválido)
+
+Si `fecha_desde > fecha_hasta`:
+
+```json
+{
+  "error": 1305,
+  "respuesta": "El período es inválido: fecha_desde debe ser menor o igual a fecha_hasta",
+  "resultado": null
+}
+```
+
+#### Códigos de error (TR-044)
+
+| Código | HTTP | Descripción |
+|--------|------|-------------|
+| 1305   | 422  | Período inválido (fecha_desde > fecha_hasta) |
+
+---
+
+### Consulta Agrupada por Cliente (TR-046)
+
+```
+GET /api/v1/reports/by-client
+```
+
+**Autenticación:** Requerida (Bearer token de Sanctum)
+
+**Autorización:** Empleado, Supervisor y Cliente pueden acceder. El backend aplica filtros automáticos por rol:
+- **Empleado (no supervisor):** Solo sus tareas agrupadas por cliente.
+- **Supervisor:** Todas las tareas agrupadas por cliente; cada tarea incluye `empleado`.
+- **Cliente:** Solo tareas donde `cliente_id` = su cliente (un grupo o vacío).
+
+#### Query Parameters
+
+| Parámetro    | Tipo   | Descripción |
+|-------------|--------|-------------|
+| fecha_desde | string | Fecha inicio período (YMD) |
+| fecha_hasta | string | Fecha fin período (YMD) |
+
+#### Response 200 OK
+
+```json
+{
+  "error": 0,
+  "respuesta": "Reporte por cliente obtenido correctamente",
+  "resultado": {
+    "grupos": [
+      {
+        "cliente_id": 1,
+        "nombre": "Cliente A",
+        "tipo_cliente": { "id": 1, "descripcion": "Corp" },
+        "total_horas": 45.5,
+        "cantidad_tareas": 12,
+        "tareas": [
+          {
+            "id": 1,
+            "fecha": "2026-01-15",
+            "tipo_tarea": { "id": 2, "descripcion": "Desarrollo" },
+            "horas": 2.5,
+            "empleado": { "id": 1, "nombre": "Juan Pérez", "code": "JPEREZ" },
+            "descripcion": "Desarrollo de feature X..."
+          }
+        ]
+      }
+    ],
+    "total_general_horas": 120.25,
+    "total_general_tareas": 48
+  }
+}
+```
+
+**Nota:** `empleado` en cada tarea solo se incluye cuando el usuario es supervisor. Los grupos se ordenan por `total_horas` descendente.
+
+#### Response 422 (período inválido)
+
+Si `fecha_desde > fecha_hasta`: mismo cuerpo que TR-044 (error 1305).
+
+#### Códigos de error (TR-046)
+
+| Código | HTTP | Descripción |
+|--------|------|-------------|
+| 1305   | 422  | Período inválido (fecha_desde > fecha_hasta) |
+
+---
+
 ## Reglas de Negocio
 
 ### Validación de Fecha
@@ -276,6 +422,7 @@ GET /api/v1/tasks/employees
 | 4202 | 422 | Tipo de tarea inactivo o inhabilitado |
 | 4203 | 422 | Empleado inactivo o inhabilitado |
 | 4204 | 422 | Tipo de tarea no disponible para el cliente |
+| 1305 | 422 | Período inválido en consulta detallada (TR-044) |
 | 9999 | 500 | Error inesperado del servidor |
 
 ---

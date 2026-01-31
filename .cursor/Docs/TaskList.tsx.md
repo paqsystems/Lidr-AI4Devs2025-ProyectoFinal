@@ -6,9 +6,13 @@ Componente principal de la pantalla **Mis Tareas** (TR-033). Muestra la lista pa
 ## Ubicación
 `frontend/src/features/tasks/components/TaskList.tsx`
 
+## Conservación de filtros al volver de edición (TR-029)
+Al navegar a editar una tarea, se envía en `location.state` el estado actual de la lista: `returnFilters` (fecha desde/hasta, cliente, tipo de tarea, empleado, búsqueda, orden) y `returnPage`. Al volver desde la pantalla de edición (guardar o “Volver a la lista”), TaskForm hace `navigate('/tareas', { state: location.state })`. TaskList restaura filtros y página de dos formas: (1) estado inicial desde `getInitialStateFromLocation(location)`; (2) `useEffect` que, al detectar `location.state` con `returnFilters` y `returnPage` en `/tareas`, aplica esos valores (por si el estado llega después del primer render). Así se conservan fechas, cliente, tipo de tarea, búsqueda, ordenamiento y página.
+
 ## Dependencias
-- `task.service.ts`: `getTasks()`, tipos `TaskListItem`, `TaskListParams`, `TaskFiltersValues`
-- `TaskFilters`, `TaskPagination`, `TaskTotals`
+- `task.service.ts`: `getTasks()`, tipos `TaskListItem`, `TaskListParams`
+- `TaskFilters`: componente y tipo `TaskFiltersValues`
+- `TaskPagination`, `TaskTotals`
 - Ruta protegida `/tareas` (solo empleados)
 
 ## data-testid (E2E)
@@ -24,5 +28,6 @@ Componente principal de la pantalla **Mis Tareas** (TR-033). Muestra la lista pa
 - `task.list.loading` – estado de carga
 
 ## Notas
-- Editar navega a `/tareas/:id/editar` (TR-029); eliminar muestra confirmación (TR-030 pendiente de API).
+- Editar navega a `/tareas/:id/editar` con `state: { returnFilters, returnPage }` (TR-029); al volver se restauran filtros y página.
+- Eliminar muestra confirmación (TR-030 pendiente de API).
 - Los totales se calculan sobre el conjunto filtrado (backend).

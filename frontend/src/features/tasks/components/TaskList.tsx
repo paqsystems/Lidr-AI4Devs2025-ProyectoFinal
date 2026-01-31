@@ -3,14 +3,16 @@
  *
  * Lista paginada de tareas propias con filtros, totales y acciones editar/eliminar.
  * TR-033(MH)-visualización-de-lista-de-tareas-propias.
+ * TR-030(MH)-eliminación-de-tarea-propia: modal de confirmación y deleteTask.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getTasks, TaskListItem, TaskListParams, TaskFiltersValues } from '../services/task.service';
-import { TaskFilters } from './TaskFilters';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { getTasks, deleteTask, TaskListItem, TaskListParams } from '../services/task.service';
+import { TaskFilters, type TaskFiltersValues } from './TaskFilters';
 import { TaskPagination } from './TaskPagination';
 import { TaskTotals } from './TaskTotals';
+import { DeleteTaskModal } from './DeleteTaskModal';
 import { t } from '../../../shared/i18n';
 import './TaskList.css';
 
@@ -45,8 +47,24 @@ function buildParams(
   return params;
 }
 
+export interface TaskListReturnState {
+  returnFilters: TaskFiltersValues;
+  returnPage: number;
+}
+
+function getInitialStateFromLocation(location: ReturnType<typeof useLocation>) {
+  const state = location.state as TaskListReturnState | null;
+  return {
+    filters: state?.returnFilters ?? DEFAULT_FILTERS,
+    appliedFilters: state?.returnFilters ?? DEFAULT_FILTERS,
+    page: state?.returnPage ?? 1,
+  };
+}
+
 export function TaskList(): React.ReactElement {
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialState = getInitialStateFromLocation(location);
   const [data, setData] = useState<TaskListItem[]>([]);
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -55,11 +73,15 @@ export function TaskList(): React.ReactElement {
     last_page: 1,
   });
   const [totales, setTotales] = useState({ cantidad_tareas: 0, total_horas: 0 });
-  const [filters, setFilters] = useState<TaskFiltersValues>(DEFAULT_FILTERS);
-  const [appliedFilters, setAppliedFilters] = useState<TaskFiltersValues>(DEFAULT_FILTERS);
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState<TaskFiltersValues>(initialState.filters);
+  const [appliedFilters, setAppliedFilters] = useState<TaskFiltersValues>(initialState.appliedFilters);
+  const [page, setPage] = useState(initialState.page);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [taskToDelete, setTaskToDelete] = useState<TaskListItem | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
   const loadTasks = useCallback(async (params: TaskListParams) => {
     setLoading(true);
@@ -81,6 +103,25 @@ export function TaskList(): React.ReactElement {
     loadTasks(params);
   }, [page, appliedFilters, loadTasks]);
 
+  // Restaurar filtros y página al volver de edición (location.state puede llegar después del primer render)
+  const prevLocationKey = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const state = location.state as TaskListReturnState | null;
+    const hasReturnState =
+      state?.returnFilters != null &&
+      typeof state?.returnPage === 'number' &&
+      location.pathname === '/tareas';
+    if (hasReturnState && prevLocationKey.current !== location.key) {
+      prevLocationKey.current = location.key;
+      setFilters(state.returnFilters);
+      setAppliedFilters(state.returnFilters);
+      setPage(state.returnPage);
+    }
+    if (!hasReturnState) {
+      prevLocationKey.current = location.key;
+    }
+  }, [location.pathname, location.key, location.state]);
+
   const handleApplyFilters = () => {
     setAppliedFilters(filters);
     setPage(1);
@@ -91,14 +132,37 @@ export function TaskList(): React.ReactElement {
   };
 
   const handleEdit = (id: number) => {
-    navigate(`/tareas/${id}/editar`);
+    navigate(`/tareas/${id}/editar`, {
+      state: { returnFilters: appliedFilters, returnPage: page } as TaskListReturnState,
+    });
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm(t('tasks.list.deleteConfirm', '¿Eliminar esta tarea?'))) {
-      // TR-030: eliminación; por ahora solo navegación o placeholder
-      navigate(`/tareas`);
+  const handleDeleteClick = (row: TaskListItem) => {
+    if (row.cerrado) return;
+    setDeleteError('');
+    setTaskToDelete(row);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return;
+    setDeleteLoading(true);
+    setDeleteError('');
+    const result = await deleteTask(taskToDelete.id);
+    setDeleteLoading(false);
+    if (result.success) {
+      setTaskToDelete(null);
+      setSuccessMessage(t('tasks.delete.success', 'Tarea eliminada correctamente'));
+      const params = buildParams(page, appliedFilters, DEFAULT_PER_PAGE);
+      await loadTasks(params);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } else {
+      setDeleteError(result.errorMessage ?? t('tasks.list.error.load', 'Error al eliminar'));
     }
+  };
+
+  const handleCancelDelete = () => {
+    setTaskToDelete(null);
+    setDeleteError('');
   };
 
   return (
@@ -118,6 +182,22 @@ export function TaskList(): React.ReactElement {
         <div className="task-list-error" data-testid="task.list.error" role="alert">
           {errorMessage}
         </div>
+      )}
+
+      {successMessage && (
+        <div className="task-list-success" data-testid="task.list.deleteSuccess" role="status">
+          {successMessage}
+        </div>
+      )}
+
+      {taskToDelete && (
+        <DeleteTaskModal
+          task={taskToDelete}
+          loading={deleteLoading}
+          errorMessage={deleteError}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
       )}
 
       {!errorMessage && (
@@ -181,7 +261,7 @@ export function TaskList(): React.ReactElement {
                           <button
                             type="button"
                             className="task-list-btn-action task-list-btn-delete"
-                            onClick={() => handleDelete(row.id)}
+                            onClick={() => handleDeleteClick(row)}
                             disabled={row.cerrado}
                             data-testid={`task.list.delete.${row.id}`}
                             aria-label={t('tasks.list.deleteLabel', 'Eliminar tarea')}

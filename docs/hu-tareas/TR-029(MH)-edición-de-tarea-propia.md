@@ -8,8 +8,8 @@
 | Roles              | Empleado                                   |
 | Dependencias       | HU-028 (Carga de Tarea Diaria)             |
 | Clasificación      | HU SIMPLE                                  |
-| Última actualización | 2026-01-28                               |
-| Estado             | 📋 PENDIENTE                               |
+| Última actualización | 2026-01-29                               |
+| Estado             | ✅ COMPLETADO (implementación TR-029)     |
 
 ---
 
@@ -349,39 +349,60 @@ Feature: Edición de Tarea Propia
 
 ## 10) Checklist Final
 
-- [ ] AC cumplidos
-- [ ] Backend: UpdateTaskRequest con validaciones
-- [ ] Backend: TaskService::update() implementado
-- [ ] Backend: Endpoints GET y PUT implementados
-- [ ] Backend: Códigos de error 2110 y 403 implementados
-- [ ] Frontend: TaskForm modo edición implementado
-- [ ] Frontend: TaskList botón editar implementado
-- [ ] Frontend: Ruta /tareas/{id}/editar implementada
-- [ ] Frontend: Manejo de errores implementado
-- [ ] Unit tests TaskService ok
-- [ ] Integration tests TaskController ok
-- [ ] Frontend unit tests (Vitest) task.service ok
-- [ ] ≥1 E2E Playwright ok (sin waits ciegos)
-- [ ] Docs actualizadas
-- [ ] IA log actualizado
+- [x] AC cumplidos
+- [x] Backend: UpdateTaskRequest con validaciones
+- [x] Backend: TaskService::getTask() y updateTask() implementados
+- [x] Backend: Endpoints GET /tasks/{id} y PUT /tasks/{id} implementados
+- [x] Backend: Códigos de error 2110 y 4030 implementados
+- [x] Frontend: TaskForm modo edición (prop taskId) implementado
+- [x] Frontend: TaskList botón editar (ya existía, navega a /tareas/{id}/editar)
+- [x] Frontend: Ruta /tareas/:id/editar con TaskEditPage implementada
+- [x] Frontend: Manejo de errores 2110, 4030, 404
+- [x] Unit tests TaskService ok (getTask, updateTask)
+- [x] Integration tests TaskController ok (show, update)
+- [x] Frontend unit tests (Vitest) getTask/updateTask ok
+- [x] ≥1 E2E Playwright ok (task-edit.spec.ts)
+- [x] Docs actualizadas
+- [x] IA log actualizado
 
 ---
 
 ## Archivos creados/modificados
 
-*(Se completará durante la implementación)*
+### Backend
+- `backend/app/Services/TaskService.php` – Constantes ERROR_CLOSED (2110), ERROR_FORBIDDEN_EDIT (4030); getTask(id, user); updateTask(id, datos, user).
+- `backend/app/Http/Requests/Api/V1/UpdateTaskRequest.php` – Nuevo. Validaciones igual que CreateTaskRequest sin usuario_id.
+- `backend/app/Http/Controllers/Api/V1/TaskController.php` – show(id), update(UpdateTaskRequest, id); handleTaskException() para mapear códigos.
+- `backend/routes/api.php` – GET /tasks/{id}, PUT /tasks/{id}.
+- `backend/tests/Unit/Services/TaskServiceTest.php` – Tests getTask (éxito, 404, cerrada, sin permisos); updateTask (éxito, cerrada, sin permisos).
+- `backend/tests/Feature/Api/V1/TaskControllerTest.php` – Tests show (200, 404, 403, 400/2110); update (200, 400/2110, 403, 422).
 
-### Tests unitarios frontend (Vitest) (al implementar)
-- `frontend/src/features/tasks/services/task.service.test.ts` – Tests para getTask(), updateTask() (mock API, errores 2110/403).
+### Frontend
+- `frontend/src/features/tasks/services/task.service.ts` – Tipos TaskForEdit, GetTaskResult, UpdateTaskData, UpdateTaskResult; getTask(id); updateTask(id, payload).
+- `frontend/src/features/tasks/components/TaskForm.tsx` – Prop taskId opcional; modo edición: carga con getTask, campo Empleado solo lectura, submit updateTask, redirección a /tareas.
+- `frontend/src/features/tasks/components/TaskEditPage.tsx` – Nuevo. useParams id → TaskForm taskId.
+- `frontend/src/features/tasks/components/TaskForm.css` – .form-input-readonly.
+- `frontend/src/app/App.tsx` – Ruta /tareas/:id/editar con TaskEditPage.
+
+### Tests unitarios frontend (Vitest)
+- `frontend/src/features/tasks/services/task.service.test.ts` – Tests getTask (200, 404, 2110, 4030); updateTask (200, 2110, 422).
+
+### Tests E2E
+- `frontend/tests/e2e/task-edit.spec.ts` – E2E: navegar a editar desde lista, título "Editar Tarea".
 
 ## Comandos ejecutados
 
-*(Se completará durante la implementación)*
+- Backend: `php artisan test --filter="TaskServiceTest::test_get_task|TaskServiceTest::test_update_task|TaskControllerTest::show_|TaskControllerTest::update_"`
+- Frontend Vitest: `npm run test:run -- src/features/tasks/services/task.service.test.ts`
+- Frontend E2E: `npx playwright test tests/e2e/task-edit.spec.ts` (requiere backend y frontend en marcha).
 
 ## Notas y decisiones
 
-*(Se completará durante la implementación)*
+- GET /tasks/{id} retorna usuario_nombre para mostrar empleado en solo lectura en el formulario de edición.
+- Empleado: solo puede editar sus tareas no cerradas. Supervisor: puede editar cualquier tarea no cerrada (TR-031 no implementado en este ticket).
+- Error 2110 → HTTP 400; 4030 → HTTP 403; 4040 → HTTP 404.
+- **Conservación de filtros al volver:** Al retornar de la edición (guardar o “Volver a la lista”), se conservan en la lista los valores de filtros (fechas, cliente, tipo de tarea, búsqueda, ordenamiento) y la página, mediante `location.state` (returnFilters, returnPage) y restauración en TaskList (estado inicial + useEffect).
 
 ## Pendientes / follow-ups
 
-*(Se completará durante la implementación)*
+- TR-031: Edición de tarea por supervisor (mismo endpoint, permisos ya soportados en backend).

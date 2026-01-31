@@ -49,6 +49,11 @@
   text-align: center;
 }
 
+.form-input-readonly {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }
