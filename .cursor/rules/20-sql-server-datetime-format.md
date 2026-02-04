@@ -162,6 +162,22 @@ public function boot(): void
 
 ---
 
-**Fecha de creación:** 2026-01-27  
-**Última actualización:** 2026-01-27  
-**Origen:** Error encontrado durante implementación de TR-001(MH)
+## Impacto
+
+- **Archivos afectados:** Todos los modelos, seeders, tests y código que interactúe con fechas
+- **Migraciones:** No requieren cambios (usan tipos estándar de Laravel)
+- **Frontend:** No afectado (las fechas se serializan correctamente en JSON)
+
+## Referencias
+
+- [TR-001(MH) - Login de Empleado](../../docs/hu-tareas/TR-001(MH)-login-de-empleado.md)
+- [Laravel Database Configuration](https://laravel.com/docs/10.x/database)
+- [SQL Server GETDATE()](https://docs.microsoft.com/en-us/sql/t-sql/functions/getdate-transact-sql)
+
+## Historial
+
+| Fecha     | Cambio              |
+|-----------|---------------------|
+| 2026-01-27 | Creación de la regla |
+
+**Origen:** Error encontrado durante implementación de TR-001(MH) (Laravel genera timestamps con milisegundos que SQL Server no acepta).

@@ -216,3 +216,20 @@ Cliente::query()
 - Índices en campos de búsqueda/filtros (definir en migrations).
 - Auditoría: created_at/updated_at + tracking usuario donde aplique.
 
+---
+
+## Relación con otros documentos
+- Complementa `docs/backend/PLAYBOOK_BACKEND_LARAVEL.md`
+- Referenciado desde `.cursor/rules/05-backend-policy.md`
+- Alineado con `docs/domain/DATA_MODEL.md`
+
+## Uso
+Este documento debe ser consultado por:
+- Desarrolladores del backend para implementar acceso a datos
+- Revisores de código para validar cumplimiento de reglas
+- Arquitectos para definir estrategias de consultas
+
+## Mantenimiento
+- Actualizar cuando se identifiquen nuevos anti-patrones
+- Mantener ejemplos actualizados con el código
+- Documentar excepciones cuando sea necesario

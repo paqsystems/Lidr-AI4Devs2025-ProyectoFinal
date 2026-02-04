@@ -23,6 +23,11 @@ Copiar a:
 - `/.cursor/rules/12-ticketing-domain.md`
 - `/.cursor/rules/13-user-story-to-task-breakdown.md`
 - `/.cursor/rules/14-dbml-sync-rule.md`
+- `/.cursor/rules/15-task-execution-traceability.md`
+- `/.cursor/rules/16-hu-simple-vs-hu-compleja.md`
+- `/.cursor/rules/16-prompt-dispatcher.md`
+- `/.cursor/rules/20-sql-server-datetime-format.md`
+- `/.cursor/rules/21-Iniciar-tunel-SSH-para-MySql.md`
 
 > Si tu instalación de Cursor usa un único archivo `.cursorrules`, concatená el contenido de los archivos anteriores en ese archivo (manteniendo el orden).
 
@@ -47,6 +52,11 @@ Copiar a:
 12. 12-ticketing-domain.md
 13. 13-user-story-to-task-breakdown.md
 14. 14-dbml-sync-rule.md
+15. 15-task-execution-traceability.md
+16. 16-hu-simple-vs-hu-compleja.md
+17. 16-prompt-dispatcher.md
+18. 20-sql-server-datetime-format.md
+19. 21-Iniciar-tunel-SSH-para-MySql.md
 
 Luego usar `/docs/*` como material ampliado.
 
@@ -333,21 +343,11 @@ npm run test:e2e:headed # Ver navegador
 
 ### Pull Requests
 
-Los cambios de la **Entrega 1 - Documentación Técnica** se encuentran en la rama  `feature-entrega1-[INICIALES]`.
+**Entrega 1 – Documentación Técnica**  
+Los cambios están en la rama `feature-entrega1-PAQ`. PR hacia `main` con documentación técnica (producto, arquitectura, modelo de datos, historias, tickets, especificaciones de API, Playwright). Ver `docs/_ENTREGA-1/INSTRUCCIONES-PR-ENTREGA-1.md`.
 
-**Pull Request:** Se creará un PR hacia `main` con todos los artefactos de documentación técnica.
-
-**Contenido del PR:**
-- Documentación de producto
-- Arquitectura del sistema
-- Modelo de datos completo
-- 55 historias de usuario con criterios de aceptación
-- 33 tickets técnicos derivados
-- 41 especificaciones de endpoints de API
-- Reglas de negocio y validaciones
-- Especificaciones de modelos backend
-- Documentación de estructura de frontend
-- Configuración de Playwright para tests E2E
+**Entrega 2 – Código funcional (primer MVP ejecutable)**  
+Los cambios están en la rama `feature-entrega2-PAQ`. PR hacia `main` con backend, frontend y BD conectados, flujo principal "casi" completo (auth, tareas, clientes, informes, dashboard) y suite de tests. Ver `docs/_ENTREGA-2/VERIFICACION-ENTREGA-2.md` y `docs/_ENTREGA-2/INSTRUCCIONES-PR-ENTREGA-2.md`.
 
 ---
 
@@ -405,8 +405,10 @@ La operatoria básica fue :
 - realicé el primer PR
 - pedí generar un documento MANUAL-PROGRAMADOR.md para ver si un tercero puede seguir el proyecto sin explicación humana
 
-Cómo me sentí con el proceso : 
+## Cómo me sentí con el proceso : 
 - me sentí muy cómodo.
 - como soy más analista de sistemas que programador, creo entender bien la diferencia de funciones entre la IA y yo, y poder hacer las ordenes, seguimientos y controles como si la IA fuese un programador humano.
 - Sólo siento que me sobrepasa la cantidad de información que genera. Debo contemplar reservar una importante suma de tiempo para poder controlar y revisar todo lo que genera.
 - Por normativa propia y ampliado ahora por el punto anterior, procuro realizar pasos pequeños cada vez, para poder hacer un mejor seguimiento y evitar "alucinaciones" de la IA
+- en ningún momento generé código manualmente. Tampoco solicité cambios en el código desde el prompt, sino que siempre modifiqué especificaciones y le pedí que adecué el código a la misma.
+- en forma muy artesanal, en casos de ajustes, correcciones o modificaciones procuré usar el concepto de spec-kit : generar un documento con el mismo nombre del TR a modificar con el agregado "-update"; documenté ahí todos los pasos como una tarea nueva; al quedar debidamente probado, solicité integrar ese documento al original. Desgraciadamente omití conservar una copia como ejemplo.
