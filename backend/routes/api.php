@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ClienteController;
+use App\Http\Controllers\Api\V1\EmpleadoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,18 @@ Route::prefix('v1')->group(function () {
             ->name('api.v1.clientes.update');
         Route::delete('/clientes/{id}', [ClienteController::class, 'destroy'])
             ->name('api.v1.clientes.destroy');
+
+        // Rutas de empleados (solo supervisores) @see TR-018(MH), TR-019(MH), TR-020(MH), TR-021(MH)
+        Route::get('/empleados', [EmpleadoController::class, 'index'])
+            ->name('api.v1.empleados.index');
+        Route::post('/empleados', [EmpleadoController::class, 'store'])
+            ->name('api.v1.empleados.store');
+        Route::get('/empleados/{id}', [EmpleadoController::class, 'show'])
+            ->name('api.v1.empleados.show');
+        Route::put('/empleados/{id}', [EmpleadoController::class, 'update'])
+            ->name('api.v1.empleados.update');
+        Route::delete('/empleados/{id}', [EmpleadoController::class, 'destroy'])
+            ->name('api.v1.empleados.destroy');
 
         // Rutas de tareas
         // @see TR-028(MH)-carga-de-tarea-diaria.md

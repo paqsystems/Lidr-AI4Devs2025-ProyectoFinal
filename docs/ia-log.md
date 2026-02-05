@@ -1585,3 +1585,175 @@ Implementación de TR-052(MH): Resumen de dedicación por cliente en dashboard. 
 
 ### Referencias
 - `docs/hu-tareas/TR-052(MH)-resumen-de-dedicación-por-cliente-en-dashboard.md`
+
+---
+
+## Entrada #XX+1
+
+### Fecha
+2026-02-05
+
+### Etapa del proyecto
+Backend y Frontend – Implementación TR-019(MH) Creación de Empleado
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecuta la tarea TR-019(mh)"
+
+### Resultado generado por IA
+- **EmpleadoService.php:** Agregado método create() con validaciones (code, nombre, email, password), creación primero User en USERS (code, password_hash, activo, inhabilitado) y luego empleado en PQ_PARTES_USUARIOS con user_id y mismo code, validación de code único en USERS y email único, manejo de errores 422/409.
+- **EmpleadoController.php:** Agregado método store() para POST /api/v1/empleados, validación de request, manejo de respuestas 201/422/409/403/500.
+- **api.php:** Ruta POST /api/v1/empleados agregada.
+- **EmpleadoControllerTest.php:** Agregados 10 tests de integración (creación correcta, 403 empleado, 401 sin token, código duplicado 409, email duplicado 409, validaciones 422).
+- **empleado.service.ts:** Agregada función createEmpleado() con interfaces CreateEmpleadoBody, EmpleadoCreadoItem, CreateEmpleadoResult, manejo de respuestas 201/422/409/403.
+- **EmpleadosNuevoPage.tsx:** Componente de formulario con campos código, nombre, email, contraseña, confirmar contraseña, supervisor (checkbox), activo (checkbox), inhabilitado (checkbox), validaciones frontend (contraseñas coinciden, mínimo 8 caracteres), manejo de errores por campo, mensaje de éxito y redirección.
+- **EmpleadosNuevoPage.css:** Estilos consistentes con ClientesNuevaPage.
+- **App.tsx:** Ruta /empleados/nuevo protegida por SupervisorRoute agregada.
+- **empleado.service.test.ts:** Agregados 5 tests unitarios con Vitest (éxito 201, validación 422, conflicto 409, 403 no supervisor, valores por defecto).
+- **empleados-create.spec.ts:** Tests E2E con Playwright (acceso al formulario, creación correcta, validación contraseñas no coinciden, validación contraseña corta, código duplicado).
+- **Docs:** Actualización TR-019 con archivos creados/modificados, comandos ejecutados, notas y decisiones.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración. La implementación siguió el patrón establecido de TR-009 (creación de clientes) adaptado para empleados donde siempre se crea el User.
+
+### Referencias
+- `docs/hu-tareas/TR-019(MH)-creación-de-empleado.md`
+
+---
+
+## Entrada #XX
+
+### Fecha
+2026-02-05
+
+### Etapa del proyecto
+Backend y Frontend – Implementación TR-018(MH) Listado de Empleados
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecuta la tarea TR-018(MH)"
+
+### Resultado generado por IA
+- **EmpleadoService.php:** Servicio con método list() para búsqueda (código, nombre, email), filtros (supervisor, activo, inhabilitado), paginación y ordenamiento.
+- **EmpleadoController.php:** Controller con método index() para GET /api/v1/empleados, validación de permisos (solo supervisores), manejo de query params.
+- **api.php:** Ruta GET /api/v1/empleados agregada.
+- **EmpleadoControllerTest.php:** Tests de integración (supervisor accede, empleado 403, sin token 401, filtros, búsqueda, paginación).
+- **empleado.service.ts:** Servicio frontend con función getEmpleados(), construcción de query params, manejo de respuestas 200/401/403.
+- **EmpleadosPage.tsx:** Componente de listado con tabla (código, nombre, email, supervisor, estado, inhabilitado), búsqueda, filtros (supervisor, activo, inhabilitado), paginación, total, indicador visual para inhabilitados, acciones editar/eliminar (navegación a otras HU).
+- **EmpleadosPage.css:** Estilos consistentes con ClientesPage.
+- **App.tsx:** Ruta /empleados protegida por SupervisorRoute agregada.
+- **empleado.service.test.ts:** Tests unitarios con Vitest (éxito, construcción params, errores 403/401, manejo de resultados vacíos).
+- **empleados-list.spec.ts:** Tests E2E con Playwright (supervisor accede, tabla/filtros/total, búsqueda, filtros combinados, diferenciación visual inhabilitados, empleado redirigido).
+- **Docs:** Actualización TR-018 con archivos creados/modificados, comandos ejecutados, notas y decisiones.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración. La implementación siguió el patrón establecido de TR-008 (listado de clientes) manteniendo consistencia.
+
+### Referencias
+- `docs/hu-tareas/TR-018(MH)-listado-de-empleados.md`
+
+---
+
+## Entrada #XX
+
+### Fecha
+2026-02-05
+
+### Etapa del proyecto
+Backend y Frontend – Implementación TR-020(MH) Edición de Empleado
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecuta la tarea TR-019(MH)" (el usuario solicitó TR-019 pero estaba completada; el agente identificó que TR-020 estaba pendiente y procedió con ella)
+
+### Resultado generado por IA
+- **EmpleadoService.php:** Agregados métodos getById() y update() con validaciones (nombre obligatorio, email único excluyendo el empleado actual, password opcional mínimo 8 caracteres), actualización transaccional de PQ_PARTES_USUARIOS y USERS (password_hash si cambia contraseña, sincronización de activo e inhabilitado), validación explícita de que code no es modificable, manejo de errores 422/409/404.
+- **EmpleadoController.php:** Agregados métodos show() para GET /api/v1/empleados/{id} y update() para PUT /api/v1/empleados/{id}, validación de permisos (solo supervisores), manejo de respuestas 200/404/403/422/409/401, ignorar campo code en el body del PUT.
+- **api.php:** Rutas GET y PUT /api/v1/empleados/{id} agregadas.
+- **EmpleadoControllerTest.php:** Agregados 12 tests de integración (show: supervisor 200, id inexistente 404, empleado 403, sin token 401; update: supervisor actualiza 200, cambiar password actualiza USERS, cambiar estado sincroniza USERS, email duplicado 409, id inexistente 404, empleado 403, sin token 401, nombre requerido 422, password corto 422, code no modificable).
+- **empleado.service.ts:** Agregadas funciones getEmpleado() y updateEmpleado() con interfaces GetEmpleadoResult, UpdateEmpleadoBody, EmpleadoItem, EmpleadoActualizadoItem, UpdateEmpleadoResult, manejo de respuestas 200/404/403/422/409.
+- **EmpleadosEditarPage.tsx:** Componente de formulario con código en solo lectura, campos editables (nombre, email, supervisor, activo, inhabilitado), opción "Cambiar contraseña" con campos password y passwordConfirm opcionales, validaciones frontend (nombre requerido, contraseñas coinciden si se cambia, mínimo 8 caracteres), manejo de errores por campo, mensaje de éxito y redirección al listado.
+- **EmpleadosNuevoPage.css:** Agregado estilo para input readonly/disabled.
+- **App.tsx:** Ruta /empleados/:id/editar protegida por SupervisorRoute agregada.
+- **components/index.ts:** Exportación de EmpleadosEditarPage agregada.
+- **empleado.service.test.ts:** Agregados 8 tests unitarios con Vitest (getEmpleado: éxito 200, 404 no encontrado, 403 no supervisor, error API; updateEmpleado: éxito 200, envía password solo si presente, no envía password si no presente, validación 422, conflicto 409, 404 no encontrado, 403 no supervisor, manejo email null).
+- **empleados-edit.spec.ts:** Tests E2E con Playwright (acceso al formulario desde listado, edición correcta y redirección, código solo lectura, opción cambiar contraseña muestra campos, validación contraseñas no coinciden, validación contraseña corta, botón cancelar redirige sin guardar).
+- **Docs:** Actualización TR-020 con estado COMPLETADO y archivos creados/modificados.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración. La implementación siguió el patrón establecido de TR-010 (edición de clientes) adaptado para empleados con sincronización de estados entre USERS y PQ_PARTES_USUARIOS.
+
+### Referencias
+- `docs/hu-tareas/TR-020(MH)-edición-de-empleado.md`
+
+---
+
+## Entrada #XX
+
+### Fecha
+2026-02-05
+
+### Etapa del proyecto
+Backend y Frontend – Implementación TR-021(MH) Eliminación de Empleado
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"ejecuta la tarea @docs/hu-tareas/TR-021(MH)-eliminación-de-empleado.md"
+
+### Resultado generado por IA
+- **EmpleadoService.php:** Agregado método delete() con verificación de tareas asociadas (RegistroTarea con usuario_id), eliminación transaccional de Usuario y User (primero Usuario, luego User para evitar restricciones de foreign key), manejo de errores 2113 (tiene tareas), 404 (no encontrado).
+- **EmpleadoController.php:** Agregado método destroy() para DELETE /api/v1/empleados/{id}, validación de permisos (solo supervisores), manejo de respuestas 200/422 (2113)/404/403/500.
+- **api.php:** Ruta DELETE /api/v1/empleados/{id} agregada.
+- **EmpleadoControllerTest.php:** Agregados 5 tests de integración (destroy: supervisor elimina sin tareas 200, empleado con tareas 422, id inexistente 404, empleado 403, sin token 401).
+- **empleado.service.ts:** Agregada función deleteEmpleado() con interfaces DeleteEmpleadoResult, constante ERROR_TIENE_TAREAS (2113), manejo de respuestas 200/422 (2113)/404/403.
+- **EmpleadosPage.tsx:** Agregado modal de confirmación con estados (empleadoToDelete, deleteLoading, deleteError, successMessage), handlers (handleDeleteClick, handleDeleteCancel, handleDeleteConfirm), modal JSX con código y nombre del empleado, botones Cancelar y Confirmar, mensaje de error si aplica, recarga del listado tras éxito.
+- **EmpleadosPage.css:** Agregados estilos para modal de confirmación (overlay, modal, título, texto, error, acciones, botón cancelar) y mensaje de éxito.
+- **empleado.service.test.ts:** Agregados 4 tests unitarios con Vitest (deleteEmpleado: éxito 200, error 422 con tareas, 404 no encontrado, 403 no supervisor).
+- **empleados-delete.spec.ts:** Tests E2E con Playwright (supervisor elimina empleado sin tareas y es redirigido, cancelar eliminación cierra modal sin eliminar, modal muestra código y nombre del empleado).
+- **Docs:** Actualización TR-021 con estado COMPLETADO y archivos creados/modificados.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración. La implementación siguió el patrón establecido de TR-011 (eliminación de clientes) adaptado para empleados con verificación de tareas asociadas y eliminación transaccional.
+
+### Referencias
+- `docs/hu-tareas/TR-021(MH)-eliminación-de-empleado.md`
+
+---
+
+## Entrada TR-022
+
+### Fecha
+2026-02-05
+
+### Etapa del proyecto
+Frontend – Implementación TR-022(SH) Visualización de Detalle de Empleado
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"ejecuta la tarea TR-022(SH)"
+
+### Resultado generado por IA
+- **empleado.service.ts:** Añadidas interfaces EmpleadoItem, GetEmpleadoResult, EmpleadoDetalleItem, GetEmpleadoDetalleResult, UpdateEmpleadoBody, EmpleadoActualizadoItem, UpdateEmpleadoResult; función getEmpleadoDetalle(id) que llama a GET /api/v1/empleados/{id}?include_stats=true; eliminado bloque duplicado de interfaces.
+- **EmpleadosDetallePage.tsx:** Nueva pantalla de detalle con datos del empleado (código, nombre, email, supervisor, estado, inhabilitado), estadísticas opcionales (total_tareas), fechas opcionales (created_at, updated_at), botones Editar (navega a /empleados/:id/editar), Eliminar (modal de confirmación) y Volver al listado; estados loading/error/success; data-testid según spec TR-022.
+- **EmpleadosDetallePage.css:** Estilos para página de detalle (card, dl/dt/dd, botones, modal reutilizando clases de EmpleadosPage).
+- **EmpleadosPage.tsx:** Añadidos handlers handleDeleteClick, handleDeleteCancel, handleDeleteConfirm (faltaban y se referenciaban en el modal); botón "Ver detalle" por fila que navega a /empleados/:id.
+- **EmpleadosPage.css:** Estilo para botón Ver detalle (empleados-page-btn-detail).
+- **App.tsx:** Ruta /empleados/:id con EmpleadosDetallePage protegida por SupervisorRoute; import de EmpleadosDetallePage.
+- **components/index.ts:** Export de EmpleadosDetallePage.
+- **empleado.service.test.ts:** Describe getEmpleadoDetalle (TR-022) con 3 tests (éxito 200 con total_tareas, 404 no encontrado, 403 no supervisor); import de getEmpleadoDetalle.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración. La implementación sigue el patrón de detalle/edición de empleados y la spec TR-022.
+
+### Referencias
+- `docs/hu-tareas/TR-022(SH)-visualización-de-detalle-de-empleado.md`

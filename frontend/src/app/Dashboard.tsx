@@ -159,14 +159,24 @@ export function Dashboard(): React.ReactElement {
               Tareas por Cliente
             </button>
             {isSupervisor && (
-              <button
-                onClick={() => navigate('/clientes')}
-                className="profile-link-button"
-                data-testid="app.clientesLink"
-                aria-label="Listado de clientes"
-              >
-                Clientes
-              </button>
+              <>
+                <button
+                  onClick={() => navigate('/clientes')}
+                  className="profile-link-button"
+                  data-testid="app.clientesLink"
+                  aria-label="Listado de clientes"
+                >
+                  Clientes
+                </button>
+                <button
+                  onClick={() => navigate('/empleados')}
+                  className="profile-link-button"
+                  data-testid="app.empleadosLink"
+                  aria-label="Listado de empleados"
+                >
+                  Empleados
+                </button>
+              </>
             )}
             {user.tipoUsuario === 'usuario' && (
               <>

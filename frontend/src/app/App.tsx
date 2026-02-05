@@ -15,6 +15,7 @@ import { LoginForm } from '../features/auth';
 import { ProfileView } from '../features/user';
 import { TaskForm, TaskList, TaskListAll, TaskEditPage, ConsultaDetalladaPage, TareasPorClientePage } from '../features/tasks';
 import { ClientesPage, ClientesNuevaPage, ClientesEditarPage } from '../features/clients';
+import { EmpleadosPage, EmpleadosNuevoPage, EmpleadosEditarPage, EmpleadosDetallePage } from '../features/employees';
 import { ProtectedRoute, PublicRoute } from '../routes';
 import { EmployeeRoute } from '../routes/EmployeeRoute';
 import { SupervisorRoute } from '../routes/SupervisorRoute';
@@ -79,6 +80,38 @@ export function App(): React.ReactElement {
             element={
               <SupervisorRoute>
                 <ClientesEditarPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="empleados"
+            element={
+              <SupervisorRoute>
+                <EmpleadosPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="empleados/nuevo"
+            element={
+              <SupervisorRoute>
+                <EmpleadosNuevoPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="empleados/:id/editar"
+            element={
+              <SupervisorRoute>
+                <EmpleadosEditarPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="empleados/:id"
+            element={
+              <SupervisorRoute>
+                <EmpleadosDetallePage />
               </SupervisorRoute>
             }
           />

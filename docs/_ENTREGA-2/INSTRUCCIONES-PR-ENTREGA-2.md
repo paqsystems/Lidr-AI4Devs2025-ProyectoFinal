@@ -52,6 +52,9 @@ Esta PR contiene el código funcional requerido para la Entrega 2: backend, fron
 
 ### Contenido principal
 
+#### Evidencia visual
+- Se incluye el video **"Proyecto Final - Entrega 2.mp4"** para visualizar el funcionamiento del proyecto y demostrar el flujo principal implementado.
+
 #### Backend (Laravel + Sanctum)
 - Autenticación: login, logout (HU-001)
 - Perfil de usuario (TR-006)
@@ -76,8 +79,6 @@ Esta PR contiene el código funcional requerido para la Entrega 2: backend, fron
 - Frontend: Vitest (servicios, lógica)
 - E2E: Playwright (auth, tareas, clientes, informes, dashboard, perfil)
 
-#### Evidencia visual
-- Se incluye el video **"Proyecto Final - Entrega 2.mp4"** para visualizar el funcionamiento del proyecto y demostrar el flujo principal implementado.
 
 ### Historias / Tickets cubiertos
 
