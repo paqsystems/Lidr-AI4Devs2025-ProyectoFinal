@@ -107,7 +107,7 @@ class TaskController extends Controller
             return response()->json([
                 'error' => 4030,
                 'respuesta' => 'Solo los supervisores pueden acceder a todas las tareas',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 

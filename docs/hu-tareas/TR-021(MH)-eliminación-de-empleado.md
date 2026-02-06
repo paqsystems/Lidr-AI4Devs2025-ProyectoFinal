@@ -153,7 +153,7 @@ Feature: Eliminación de Empleado
 {
   "error": 0,
   "respuesta": "Empleado eliminado correctamente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -164,7 +164,7 @@ Feature: Eliminación de Empleado
 {
   "error": 3101,
   "respuesta": "No tiene permisos para acceder a esta funcionalidad",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -173,7 +173,7 @@ Feature: Eliminación de Empleado
 {
   "error": 4003,
   "respuesta": "Empleado no encontrado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -182,7 +182,7 @@ Feature: Eliminación de Empleado
 {
   "error": 2113,
   "respuesta": "No se puede eliminar un empleado que tiene tareas asociadas",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

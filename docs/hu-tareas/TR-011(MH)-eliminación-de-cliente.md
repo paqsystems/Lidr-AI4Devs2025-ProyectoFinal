@@ -152,7 +152,7 @@ Feature: Eliminación de Cliente
 {
   "error": 0,
   "respuesta": "Cliente eliminado correctamente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -163,7 +163,7 @@ Feature: Eliminación de Cliente
 {
   "error": 3101,
   "respuesta": "No tiene permisos para acceder a esta funcionalidad",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -172,7 +172,7 @@ Feature: Eliminación de Cliente
 {
   "error": 4003,
   "respuesta": "Cliente no encontrado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -181,7 +181,7 @@ Feature: Eliminación de Cliente
 {
   "error": 2112,
   "respuesta": "No se puede eliminar un cliente que tiene tareas asociadas",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

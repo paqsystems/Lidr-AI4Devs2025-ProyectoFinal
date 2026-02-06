@@ -91,7 +91,7 @@ Accept: application/json
 {
   "error": 4003,
   "respuesta": "Cliente no encontrado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

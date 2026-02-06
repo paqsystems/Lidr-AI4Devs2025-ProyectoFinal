@@ -45,7 +45,7 @@ Accept: application/json
 {
   "error": 0,
   "respuesta": "Tarea eliminada correctamente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -59,7 +59,7 @@ Accept: application/json
 {
   "error": 4005,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -69,7 +69,7 @@ Accept: application/json
 {
   "error": 2104,
   "respuesta": "No se puede eliminar tarea de otro usuario",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -79,7 +79,7 @@ Accept: application/json
 {
   "error": 2111,
   "respuesta": "No se puede eliminar una tarea cerrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

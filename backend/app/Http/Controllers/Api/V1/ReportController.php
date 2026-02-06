@@ -64,7 +64,7 @@ class ReportController extends Controller
                 return response()->json([
                     'error' => (int) $e->getCode(),
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 422);
             }
             return response()->json([
@@ -104,7 +104,7 @@ class ReportController extends Controller
                 return response()->json([
                     'error' => (int) $e->getCode(),
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 422);
             }
             return response()->json([

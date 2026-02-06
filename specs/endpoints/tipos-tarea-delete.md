@@ -23,7 +23,7 @@ Elimina un tipo de tarea. No se puede eliminar si tiene tareas asociadas o clien
 {
   "error": 0,
   "respuesta": "Tipo de tarea eliminado correctamente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -37,7 +37,7 @@ Elimina un tipo de tarea. No se puede eliminar si tiene tareas asociadas o clien
 {
   "error": 2114,
   "respuesta": "No se puede eliminar un tipo de tarea que está en uso",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

@@ -127,7 +127,7 @@ Feature: Selección de Empleado Propietario (Supervisor)
 {
   "error": 4030,
   "respuesta": "Solo los supervisores pueden asignar tareas a otros empleados",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

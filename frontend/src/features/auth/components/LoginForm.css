@@ -47,6 +47,21 @@
   margin-bottom: 1.25rem;
 }
 
+.form-group-forgot {
+  margin-bottom: 0.5rem;
+  text-align: right;
+}
+
+.forgot-password-link {
+  font-size: 0.875rem;
+  color: #667eea;
+  text-decoration: none;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
 .form-label {
   display: block;
   margin-bottom: 0.5rem;

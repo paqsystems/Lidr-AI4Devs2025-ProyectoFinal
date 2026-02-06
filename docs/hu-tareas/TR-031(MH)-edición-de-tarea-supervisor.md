@@ -193,7 +193,7 @@ Feature: Edición de Tarea (Supervisor)
 {
   "error": 2110,
   "respuesta": "No se puede modificar una tarea cerrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -202,7 +202,7 @@ Feature: Edición de Tarea (Supervisor)
 {
   "error": 4030,
   "respuesta": "Solo los supervisores pueden cambiar el propietario de una tarea",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

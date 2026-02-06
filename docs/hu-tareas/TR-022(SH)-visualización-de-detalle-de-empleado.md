@@ -181,7 +181,7 @@ Feature: Visualización de Detalle de Empleado
 {
   "error": 3101,
   "respuesta": "No tiene permisos para acceder a esta funcionalidad",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -190,7 +190,7 @@ Feature: Visualización de Detalle de Empleado
 {
   "error": 4003,
   "respuesta": "Empleado no encontrado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

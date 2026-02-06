@@ -44,7 +44,7 @@ Accept: application/json
 {
   "error": 0,
   "respuesta": "Tipo de tarea desasignado correctamente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -58,7 +58,7 @@ Accept: application/json
 {
   "error": 2116,
   "respuesta": "El cliente debe tener al menos un tipo de tarea disponible",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

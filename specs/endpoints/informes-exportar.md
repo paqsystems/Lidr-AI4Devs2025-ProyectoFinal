@@ -55,7 +55,7 @@ Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 {
   "error": 2120,
   "respuesta": "No hay datos para exportar",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

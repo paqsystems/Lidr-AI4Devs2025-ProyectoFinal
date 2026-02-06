@@ -62,7 +62,7 @@ Actualiza un tipo de tarea existente. El código (`code`) no es modificable.
 {
   "error": 2117,
   "respuesta": "Solo puede haber un tipo de tarea por defecto",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

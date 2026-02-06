@@ -164,7 +164,7 @@ Feature: Eliminación de Tarea Propia
 {
   "error": 4040,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -173,7 +173,7 @@ Feature: Eliminación de Tarea Propia
 {
   "error": 2111,
   "respuesta": "No se puede eliminar una tarea cerrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -182,7 +182,7 @@ Feature: Eliminación de Tarea Propia
 {
   "error": 4030,
   "respuesta": "No tiene permisos para eliminar esta tarea",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

@@ -230,7 +230,7 @@ Feature: Creación de Empleado
 {
   "error": 409,
   "respuesta": "El código del empleado ya existe",
-  "resultado": null
+  "resultado": {}
 }
 ```
 - 4101: Código de empleado duplicado en USERS

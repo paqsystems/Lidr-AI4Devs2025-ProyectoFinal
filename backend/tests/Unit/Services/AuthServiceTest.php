@@ -20,6 +20,7 @@ use Tests\TestCase;
  * @see TR-001(MH)-login-de-empleado.md
  * @see TR-002(SH)-login-de-cliente.md
  * @see TR-003(MH)-logout.md
+ * @see TR-005(SH)-cambio-de-contraseña-usuario-autenticado.md
  */
 class AuthServiceTest extends TestCase
 {
@@ -567,5 +568,61 @@ class AuthServiceTest extends TestCase
         $this->assertNull($userData['usuario_id']);
         $this->assertNotNull($userData['cliente_id']);
         $this->assertFalse($userData['es_supervisor']);
+    }
+
+    // ========================================
+    // Tests de Cambio de Contraseña (TR-005)
+    // ========================================
+
+    /** @test */
+    public function change_password_exitoso_actualiza_hash_en_users()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $this->authService->changePassword($user, 'password123', 'nuevaContraseña456');
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('nuevaContraseña456', $user->password_hash));
+        $this->assertFalse(Hash::check('password123', $user->password_hash));
+    }
+
+    /** @test */
+    public function change_password_contrasena_actual_incorrecta_lanza_excepcion()
+    {
+        $this->expectException(AuthException::class);
+        $this->expectExceptionMessage('La contraseña actual es incorrecta');
+
+        $user = User::where('code', 'JPEREZ')->first();
+        try {
+            $this->authService->changePassword($user, 'contraseñaIncorrecta', 'nuevaContraseña456');
+        } catch (AuthException $e) {
+            $this->assertEquals(AuthService::ERROR_CURRENT_PASSWORD_INVALID, $e->getErrorCode());
+            throw $e;
+        }
+    }
+
+    /** @test */
+    public function change_password_nueva_contrasena_muy_corta_lanza_excepcion()
+    {
+        $this->expectException(AuthException::class);
+        $this->expectExceptionMessage('al menos');
+
+        $user = User::where('code', 'JPEREZ')->first();
+        try {
+            $this->authService->changePassword($user, 'password123', 'short');
+        } catch (AuthException $e) {
+            $this->assertEquals(422, $e->getErrorCode());
+            throw $e;
+        }
+    }
+
+    /** @test */
+    public function change_password_exitoso_usuario_puede_login_con_nueva_contrasena()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $this->authService->changePassword($user, 'password123', 'nuevaContraseña789');
+
+        $result = $this->authService->login('JPEREZ', 'nuevaContraseña789');
+        $this->assertArrayHasKey('token', $result);
+        $this->assertEquals('JPEREZ', $result['user_data']['user_code']);
     }
 }

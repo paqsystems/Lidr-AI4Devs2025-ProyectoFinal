@@ -15,11 +15,10 @@ Todas las respuestas HTTP (éxito o error) deben ser JSON con:
   - `0` = OK
   - `!= 0` = error controlado (validación/negocio/autorización/etc.)
 - `respuesta`: texto legible, apto para mostrar.
-- `resultado`: puede ser:
-  - objeto complejo
-  - lista/colección
-  - `null` (cuando no aplique)
-  - ausente (solo cuando no aplique y se documente)
+- `resultado`: **siempre** un objeto JSON. Nunca `null` ni ausente.
+  - Objeto con datos (recurso, lista paginada, etc.)
+  - Objeto vacío `{}` cuando no hay datos que retornar (éxito sin cuerpo o errores sin detalle adicional)
+  - Ver `specs/contracts/response-envelope.md` como referencia.
 
 ### Regla
 El frontend **nunca** debe depender de formatos alternativos.

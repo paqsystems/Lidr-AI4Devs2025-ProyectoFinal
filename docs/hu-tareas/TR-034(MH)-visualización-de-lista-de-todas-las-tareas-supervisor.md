@@ -205,7 +205,7 @@ Feature: Visualización de Lista de Todas las Tareas (Supervisor)
 {
   "error": 4030,
   "respuesta": "Solo los supervisores pueden acceder a todas las tareas",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

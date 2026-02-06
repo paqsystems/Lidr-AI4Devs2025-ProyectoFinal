@@ -846,8 +846,8 @@ class EmpleadoControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonPath('error', 0)
-            ->assertJsonPath('respuesta', 'Empleado eliminado correctamente')
-            ->assertJsonPath('resultado', null);
+            ->assertJsonPath('respuesta', 'Empleado eliminado correctamente');
+        $this->assertEmpty($response->json('resultado'));
 
         // Verificar que el empleado fue eliminado
         $this->assertNull(Usuario::find($empleadoId));

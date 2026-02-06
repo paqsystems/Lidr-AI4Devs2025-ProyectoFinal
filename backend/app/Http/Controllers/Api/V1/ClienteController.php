@@ -56,7 +56,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -136,7 +136,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -172,7 +172,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -188,7 +188,7 @@ class ClienteController extends Controller
                 return response()->json([
                     'error' => ClienteService::ERROR_NOT_FOUND,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 404);
             }
             throw $e;
@@ -208,7 +208,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -255,20 +255,20 @@ class ClienteController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 409);
             }
             if ($code === ClienteService::ERROR_SIN_TIPOS_TAREA) {
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 422);
             }
             return response()->json([
                 'error' => 9999,
                 'respuesta' => 'Error inesperado del servidor',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 500);
         }
     }
@@ -286,7 +286,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -332,27 +332,27 @@ class ClienteController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 404);
             }
             if ($code === ClienteService::ERROR_CODE_DUPLICATE || $code === ClienteService::ERROR_EMAIL_DUPLICATE) {
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 409);
             }
             if ($code === ClienteService::ERROR_SIN_TIPOS_TAREA) {
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 422);
             }
             return response()->json([
                 'error' => 9999,
                 'respuesta' => 'Error inesperado del servidor',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 500);
         }
     }
@@ -370,7 +370,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -379,7 +379,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => 0,
                 'respuesta' => 'Cliente eliminado correctamente',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 200);
         } catch (\Exception $e) {
             $code = (int) $e->getCode();
@@ -387,20 +387,20 @@ class ClienteController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 404);
             }
             if ($code === ClienteService::ERROR_TIENE_TAREAS) {
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 422);
             }
             return response()->json([
                 'error' => 9999,
                 'respuesta' => 'Error inesperado del servidor',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 500);
         }
     }
@@ -417,7 +417,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -433,7 +433,7 @@ class ClienteController extends Controller
                 return response()->json([
                     'error' => ClienteService::ERROR_NOT_FOUND,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 404);
             }
             throw $e;
@@ -452,7 +452,7 @@ class ClienteController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -484,7 +484,7 @@ class ClienteController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 404);
             }
             if (in_array($code, [
@@ -496,7 +496,7 @@ class ClienteController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 422);
             }
             throw $e;

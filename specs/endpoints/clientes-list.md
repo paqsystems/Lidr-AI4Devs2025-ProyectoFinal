@@ -113,7 +113,7 @@ Accept: application/json
 {
   "error": 3001,
   "respuesta": "Usuario no autenticado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -123,7 +123,7 @@ Accept: application/json
 {
   "error": 3101,
   "respuesta": "No tiene permisos para acceder a esta funcionalidad",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

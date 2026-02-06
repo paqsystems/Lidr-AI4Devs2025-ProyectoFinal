@@ -260,4 +260,66 @@ class UserProfileServiceTest extends TestCase
         $this->assertIsString($profile['created_at']);
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $profile['created_at']);
     }
+
+    /** @test */
+    public function updateProfile_empleado_actualiza_nombre_y_email()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $profile = $this->profileService->updateProfile($user, [
+            'nombre' => 'Juan Pérez Actualizado',
+            'email' => 'nuevo@ejemplo.com',
+        ]);
+
+        $this->assertEquals('JPEREZ', $profile['user_code']);
+        $this->assertEquals('Juan Pérez Actualizado', $profile['nombre']);
+        $this->assertEquals('nuevo@ejemplo.com', $profile['email']);
+
+        $empleado = Usuario::where('user_id', $user->id)->first();
+        $this->assertEquals('Juan Pérez Actualizado', $empleado->nombre);
+        $this->assertEquals('nuevo@ejemplo.com', $empleado->email);
+    }
+
+    /** @test */
+    public function updateProfile_cliente_actualiza_nombre_y_email()
+    {
+        $user = User::where('code', 'CLI001')->first();
+        if (!$user) {
+            $this->markTestSkipped('Cliente CLI001 no existe');
+        }
+
+        $profile = $this->profileService->updateProfile($user, [
+            'nombre' => 'Empresa ABC Actualizada',
+            'email' => 'nuevo@empresaabc.com',
+        ]);
+
+        $this->assertEquals('CLI001', $profile['user_code']);
+        $this->assertEquals('Empresa ABC Actualizada', $profile['nombre']);
+        $this->assertEquals('nuevo@empresaabc.com', $profile['email']);
+    }
+
+    /** @test */
+    public function updateProfile_email_vacio_guarda_null()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        $this->profileService->updateProfile($user, [
+            'nombre' => 'Juan Pérez',
+            'email' => '',
+        ]);
+
+        $empleado = Usuario::where('user_id', $user->id)->first();
+        $this->assertNull($empleado->email);
+    }
+
+    /** @test */
+    public function updateProfile_usuario_sin_perfil_lanza_excepcion()
+    {
+        $user = User::where('code', 'SINPERFIL')->first();
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('sin perfil');
+
+        $this->profileService->updateProfile($user, [
+            'nombre' => 'Cualquier Nombre',
+            'email' => null,
+        ]);
+    }
 }

@@ -107,7 +107,7 @@ Accept: application/json
 {
   "error": 3001,
   "respuesta": "Usuario no autenticado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -117,7 +117,7 @@ Accept: application/json
 {
   "error": 4005,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -127,7 +127,7 @@ Accept: application/json
 {
   "error": 2105,
   "respuesta": "No se puede editar tarea de otro usuario",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

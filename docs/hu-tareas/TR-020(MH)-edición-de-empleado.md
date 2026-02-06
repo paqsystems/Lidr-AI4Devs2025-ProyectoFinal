@@ -274,7 +274,7 @@ Feature: Edición de Empleado
 {
   "error": 409,
   "respuesta": "El email ya está registrado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 - 4102: Email duplicado

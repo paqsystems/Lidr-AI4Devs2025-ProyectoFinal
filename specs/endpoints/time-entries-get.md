@@ -88,7 +88,7 @@ Accept: application/json
 {
   "error": 4005,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -98,7 +98,7 @@ Accept: application/json
 {
   "error": 3102,
   "respuesta": "No tiene permisos para ver esta tarea",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

@@ -11,7 +11,7 @@
 
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { LoginForm } from '../features/auth';
+import { LoginForm, ForgotPasswordPage, ResetPasswordPage } from '../features/auth';
 import { ProfileView } from '../features/user';
 import { TaskForm, TaskList, TaskListAll, TaskEditPage, ConsultaDetalladaPage, TareasPorClientePage } from '../features/tasks';
 import { ClientesPage, ClientesNuevaPage, ClientesEditarPage } from '../features/clients';
@@ -36,6 +36,23 @@ export function App(): React.ReactElement {
           element={
             <PublicRoute>
               <LoginForm />
+            </PublicRoute>
+          }
+        />
+        {/* Recuperación de contraseña (públicas) @see TR-004(SH) */}
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPasswordPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicRoute>
+              <ResetPasswordPage />
             </PublicRoute>
           }
         />

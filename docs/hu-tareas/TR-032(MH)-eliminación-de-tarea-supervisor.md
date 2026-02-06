@@ -144,7 +144,7 @@ Feature: Eliminación de Tarea (Supervisor)
 {
   "error": 4040,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -153,7 +153,7 @@ Feature: Eliminación de Tarea (Supervisor)
 {
   "error": 2111,
   "respuesta": "No se puede eliminar una tarea cerrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

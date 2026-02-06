@@ -1757,3 +1757,90 @@ Frontend – Implementación TR-022(SH) Visualización de Detalle de Empleado
 
 ### Referencias
 - `docs/hu-tareas/TR-022(SH)-visualización-de-detalle-de-empleado.md`
+
+---
+
+## Entrada TR-005(SH)
+
+### Fecha
+2026-02-05
+
+### Etapa del proyecto
+Backend, Frontend y Tests – Implementación TR-005(SH) Cambio de contraseña (usuario autenticado)
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"ejecuta la tarea TR-005(SH)"
+
+### Resultado generado por IA
+- **Backend:** ChangePasswordRequest.php (validación current_password, password min 8, password_confirmation); AuthService.changePassword() con ERROR_CURRENT_PASSWORD_INVALID 3204; AuthController.changePassword(); ruta POST /api/v1/auth/change-password (auth:sanctum). AuthServiceTest: 4 tests unitarios changePassword. ChangePasswordTest.php: 6 tests de integración (200, 401, 422 contraseña incorrecta, 422 confirmación, 422 nueva corta, actualización hash).
+- **Frontend:** user.service.ts changePassword(); ProfileView opción "Cambiar contraseña", formulario con contraseña actual/nueva/confirmación, validación cliente, mensajes éxito/error, data-testid. ProfileView.css estilos sección cambio contraseña.
+- **E2E:** profile-change-password.spec.ts (serial: cambio exitoso, error contraseña actual incorrecta, restaura contraseña para no afectar otros E2E).
+- **Docs:** specs/endpoints/auth-change-password.md; ia-log entrada TR-005.
+
+### Ajustes humanos realizados
+- Ninguno en esta iteración. Decisión de diseño: tras cambio exitoso se mantiene la sesión (no se invalida el token).
+
+### Referencias
+- `docs/hu-tareas/TR-005(SH)-cambio-de-contraseña-usuario-autenticado.md`
+- `specs/endpoints/auth-change-password.md`
+
+---
+
+## Entrada TR-007(SH)
+
+### Fecha
+2026-02-05
+
+### Etapa del proyecto
+Backend, Frontend y Tests – Implementación HU-007(SH) Edición de perfil de usuario
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Aplica el prompt correspondiente a la historia HU-007(SH)"
+
+### Resultado generado por IA
+- **TR-007(SH):** Creado docs/hu-tareas/TR-007(SH)-edición-de-perfil-de-usuario.md con HU refinada, AC, RN, contrato PUT /user/profile, plan de tareas y data-testid.
+- **Backend:** UpdateProfileRequest (nombre requerido, email nullable/único excluyendo usuario actual); UserProfileService.updateProfile() para empleado (PQ_PARTES_USUARIOS) y cliente (PQ_PARTES_CLIENTES); UserProfileController.update(); ruta PUT /api/v1/user/profile. UserProfileServiceTest: 4 tests updateProfile. UserProfileTest (Feature): 4 tests PUT (200, 401, 422 nombre vacío, 422 email duplicado).
+- **Frontend:** user.service.ts updateProfile(nombre, email); ProfileView opción "Editar perfil", formulario nombre/email (código solo lectura), mensajes éxito/error, data-testid. ProfileView.css estilos sección editar perfil.
+- **Docs:** specs/endpoints/user-profile-update.md; ia-log entrada TR-007.
+
+### Ajustes humanos realizados
+- Corregido tipo de retorno de buildEmailUniqueRule: debe ser ValidationRule|Unique (Rule::unique() devuelve Rules\Unique).
+
+### Referencias
+- `docs/hu-tareas/TR-007(SH)-edición-de-perfil-de-usuario.md`
+- `specs/endpoints/user-profile-update.md`
+
+---
+
+## Entrada TR-004(SH)
+
+### Fecha
+2026-02-05
+
+### Etapa del proyecto
+Backend, Frontend y Tests – Implementación HU-004(SH) Recuperación de contraseña
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecuta la tarea TR-004(SH)-recuperación-de-contraseña.md"
+
+### Resultado generado por IA
+- **Backend (ya existía en sesión previa):** PasswordResetService (requestReset por code/email, resetPassword con token 1h un solo uso), ResetPasswordMail, ForgotPasswordRequest, ResetPasswordRequest, AuthController forgotPassword/resetPassword, rutas POST /auth/forgot-password y /auth/reset-password. Respuesta genérica siempre en forgot-password.
+- **Frontend:** auth.service forgotPassword(codeOrEmail), resetPassword(token, password, passwordConfirmation); ForgotPasswordPage y ResetPasswordPage con formularios y data-testid; enlace en LoginForm; rutas públicas /forgot-password y /reset-password en App.tsx; estilos LoginForm para enlace y páginas.
+- **Tests:** Backend Feature PasswordResetTest (forgot 200/422, reset 200/422 token inválido, contraseña corta, confirmación); Unit PasswordResetServiceTest (requestReset con/sin email, resetPassword válido/inválido/expirado/corta). Frontend auth.service.test.ts (forgotPassword y resetPassword éxito/error/red). E2E auth-forgot-password.spec.ts (enlace, formulario éxito, reset sin token).
+- **Docs:** specs/endpoints/auth-forgot-password.md, auth-reset-password.md; checklist TR-004 actualizado; ia-log entrada TR-004.
+
+### Ajustes humanos realizados
+- Ninguno. Implementación alineada con TR-004.
+
+### Referencias
+- `docs/hu-tareas/TR-004(SH)-recuperación-de-contraseña.md`
+- `specs/endpoints/auth-forgot-password.md`, `specs/endpoints/auth-reset-password.md`

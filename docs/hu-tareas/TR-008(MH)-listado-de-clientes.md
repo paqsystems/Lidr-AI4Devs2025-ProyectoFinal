@@ -194,7 +194,7 @@ Feature: Listado de Clientes
 {
   "error": 3101,
   "respuesta": "No tiene permiso para acceder a esta funcionalidad",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

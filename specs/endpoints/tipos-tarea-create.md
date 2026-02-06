@@ -72,7 +72,7 @@ Crea un nuevo tipo de tarea. Solo accesible para supervisores.
 {
   "error": 2117,
   "respuesta": "Solo puede haber un tipo de tarea por defecto",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

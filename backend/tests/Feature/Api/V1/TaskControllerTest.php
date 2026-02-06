@@ -630,8 +630,8 @@ class TaskControllerTest extends TestCase
             ->assertJson([
                 'error' => 4030,
                 'respuesta' => 'Solo los supervisores pueden acceder a todas las tareas',
-                'resultado' => null,
             ]);
+        $this->assertEmpty($response->json('resultado'));
     }
 
     // ========================================

@@ -83,7 +83,7 @@ Accept: application/json
 {
   "error": 3001,
   "respuesta": "No autenticado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -93,7 +93,7 @@ Accept: application/json
 {
   "error": 3002,
   "respuesta": "Token inválido o expirado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

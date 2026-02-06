@@ -168,7 +168,7 @@ Feature: Edición de Tarea Propia
 {
   "error": 4040,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -177,7 +177,7 @@ Feature: Edición de Tarea Propia
 {
   "error": 4030,
   "respuesta": "No tiene permisos para acceder a esta tarea",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -242,7 +242,7 @@ Feature: Edición de Tarea Propia
 {
   "error": 2110,
   "respuesta": "No se puede modificar una tarea cerrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -251,7 +251,7 @@ Feature: Edición de Tarea Propia
 {
   "error": 4030,
   "respuesta": "No tiene permisos para editar esta tarea",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

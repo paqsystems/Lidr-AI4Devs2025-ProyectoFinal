@@ -198,7 +198,7 @@ Feature: Consulta Detallada de Tareas
 {
   "error": 1305,
   "respuesta": "El período es inválido: fecha_desde debe ser menor o igual a fecha_hasta",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -207,7 +207,7 @@ Feature: Consulta Detallada de Tareas
 {
   "error": 4030,
   "respuesta": "No tiene permiso para acceder a esta consulta",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

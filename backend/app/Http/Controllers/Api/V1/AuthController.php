@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ChangePasswordRequest;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Resources\Auth\LoginResource;
 use App\Services\AuthService;
+use App\Services\PasswordResetService;
 use App\Services\AuthException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controller: AuthController
@@ -21,22 +26,18 @@ use Illuminate\Http\Request;
  * 
  * @see TR-001(MH)-login-de-empleado.md
  * @see TR-003(MH)-logout.md
+ * @see TR-004(SH)-recuperación-de-contraseña.md
+ * @see TR-005(SH)-cambio-de-contraseña-usuario-autenticado.md
  */
 class AuthController extends Controller
 {
-    /**
-     * Servicio de autenticación
-     */
     protected AuthService $authService;
+    protected PasswordResetService $passwordResetService;
 
-    /**
-     * Constructor
-     *
-     * @param AuthService $authService Servicio de autenticación inyectado
-     */
-    public function __construct(AuthService $authService)
+    public function __construct(AuthService $authService, PasswordResetService $passwordResetService)
     {
         $this->authService = $authService;
+        $this->passwordResetService = $passwordResetService;
     }
 
     /**
@@ -154,6 +155,107 @@ class AuthController extends Controller
                 'error' => 9999,
                 'respuesta' => 'Error inesperado del servidor',
                 'resultado' => (object) []
+            ], 500);
+        }
+    }
+
+    /**
+     * Cambiar contraseña del usuario autenticado.
+     *
+     * Requiere autenticación (auth:sanctum).
+     * Valida contraseña actual, nueva y confirmación; actualiza password_hash en USERS.
+     *
+     * @param ChangePasswordRequest $request Request con current_password, password, password_confirmation
+     * @return JsonResponse 200 éxito, 401 no autenticado, 422 contraseña actual incorrecta o validación
+     *
+     * @see TR-005(SH)-cambio-de-contraseña-usuario-autenticado.md
+     */
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            $this->authService->changePassword(
+                $user,
+                $request->input('current_password'),
+                $request->input('password')
+            );
+
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Contraseña actualizada correctamente.',
+                'resultado' => (object) [],
+            ], 200);
+        } catch (AuthException $e) {
+            return response()->json([
+                'error' => $e->getErrorCode(),
+                'respuesta' => $e->getMessage(),
+                'resultado' => (object) [],
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 9999,
+                'respuesta' => 'Error inesperado del servidor',
+                'resultado' => (object) [],
+            ], 500);
+        }
+    }
+
+    /**
+     * Solicitar recuperación de contraseña (forgot).
+     * Siempre responde 200 con mensaje genérico (no revelar si el usuario existe o si se envió correo).
+     *
+     * @see TR-004(SH)-recuperación-de-contraseña.md
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        try {
+            $this->passwordResetService->requestReset($request->input('code_or_email'));
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Si el usuario existe y tiene email configurado, recibirá un enlace para restablecer la contraseña.',
+                'resultado' => (object) [],
+            ], 200);
+        } catch (\Exception $e) {
+            Log::warning('Recuperación de contraseña: fallo al enviar correo.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Si el usuario existe y tiene email configurado, recibirá un enlace para restablecer la contraseña.',
+                'resultado' => (object) [],
+            ], 200);
+        }
+    }
+
+    /**
+     * Restablecer contraseña con token (reset).
+     *
+     * @see TR-004(SH)-recuperación-de-contraseña.md
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        try {
+            $this->passwordResetService->resetPassword(
+                $request->input('token'),
+                $request->input('password')
+            );
+            return response()->json([
+                'error' => 0,
+                'respuesta' => 'Contraseña restablecida correctamente.',
+                'resultado' => (object) [],
+            ], 200);
+        } catch (AuthException $e) {
+            return response()->json([
+                'error' => $e->getErrorCode(),
+                'respuesta' => $e->getMessage(),
+                'resultado' => (object) [],
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 9999,
+                'respuesta' => 'Error inesperado del servidor',
+                'resultado' => (object) [],
             ], 500);
         }
     }

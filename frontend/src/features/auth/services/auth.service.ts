@@ -186,3 +186,71 @@ export async function logout(): Promise<LogoutResult> {
 export function logoutSync(): void {
   clearAuth();
 }
+
+/**
+ * Resultado de solicitar recuperación de contraseña (forgot).
+ * El API siempre responde 200 con mensaje genérico.
+ */
+export interface ForgotPasswordResult {
+  success: boolean;
+  message?: string;
+  errorMessage?: string;
+}
+
+/**
+ * Solicita enlace de recuperación de contraseña.
+ * @see TR-004(SH)-recuperación-de-contraseña.md
+ */
+export async function forgotPassword(codeOrEmail: string): Promise<ForgotPasswordResult> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ code_or_email: codeOrEmail.trim() }),
+    });
+    const data = await response.json();
+    if (response.ok && data.error === 0) {
+      return { success: true, message: data.respuesta };
+    }
+    return { success: false, errorMessage: data.respuesta || 'Error al solicitar recuperación.' };
+  } catch {
+    return { success: false, errorMessage: 'Error de conexión. Intente nuevamente.' };
+  }
+}
+
+/**
+ * Resultado de restablecer contraseña (reset).
+ */
+export interface ResetPasswordResult {
+  success: boolean;
+  errorMessage?: string;
+}
+
+/**
+ * Restablece la contraseña con el token recibido por email.
+ * @see TR-004(SH)-recuperación-de-contraseña.md
+ */
+export async function resetPassword(
+  token: string,
+  password: string,
+  passwordConfirmation: string
+): Promise<ResetPasswordResult> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        token: token.trim(),
+        password,
+        password_confirmation: passwordConfirmation,
+      }),
+    });
+    const data = await response.json();
+    if (response.ok && data.error === 0) {
+      return { success: true };
+    }
+    return { success: false, errorMessage: data.respuesta || 'Error al restablecer contraseña.' };
+  } catch {
+    return { success: false, errorMessage: 'Error de conexión. Intente nuevamente.' };
+  }
+}

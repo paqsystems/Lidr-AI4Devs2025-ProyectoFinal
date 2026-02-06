@@ -49,6 +49,37 @@ class UserProfileService
     }
 
     /**
+     * Actualizar perfil del usuario autenticado (nombre, email).
+     * Empleado: actualiza PQ_PARTES_USUARIOS. Cliente: actualiza PQ_PARTES_CLIENTES.
+     * El código no es modificable.
+     *
+     * @param User $user Usuario autenticado
+     * @param array $data ['nombre' => string, 'email' => string|null]
+     * @return array Datos del perfil actualizados (mismo formato que getProfile)
+     * @throws \RuntimeException Si el usuario no tiene perfil en PQ_PARTES_USUARIOS ni PQ_PARTES_CLIENTES
+     */
+    public function updateProfile(User $user, array $data): array
+    {
+        $empleado = Usuario::where('user_id', $user->id)->first();
+        if ($empleado) {
+            $empleado->nombre = $data['nombre'];
+            $empleado->email = isset($data['email']) && $data['email'] !== '' ? $data['email'] : null;
+            $empleado->save();
+            return $this->buildEmpleadoProfile($user, $empleado->fresh());
+        }
+
+        $cliente = Cliente::where('user_id', $user->id)->first();
+        if ($cliente) {
+            $cliente->nombre = $data['nombre'];
+            $cliente->email = isset($data['email']) && $data['email'] !== '' ? $data['email'] : null;
+            $cliente->save();
+            return $this->buildClienteProfile($user, $cliente->fresh());
+        }
+
+        throw new \RuntimeException('Usuario sin perfil en PQ_PARTES_USUARIOS ni PQ_PARTES_CLIENTES');
+    }
+
+    /**
      * Construir perfil de empleado
      *
      * @param User $user Datos de autenticación

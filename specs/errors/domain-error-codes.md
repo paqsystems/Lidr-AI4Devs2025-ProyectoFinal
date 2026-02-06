@@ -254,7 +254,7 @@ GET /api/v1/tareas/999
 {
   "error": 4005,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -271,7 +271,7 @@ DELETE /api/v1/tareas/5
 {
   "error": 2104,
   "respuesta": "No se puede eliminar tarea de otro usuario",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -291,7 +291,7 @@ POST /api/v1/auth/login
 {
   "error": 3201,
   "respuesta": "Credenciales inválidas",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

@@ -51,7 +51,7 @@ class EmpleadoController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -88,7 +88,7 @@ class EmpleadoController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -133,13 +133,13 @@ class EmpleadoController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 409);
             }
             return response()->json([
                 'error' => 500,
                 'respuesta' => 'Error al crear empleado: ' . $e->getMessage(),
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 500);
         }
     }
@@ -157,7 +157,7 @@ class EmpleadoController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -176,13 +176,13 @@ class EmpleadoController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 404);
             }
             return response()->json([
                 'error' => 500,
                 'respuesta' => 'Error al obtener empleado: ' . $e->getMessage(),
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 500);
         }
     }
@@ -200,7 +200,7 @@ class EmpleadoController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -246,20 +246,20 @@ class EmpleadoController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 404);
             }
             if ($code === EmpleadoService::ERROR_EMAIL_DUPLICATE) {
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 409);
             }
             return response()->json([
                 'error' => 500,
                 'respuesta' => 'Error al actualizar empleado: ' . $e->getMessage(),
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 500);
         }
     }
@@ -277,7 +277,7 @@ class EmpleadoController extends Controller
             return response()->json([
                 'error' => self::ERROR_FORBIDDEN,
                 'respuesta' => 'No tiene permiso para acceder a esta funcionalidad',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 403);
         }
 
@@ -286,7 +286,7 @@ class EmpleadoController extends Controller
             return response()->json([
                 'error' => 0,
                 'respuesta' => 'Empleado eliminado correctamente',
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 200);
         } catch (\Exception $e) {
             $code = (int) $e->getCode();
@@ -294,20 +294,20 @@ class EmpleadoController extends Controller
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 404);
             }
             if ($code === EmpleadoService::ERROR_TIENE_TAREAS) {
                 return response()->json([
                     'error' => $code,
                     'respuesta' => $e->getMessage(),
-                    'resultado' => null,
+                    'resultado' => (object) [],
                 ], 422);
             }
             return response()->json([
                 'error' => 500,
                 'respuesta' => 'Error al eliminar empleado: ' . $e->getMessage(),
-                'resultado' => null,
+                'resultado' => (object) [],
             ], 500);
         }
     }

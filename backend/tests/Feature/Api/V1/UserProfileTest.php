@@ -256,4 +256,66 @@ class UserProfileTest extends TestCase
         $this->assertIsInt($response->json('error'));
         $this->assertIsString($response->json('respuesta'));
     }
+
+    /** @test */
+    public function put_profile_empleado_actualiza_200()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->putJson('/api/v1/user/profile', [
+            'nombre' => 'Juan Pérez Actualizado',
+            'email' => 'nuevo@ejemplo.com',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Perfil actualizado correctamente',
+            ])
+            ->assertJsonPath('resultado.nombre', 'Juan Pérez Actualizado')
+            ->assertJsonPath('resultado.email', 'nuevo@ejemplo.com')
+            ->assertJsonPath('resultado.user_code', 'JPEREZ');
+    }
+
+    /** @test */
+    public function put_profile_sin_autenticacion_retorna_401()
+    {
+        $response = $this->putJson('/api/v1/user/profile', [
+            'nombre' => 'Cualquier Nombre',
+            'email' => null,
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    /** @test */
+    public function put_profile_nombre_vacio_retorna_422()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->putJson('/api/v1/user/profile', [
+            'nombre' => '',
+            'email' => 'juan@ejemplo.com',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('error', 1000);
+    }
+
+    /** @test */
+    public function put_profile_email_duplicado_retorna_422()
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->putJson('/api/v1/user/profile', [
+            'nombre' => 'Juan Pérez',
+            'email' => 'maria.garcia@ejemplo.com',
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertArrayHasKey('email', $response->json('resultado.errors') ?? []);
+    }
 }

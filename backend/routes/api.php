@@ -30,9 +30,13 @@ Route::prefix('v1')->group(function () {
     
     // Rutas públicas de autenticación
     Route::prefix('auth')->group(function () {
-        // POST /api/v1/auth/login - Login de empleado
         Route::post('/login', [AuthController::class, 'login'])
             ->name('api.v1.auth.login');
+        // TR-004(SH) Recuperación de contraseña
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
+            ->name('api.v1.auth.forgotPassword');
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+            ->name('api.v1.auth.resetPassword');
     });
     
     // Rutas protegidas (requieren autenticación)
@@ -40,6 +44,10 @@ Route::prefix('v1')->group(function () {
         // POST /api/v1/auth/logout - Logout de usuario
         Route::post('/auth/logout', [AuthController::class, 'logout'])
             ->name('api.v1.auth.logout');
+
+        // POST /api/v1/auth/change-password - Cambio de contraseña (usuario autenticado) TR-005(SH)
+        Route::post('/auth/change-password', [AuthController::class, 'changePassword'])
+            ->name('api.v1.auth.changePassword');
             
         // GET /api/v1/user - Obtener usuario actual (legacy)
         Route::get('/user', function (Request $request) {
@@ -50,6 +58,10 @@ Route::prefix('v1')->group(function () {
         // @see TR-006(MH)-visualización-de-perfil-de-usuario.md
         Route::get('/user/profile', [UserProfileController::class, 'show'])
             ->name('api.v1.user.profile');
+        // PUT /api/v1/user/profile - Actualizar perfil (nombre, email)
+        // @see TR-007(SH)-edición-de-perfil-de-usuario.md
+        Route::put('/user/profile', [UserProfileController::class, 'update'])
+            ->name('api.v1.user.profile.update');
 
         // Dashboard (TR-051)
         Route::get('/dashboard', [DashboardController::class, 'index'])

@@ -196,7 +196,7 @@ Feature: Consulta Agrupada por Cliente
 {
   "error": 1305,
   "respuesta": "El período es inválido: fecha_desde debe ser menor o igual a fecha_hasta",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

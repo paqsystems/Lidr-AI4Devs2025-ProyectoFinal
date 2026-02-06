@@ -14,7 +14,7 @@
  */
 
 import React, { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../services/auth.service';
 import './LoginForm.css';
 
@@ -178,6 +178,17 @@ export function LoginForm(): React.ReactElement {
               {validationErrors.password}
             </span>
           )}
+        </div>
+
+        <div className="form-group form-group-forgot">
+          <Link
+            to="/forgot-password"
+            className="forgot-password-link"
+            data-testid="auth.forgotPasswordLink"
+            aria-label="Recuperar contraseña"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
         </div>
         
         {/* Botón de envío */}

@@ -23,7 +23,7 @@ Elimina un empleado. No se puede eliminar si tiene tareas asociadas.
 {
   "error": 0,
   "respuesta": "Empleado eliminado correctamente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -37,7 +37,7 @@ Elimina un empleado. No se puede eliminar si tiene tareas asociadas.
 {
   "error": 2113,
   "respuesta": "No se puede eliminar un empleado que tiene tareas asociadas",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
