@@ -1,2 +1,2 @@
-export { ClientesPage, ClientesNuevaPage, ClientesEditarPage } from './components';
+export { ClientesPage, ClientesNuevaPage, ClientesEditarPage, ClienteDetallePage } from './components';
 export * from './services';

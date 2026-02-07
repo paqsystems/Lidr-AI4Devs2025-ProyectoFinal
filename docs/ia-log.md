@@ -1844,3 +1844,32 @@ Backend, Frontend y Tests – Implementación HU-004(SH) Recuperación de contra
 ### Referencias
 - `docs/hu-tareas/TR-004(SH)-recuperación-de-contraseña.md`
 - `specs/endpoints/auth-forgot-password.md`, `specs/endpoints/auth-reset-password.md`
+
+---
+
+## Entrada TR-023 a TR-027 (Tipos de Tarea)
+
+### Fecha
+2026-02-06
+
+### Etapa del proyecto
+Backend, Frontend y Tests – Ejecución TR-023(MH), TR-024(MH), TR-025(MH), TR-026(MH), TR-027(SH) (ABM tipos de tarea)
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecutá la TR TR-023(MH)-listado-de-tipos-de-tarea.md; después TR-024(MH); TR-025(MH); TR-026(MH); TR-027(SH)."
+
+### Resultado generado por IA
+- **Backend:** TipoTareaService (listado paginado con filtros is_generico, is_default, activo, inhabilitado; getById, getByIdConClientes; create con validación único is_default 2117; update con 2117; delete con verificación registrosTarea y clientes, 2114). TipoTareaController (index sin page = array selector, con page = paginado; show con ?clientes=1; store, update, destroy). Rutas GET/POST/GET/PUT/DELETE /api/v1/tipos-tarea.
+- **Frontend:** feature tipoTarea: TiposTareaPage (tabla, búsqueda, filtros, Crear/Ver/Editar/Eliminar, modal eliminar, mensaje 2114), TiposTareaNuevaPage (por defecto → genérico forzado y deshabilitado), TiposTareaEditarPage (código readonly), TiposTareaDetallePage (datos + clientes asociados si no genérico). tipoTarea.service.ts (getTiposTareaList, getTipoTarea, getTipoTareaConClientes, createTipoTarea, updateTipoTarea, deleteTipoTarea). Rutas /tipos-tarea, /tipos-tarea/nuevo, /tipos-tarea/:id/editar, /tipos-tarea/:id. Dashboard: botón "Tipos de Tarea".
+- **Tests:** TipoTareaControllerTest (15 tests: index sin/con page, 403, 401, show 200/404, store 201/409/422/2117, update 200/404, destroy 200/422 2114/404). E2E tipos-tarea.spec.ts (listado, empleado redirigido, crear, editar, detalle, eliminar).
+- **Docs:** TR-023 a TR-027 actualizados con Archivos creados/modificados, Comandos, Notas, Pendientes; checklists marcados completados.
+
+### Ajustes humanos realizados
+- Ninguno. Implementación alineada con las TR.
+
+### Referencias
+- `docs/hu-tareas/TR-023(MH)-listado-de-tipos-de-tarea.md` a `TR-027(SH)-visualización-de-detalle-de-tipo-de-tarea.md`
+- `specs/errors/domain-error-codes.md` (2114, 2117)

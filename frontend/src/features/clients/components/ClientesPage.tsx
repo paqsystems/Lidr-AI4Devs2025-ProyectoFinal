@@ -304,6 +304,15 @@ export function ClientesPage(): React.ReactElement {
                       <td>
                         <button
                           type="button"
+                          className="clientes-page-btn-ver"
+                          onClick={() => navigate(`/clientes/${c.id}`)}
+                          data-testid={`clientes.ver.${c.id}`}
+                          aria-label={`Ver detalle de ${c.nombre}`}
+                        >
+                          Ver
+                        </button>
+                        <button
+                          type="button"
                           className="clientes-page-btn-edit"
                           onClick={() => navigate(`/clientes/${c.id}/editar`)}
                           data-testid={`clientes.edit.${c.id}`}

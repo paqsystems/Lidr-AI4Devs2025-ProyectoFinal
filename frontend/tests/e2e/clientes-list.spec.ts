@@ -75,4 +75,27 @@ test.describe('Listado de Clientes (Supervisor) — TR-008', () => {
     await expect(page).toHaveURL('/', { timeout: 10000 });
     await expect(page.locator('[data-testid="clientes.list"]')).not.toBeVisible();
   });
+
+  test('supervisor puede abrir detalle de cliente desde listado (TR-013)', async ({ page }) => {
+    await page.fill('[data-testid="auth.login.usuarioInput"]', SUPERVISOR.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', SUPERVISOR.password);
+    await Promise.all([
+      page.waitForResponse((resp) => resp.url().includes('/api/v1/auth/login') && resp.status() === 200),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+    await expect(page).toHaveURL('/', { timeout: 20000 });
+    await page.goto('/clientes');
+    await expect(page.locator('[data-testid="clientes.list"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="clientes.loading"]')).not.toBeVisible({ timeout: 15000 });
+
+    const verBtn = page.locator('[data-testid^="clientes.ver."]').first();
+    const hasRows = await page.locator('[data-testid="clientes.table"] tbody tr').count() > 0;
+    if (hasRows) {
+      await verBtn.click();
+      await expect(page).toHaveURL(/\/clientes\/\d+$/, { timeout: 10000 });
+      await expect(page.locator('[data-testid="clienteDetalle.container"]')).toBeVisible();
+      await expect(page.locator('[data-testid="clienteDetalle.editar"]')).toBeVisible();
+      await expect(page.locator('[data-testid="clienteDetalle.tiposTarea"]')).toBeVisible();
+    }
+  });
 });

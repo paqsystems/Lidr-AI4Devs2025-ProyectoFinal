@@ -8,7 +8,9 @@ use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ClienteController;
+use App\Http\Controllers\Api\V1\TipoClienteController;
 use App\Http\Controllers\Api\V1\EmpleadoController;
+use App\Http\Controllers\Api\V1\TipoTareaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,8 +82,16 @@ Route::prefix('v1')->group(function () {
             ->name('api.v1.clientes.index');
         Route::post('/clientes', [ClienteController::class, 'store'])
             ->name('api.v1.clientes.store');
-        Route::get('/tipos-cliente', [ClienteController::class, 'tiposCliente'])
+        Route::get('/tipos-cliente', [TipoClienteController::class, 'index'])
             ->name('api.v1.tipos-cliente.index');
+        Route::post('/tipos-cliente', [TipoClienteController::class, 'store'])
+            ->name('api.v1.tipos-cliente.store');
+        Route::get('/tipos-cliente/{id}', [TipoClienteController::class, 'show'])
+            ->name('api.v1.tipos-cliente.show');
+        Route::put('/tipos-cliente/{id}', [TipoClienteController::class, 'update'])
+            ->name('api.v1.tipos-cliente.update');
+        Route::delete('/tipos-cliente/{id}', [TipoClienteController::class, 'destroy'])
+            ->name('api.v1.tipos-cliente.destroy');
         Route::get('/clientes/{id}', [ClienteController::class, 'show'])
             ->name('api.v1.clientes.show');
         Route::get('/clientes/{id}/tipos-tarea', [ClienteController::class, 'tiposTarea'])
@@ -104,6 +114,18 @@ Route::prefix('v1')->group(function () {
             ->name('api.v1.empleados.update');
         Route::delete('/empleados/{id}', [EmpleadoController::class, 'destroy'])
             ->name('api.v1.empleados.destroy');
+
+        // Rutas de tipos de tarea (ABM solo supervisores) @see TR-023 a TR-027
+        Route::get('/tipos-tarea', [TipoTareaController::class, 'index'])
+            ->name('api.v1.tipos-tarea.index');
+        Route::post('/tipos-tarea', [TipoTareaController::class, 'store'])
+            ->name('api.v1.tipos-tarea.store');
+        Route::get('/tipos-tarea/{id}', [TipoTareaController::class, 'show'])
+            ->name('api.v1.tipos-tarea.show');
+        Route::put('/tipos-tarea/{id}', [TipoTareaController::class, 'update'])
+            ->name('api.v1.tipos-tarea.update');
+        Route::delete('/tipos-tarea/{id}', [TipoTareaController::class, 'destroy'])
+            ->name('api.v1.tipos-tarea.destroy');
 
         // Rutas de tareas
         // @see TR-028(MH)-carga-de-tarea-diaria.md

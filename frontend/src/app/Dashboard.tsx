@@ -176,6 +176,22 @@ export function Dashboard(): React.ReactElement {
                 >
                   Empleados
                 </button>
+                <button
+                  onClick={() => navigate('/tipos-cliente')}
+                  className="profile-link-button"
+                  data-testid="app.tiposClienteLink"
+                  aria-label="Tipos de cliente"
+                >
+                  Tipos de Cliente
+                </button>
+                <button
+                  onClick={() => navigate('/tipos-tarea')}
+                  className="profile-link-button"
+                  data-testid="app.tiposTareaLink"
+                  aria-label="Tipos de tarea"
+                >
+                  Tipos de Tarea
+                </button>
               </>
             )}
             {user.tipoUsuario === 'usuario' && (

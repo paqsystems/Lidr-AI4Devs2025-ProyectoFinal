@@ -14,8 +14,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginForm, ForgotPasswordPage, ResetPasswordPage } from '../features/auth';
 import { ProfileView } from '../features/user';
 import { TaskForm, TaskList, TaskListAll, TaskEditPage, ConsultaDetalladaPage, TareasPorClientePage } from '../features/tasks';
-import { ClientesPage, ClientesNuevaPage, ClientesEditarPage } from '../features/clients';
+import { ClientesPage, ClientesNuevaPage, ClientesEditarPage, ClienteDetallePage } from '../features/clients';
 import { EmpleadosPage, EmpleadosNuevoPage, EmpleadosEditarPage, EmpleadosDetallePage } from '../features/employees';
+import { TiposClientePage, TiposClienteNuevaPage, TiposClienteEditarPage } from '../features/tipoCliente';
+import { TiposTareaPage, TiposTareaNuevaPage, TiposTareaEditarPage, TiposTareaDetallePage } from '../features/tipoTarea';
 import { ProtectedRoute, PublicRoute } from '../routes';
 import { EmployeeRoute } from '../routes/EmployeeRoute';
 import { SupervisorRoute } from '../routes/SupervisorRoute';
@@ -101,6 +103,14 @@ export function App(): React.ReactElement {
             }
           />
           <Route
+            path="clientes/:id"
+            element={
+              <SupervisorRoute>
+                <ClienteDetallePage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
             path="empleados"
             element={
               <SupervisorRoute>
@@ -129,6 +139,62 @@ export function App(): React.ReactElement {
             element={
               <SupervisorRoute>
                 <EmpleadosDetallePage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="tipos-cliente"
+            element={
+              <SupervisorRoute>
+                <TiposClientePage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="tipos-cliente/nuevo"
+            element={
+              <SupervisorRoute>
+                <TiposClienteNuevaPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="tipos-cliente/:id/editar"
+            element={
+              <SupervisorRoute>
+                <TiposClienteEditarPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="tipos-tarea"
+            element={
+              <SupervisorRoute>
+                <TiposTareaPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="tipos-tarea/nuevo"
+            element={
+              <SupervisorRoute>
+                <TiposTareaNuevaPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="tipos-tarea/:id/editar"
+            element={
+              <SupervisorRoute>
+                <TiposTareaEditarPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="tipos-tarea/:id"
+            element={
+              <SupervisorRoute>
+                <TiposTareaDetallePage />
               </SupervisorRoute>
             }
           />

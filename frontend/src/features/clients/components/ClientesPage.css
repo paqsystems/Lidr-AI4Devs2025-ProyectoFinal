@@ -40,8 +40,23 @@
   background-color: #1d4ed8;
 }
 
+.clientes-page-btn-ver {
+  padding: 0.35rem 0.75rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.clientes-page-btn-ver:hover {
+  background-color: #1d4ed8;
+}
+
 .clientes-page-btn-edit {
   padding: 0.35rem 0.75rem;
+  margin-left: 0.35rem;
   background-color: #059669;
   color: white;
   border: none;
