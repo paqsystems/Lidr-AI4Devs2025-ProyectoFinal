@@ -1873,3 +1873,62 @@ Backend, Frontend y Tests – Ejecución TR-023(MH), TR-024(MH), TR-025(MH), TR-
 ### Referencias
 - `docs/hu-tareas/TR-023(MH)-listado-de-tipos-de-tarea.md` a `TR-027(SH)-visualización-de-detalle-de-tipo-de-tarea.md`
 - `specs/errors/domain-error-codes.md` (2114, 2117)
+
+---
+
+## Entrada TR-047, TR-048, TR-049 (Informes: por tipo, por fecha, exportación Excel)
+
+### Fecha
+2026-02-07
+
+### Etapa del proyecto
+Backend, Frontend y Tests – Ejecución TR-047(SH), TR-048(SH), TR-049(SH)
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecutá la TR TR-047(SH).md (y lo mismo para TR-048 y TR-049)."
+
+### Resultado generado por IA
+- **TR-047:** Backend: TaskService::listByTaskTypeReport, ReportController::byTaskType, ruta GET /api/v1/reports/by-task-type. Frontend: getReportByTaskType, TareasPorTipoPage (filtros, accordion por tipo), ruta /informes/tareas-por-tipo (SupervisorRoute), enlace en Dashboard. Tests: ReportControllerTest (by_task_type 200, 403, 422, 401), E2E tareas-por-tipo.spec.ts.
+- **TR-048:** Backend: TaskService::listByDateReport, ReportController::byDate, ruta GET /api/v1/reports/by-date. Frontend: getReportByDate, TareasPorFechaPage, ruta /informes/tareas-por-fecha (todos los roles), enlace en Dashboard. Tests: ReportControllerTest (by_date 200, 422, 401), E2E tareas-por-fecha.spec.ts.
+- **TR-049:** Dependencia xlsx en frontend; utilidad exportToExcel.ts (buildExportFileName, exportDetailToExcel, exportGroupedToExcel). Botón "Exportar a Excel" en ConsultaDetalladaPage, TareasPorClientePage, TareasPorEmpleadoPage, TareasPorTipoPage, TareasPorFechaPage; deshabilitado sin resultados; mensaje "No hay datos para exportar". Generación XLSX en cliente a partir de datos cargados.
+
+### Ajustes humanos realizados
+- Ninguno. Implementación alineada con las TR.
+
+### Referencias
+- `docs/hu-tareas/TR-047(SH)-consulta-agrupada-por-tipo-de-tarea.md`
+- `docs/hu-tareas/TR-048(SH)-consulta-agrupada-por-fecha.md`
+- `docs/hu-tareas/TR-049(SH)-exportación-de-consultas-a-excel.md`
+
+---
+
+## Entrada HU-056(SH) – Generación de historia de usuario (menú lateral de navegación)
+
+### Fecha
+2026-02-07
+
+### Etapa del proyecto
+Documentación – Nueva historia de usuario
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Quiero que generes una nueva historia de usuario, con el numero 056, de tipo SH, que reubique los botones para invocar cada proceso en la pantalla de dashboard, como opciones de menú en la parte lateral izquierda. Comentame si necesito que te explicite ahora o más adelante, el orden de presentación que desearia."
+
+### Resultado generado por IA
+- Creación de **HU-056(SH) – Menú lateral de navegación** en `docs/hu-historias/HU-056(SH)-menú-lateral-de-navegación.md`.
+- Épica: Dashboard / Navegación. Rol: Empleado / Supervisor / Cliente.
+- Criterios de aceptación: menú lateral fijo izquierdo; reubicación de las opciones actuales del dashboard (informes, tareas, clientes, empleados, tipos, proceso masivo, etc.) como ítems del menú; visibilidad según rol; menú colapsable/responsive; estado activo; dashboard sin bloque de botones; data-testid para E2E.
+- Nota en la HU: el orden de presentación de los ítems puede definirse en refinamiento o más adelante (o el usuario puede indicarlo después); si no se especifica, el equipo propondrá un orden lógico.
+- Documentación en `.cursor/Docs/HU-056(SH)-menú-lateral-de-navegación.md`.
+
+### Ajustes humanos realizados
+- Ninguno.
+
+### Referencias
+- `docs/hu-historias/HU-056(SH)-menú-lateral-de-navegación.md`
+- `PROMPTS/Prompts-PAQ.md` (Prompt 11)

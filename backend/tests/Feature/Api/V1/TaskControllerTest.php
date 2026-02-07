@@ -634,6 +634,86 @@ class TaskControllerTest extends TestCase
         $this->assertEmpty($response->json('resultado'));
     }
 
+    /** @test @see TR-040: validación rango fechas en GET /tasks/all */
+    public function indexAll_fecha_desde_mayor_que_fecha_hasta_retorna_422_1305()
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($supervisor);
+
+        $response = $this->getJson('/api/v1/tasks/all?fecha_desde=2026-02-01&fecha_hasta=2026-01-15');
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'error' => 1305,
+                'respuesta' => 'La fecha desde no puede ser posterior a fecha hasta',
+            ]);
+    }
+
+    /** @test @see TR-042: proceso masivo cerrar/reabrir */
+    public function bulk_toggle_close_supervisor_invierte_cerrado()
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($supervisor);
+        $empleado = Usuario::where('code', 'JPEREZ')->first();
+        $cliente = Cliente::where('code', 'CLI001')->first();
+        $tipoTarea = TipoTarea::where('code', 'DESARROLLO')->first();
+
+        $tarea = RegistroTarea::create([
+            'usuario_id' => $empleado->id,
+            'cliente_id' => $cliente->id,
+            'tipo_tarea_id' => $tipoTarea->id,
+            'fecha' => '2026-01-28',
+            'duracion_minutos' => 60,
+            'observacion' => 'Tarea para bulk',
+            'cerrado' => false,
+        ]);
+
+        $response = $this->postJson('/api/v1/tasks/bulk-toggle-close', [
+            'task_ids' => [$tarea->id],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'resultado' => ['processed' => 1, 'task_ids' => [$tarea->id]],
+            ]);
+        $tarea->refresh();
+        $this->assertTrue($tarea->cerrado);
+    }
+
+    /** @test @see TR-043: validación task_ids no vacío */
+    public function bulk_toggle_close_task_ids_vacio_retorna_422_1212()
+    {
+        $supervisor = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($supervisor);
+
+        $response = $this->postJson('/api/v1/tasks/bulk-toggle-close', [
+            'task_ids' => [],
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'error' => 1212,
+                'respuesta' => 'Debe seleccionar al menos una tarea',
+            ]);
+    }
+
+    /** @test @see TR-042: solo supervisores */
+    public function bulk_toggle_close_empleado_retorna_403()
+    {
+        $empleado = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($empleado);
+
+        $response = $this->postJson('/api/v1/tasks/bulk-toggle-close', [
+            'task_ids' => [1],
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'error' => 4030,
+            ]);
+    }
+
     // ========================================
     // Tests GET /api/v1/tasks/clients
     // ========================================

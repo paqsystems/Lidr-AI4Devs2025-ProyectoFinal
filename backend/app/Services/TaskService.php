@@ -119,6 +119,10 @@ class TaskService
             $busqueda = trim($filters['busqueda']);
             $query->where('observacion', 'like', '%' . $busqueda . '%');
         }
+        // TR-040: filtro por estado cerrado (true/false; si no se envía = todos)
+        if (isset($filters['cerrado']) && $filters['cerrado'] !== '' && $filters['cerrado'] !== null) {
+            $query->where('cerrado', (bool) $filters['cerrado']);
+        }
 
         $totalesQuery = RegistroTarea::query();
         if ($esSupervisor && !$filtrarPorEmpleado) {
@@ -140,6 +144,9 @@ class TaskService
         }
         if (!empty($filters['busqueda'])) {
             $totalesQuery->where('observacion', 'like', '%' . trim($filters['busqueda']) . '%');
+        }
+        if (isset($filters['cerrado']) && $filters['cerrado'] !== '' && $filters['cerrado'] !== null) {
+            $totalesQuery->where('cerrado', (bool) $filters['cerrado']);
         }
         $cantidadTareas = $totalesQuery->count();
         $totalHoras = $totalesQuery->sum('duracion_minutos') / 60;
@@ -214,6 +221,36 @@ class TaskService
                 'total_horas' => round($totalHoras, 2),
             ],
         ];
+    }
+
+    /**
+     * Procesamiento masivo: invertir estado cerrado de las tareas indicadas (TR-042).
+     * Solo supervisores. Atómico (transacción).
+     *
+     * @param array<int> $taskIds IDs de tareas
+     * @return array{processed: int, task_ids: array<int>}
+     */
+    public function bulkToggleClose(array $taskIds): array
+    {
+        $taskIds = array_values(array_unique(array_map('intval', $taskIds)));
+        $taskIds = array_filter($taskIds, fn ($id) => $id > 0);
+        if (count($taskIds) === 0) {
+            throw new \InvalidArgumentException('Debe seleccionar al menos una tarea', 1212);
+        }
+
+        return DB::transaction(function () use ($taskIds) {
+            $registros = RegistroTarea::whereIn('id', $taskIds)->get();
+            $processed = 0;
+            foreach ($registros as $t) {
+                $t->cerrado = !$t->cerrado;
+                $t->save();
+                $processed++;
+            }
+            return [
+                'processed' => $processed,
+                'task_ids' => $taskIds,
+            ];
+        });
     }
 
     /**
@@ -463,6 +500,300 @@ class TaskService
         $grupos = array_values($agrupado);
         usort($grupos, function ($a, $b) {
             return $b['total_horas'] <=> $a['total_horas'];
+        });
+
+        foreach ($grupos as &$g) {
+            $g['total_horas'] = round($g['total_horas'], 2);
+        }
+        unset($g);
+
+        $totalGeneralHoras = array_sum(array_column($grupos, 'total_horas'));
+        $totalGeneralTareas = array_sum(array_column($grupos, 'cantidad_tareas'));
+
+        return [
+            'grupos' => $grupos,
+            'total_general_horas' => round($totalGeneralHoras, 2),
+            'total_general_tareas' => (int) $totalGeneralTareas,
+        ];
+    }
+
+    /**
+     * Reporte agrupado por empleado (TR-045): grupos por usuario_id con total horas, cantidad y detalle de tareas.
+     * Solo supervisores (el controlador verifica y devuelve 403 si no).
+     *
+     * @param User $user Usuario autenticado (debe ser supervisor)
+     * @param array $filters fecha_desde, fecha_hasta, tipo_cliente_id, cliente_id, usuario_id (opcional)
+     * @return array ['grupos' => [...], 'total_general_horas' => float, 'total_general_tareas' => int]
+     * @throws \Exception Si período inválido (código ERROR_PERIODO_INVALIDO 1305)
+     */
+    public function listByEmployeeReport(User $user, array $filters): array
+    {
+        $fechaDesde = isset($filters['fecha_desde']) && $filters['fecha_desde'] !== '' ? $filters['fecha_desde'] : null;
+        $fechaHasta = isset($filters['fecha_hasta']) && $filters['fecha_hasta'] !== '' ? $filters['fecha_hasta'] : null;
+        if ($fechaDesde !== null && $fechaHasta !== null && $fechaDesde > $fechaHasta) {
+            throw new \Exception('El período es inválido: fecha_desde debe ser menor o igual a fecha_hasta', self::ERROR_PERIODO_INVALIDO);
+        }
+
+        $query = RegistroTarea::with(['cliente', 'tipoTarea', 'usuario']);
+
+        if ($fechaDesde !== null) {
+            $query->where('fecha', '>=', $fechaDesde);
+        }
+        if ($fechaHasta !== null) {
+            $query->where('fecha', '<=', $fechaHasta);
+        }
+        if (isset($filters['cliente_id']) && $filters['cliente_id'] !== '' && $filters['cliente_id'] !== null) {
+            $query->where('cliente_id', (int) $filters['cliente_id']);
+        }
+        if (isset($filters['tipo_cliente_id']) && $filters['tipo_cliente_id'] !== '' && $filters['tipo_cliente_id'] !== null) {
+            $query->whereHas('cliente', function ($q) use ($filters) {
+                $q->where('tipo_cliente_id', (int) $filters['tipo_cliente_id']);
+            });
+        }
+        if (isset($filters['usuario_id']) && $filters['usuario_id'] !== '' && $filters['usuario_id'] !== null) {
+            $query->where('usuario_id', (int) $filters['usuario_id']);
+        }
+
+        $registros = $query->orderBy('fecha', 'desc')->get();
+
+        $agrupado = [];
+        foreach ($registros as $t) {
+            $uid = $t->usuario_id;
+            if (!isset($agrupado[$uid])) {
+                $nombre = $t->usuario ? $t->usuario->nombre : 'Empleado #' . $uid;
+                $code = $t->usuario ? $t->usuario->code : '';
+                $agrupado[$uid] = [
+                    'usuario_id' => $uid,
+                    'nombre' => $nombre,
+                    'code' => $code,
+                    'total_horas' => 0,
+                    'cantidad_tareas' => 0,
+                    'tareas' => [],
+                ];
+            }
+            $horasDecimal = round($t->duracion_minutos / 60, 2);
+            $agrupado[$uid]['total_horas'] += $horasDecimal;
+            $agrupado[$uid]['cantidad_tareas']++;
+            $agrupado[$uid]['tareas'][] = [
+                'id' => $t->id,
+                'fecha' => $t->fecha->format('Y-m-d'),
+                'cliente' => [
+                    'id' => $t->cliente->id,
+                    'nombre' => $t->cliente->nombre,
+                ],
+                'tipo_tarea' => [
+                    'id' => $t->tipoTarea->id,
+                    'descripcion' => $t->tipoTarea->descripcion,
+                ],
+                'horas' => $horasDecimal,
+                'sin_cargo' => $t->sin_cargo,
+                'presencial' => $t->presencial,
+                'descripcion' => $t->observacion ?? '',
+            ];
+        }
+
+        $grupos = array_values($agrupado);
+        usort($grupos, function ($a, $b) {
+            return $b['total_horas'] <=> $a['total_horas'];
+        });
+
+        foreach ($grupos as &$g) {
+            $g['total_horas'] = round($g['total_horas'], 2);
+        }
+        unset($g);
+
+        $totalGeneralHoras = array_sum(array_column($grupos, 'total_horas'));
+        $totalGeneralTareas = array_sum(array_column($grupos, 'cantidad_tareas'));
+
+        return [
+            'grupos' => $grupos,
+            'total_general_horas' => round($totalGeneralHoras, 2),
+            'total_general_tareas' => (int) $totalGeneralTareas,
+        ];
+    }
+
+    /**
+     * Reporte agrupado por tipo de tarea (TR-047): grupos por tipo_tarea_id con total horas, cantidad y detalle.
+     * Solo supervisores (el controlador verifica y devuelve 403 si no).
+     *
+     * @param User $user Usuario autenticado (debe ser supervisor)
+     * @param array $filters fecha_desde, fecha_hasta, tipo_cliente_id, cliente_id, usuario_id (opcional)
+     * @return array ['grupos' => [...], 'total_general_horas' => float, 'total_general_tareas' => int]
+     * @throws \Exception Si período inválido (código ERROR_PERIODO_INVALIDO 1305)
+     */
+    public function listByTaskTypeReport(User $user, array $filters): array
+    {
+        $fechaDesde = isset($filters['fecha_desde']) && $filters['fecha_desde'] !== '' ? $filters['fecha_desde'] : null;
+        $fechaHasta = isset($filters['fecha_hasta']) && $filters['fecha_hasta'] !== '' ? $filters['fecha_hasta'] : null;
+        if ($fechaDesde !== null && $fechaHasta !== null && $fechaDesde > $fechaHasta) {
+            throw new \Exception('El período es inválido: fecha_desde debe ser menor o igual a fecha_hasta', self::ERROR_PERIODO_INVALIDO);
+        }
+
+        $query = RegistroTarea::with(['cliente', 'tipoTarea', 'usuario']);
+
+        if ($fechaDesde !== null) {
+            $query->where('fecha', '>=', $fechaDesde);
+        }
+        if ($fechaHasta !== null) {
+            $query->where('fecha', '<=', $fechaHasta);
+        }
+        if (isset($filters['cliente_id']) && $filters['cliente_id'] !== '' && $filters['cliente_id'] !== null) {
+            $query->where('cliente_id', (int) $filters['cliente_id']);
+        }
+        if (isset($filters['tipo_cliente_id']) && $filters['tipo_cliente_id'] !== '' && $filters['tipo_cliente_id'] !== null) {
+            $query->whereHas('cliente', function ($q) use ($filters) {
+                $q->where('tipo_cliente_id', (int) $filters['tipo_cliente_id']);
+            });
+        }
+        if (isset($filters['usuario_id']) && $filters['usuario_id'] !== '' && $filters['usuario_id'] !== null) {
+            $query->where('usuario_id', (int) $filters['usuario_id']);
+        }
+
+        $registros = $query->orderBy('fecha', 'desc')->get();
+
+        $agrupado = [];
+        foreach ($registros as $t) {
+            $tid = $t->tipo_tarea_id;
+            if (!isset($agrupado[$tid])) {
+                $descripcion = $t->tipoTarea ? $t->tipoTarea->descripcion : 'Tipo #' . $tid;
+                $agrupado[$tid] = [
+                    'tipo_tarea_id' => $tid,
+                    'descripcion' => $descripcion,
+                    'total_horas' => 0,
+                    'cantidad_tareas' => 0,
+                    'tareas' => [],
+                ];
+            }
+            $horasDecimal = round($t->duracion_minutos / 60, 2);
+            $agrupado[$tid]['total_horas'] += $horasDecimal;
+            $agrupado[$tid]['cantidad_tareas']++;
+            $agrupado[$tid]['tareas'][] = [
+                'id' => $t->id,
+                'fecha' => $t->fecha->format('Y-m-d'),
+                'cliente' => [
+                    'id' => $t->cliente->id,
+                    'nombre' => $t->cliente->nombre,
+                ],
+                'tipo_tarea' => [
+                    'id' => $t->tipoTarea->id,
+                    'descripcion' => $t->tipoTarea->descripcion,
+                ],
+                'horas' => $horasDecimal,
+                'sin_cargo' => $t->sin_cargo,
+                'presencial' => $t->presencial,
+                'descripcion' => $t->observacion ?? '',
+            ];
+        }
+
+        $grupos = array_values($agrupado);
+        usort($grupos, function ($a, $b) {
+            return $b['total_horas'] <=> $a['total_horas'];
+        });
+
+        foreach ($grupos as &$g) {
+            $g['total_horas'] = round($g['total_horas'], 2);
+        }
+        unset($g);
+
+        $totalGeneralHoras = array_sum(array_column($grupos, 'total_horas'));
+        $totalGeneralTareas = array_sum(array_column($grupos, 'cantidad_tareas'));
+
+        return [
+            'grupos' => $grupos,
+            'total_general_horas' => round($totalGeneralHoras, 2),
+            'total_general_tareas' => (int) $totalGeneralTareas,
+        ];
+    }
+
+    /**
+     * Reporte agrupado por fecha (TR-048): grupos por fecha con total horas, cantidad y detalle.
+     * Filtros por rol: empleado solo sus tareas, supervisor todas, cliente solo donde es el cliente.
+     *
+     * @param User $user Usuario autenticado
+     * @param array $filters fecha_desde, fecha_hasta
+     * @return array ['grupos' => [...], 'total_general_horas' => float, 'total_general_tareas' => int]
+     * @throws \Exception Si período inválido (ERROR_PERIODO_INVALIDO 1305)
+     */
+    public function listByDateReport(User $user, array $filters): array
+    {
+        $empleado = Usuario::where('user_id', $user->id)->first();
+        $cliente = Cliente::where('user_id', $user->id)->first();
+
+        $esCliente = $cliente !== null && $empleado === null;
+        $esSupervisor = $empleado && (bool) $empleado->supervisor;
+
+        if ($esCliente) {
+            $clienteIdFijo = $cliente->id;
+        } else {
+            if (!$empleado) {
+                return [
+                    'grupos' => [],
+                    'total_general_horas' => 0,
+                    'total_general_tareas' => 0,
+                ];
+            }
+        }
+
+        $fechaDesde = isset($filters['fecha_desde']) && $filters['fecha_desde'] !== '' ? $filters['fecha_desde'] : null;
+        $fechaHasta = isset($filters['fecha_hasta']) && $filters['fecha_hasta'] !== '' ? $filters['fecha_hasta'] : null;
+        if ($fechaDesde !== null && $fechaHasta !== null && $fechaDesde > $fechaHasta) {
+            throw new \Exception('El período es inválido: fecha_desde debe ser menor o igual a fecha_hasta', self::ERROR_PERIODO_INVALIDO);
+        }
+
+        $query = RegistroTarea::with(['cliente', 'tipoTarea', 'usuario']);
+
+        if ($esCliente) {
+            $query->where('cliente_id', $clienteIdFijo);
+        } else {
+            if (!$esSupervisor) {
+                $query->where('usuario_id', $empleado->id);
+            }
+        }
+
+        if ($fechaDesde !== null) {
+            $query->where('fecha', '>=', $fechaDesde);
+        }
+        if ($fechaHasta !== null) {
+            $query->where('fecha', '<=', $fechaHasta);
+        }
+
+        $registros = $query->orderBy('fecha', 'desc')->get();
+
+        $agrupado = [];
+        foreach ($registros as $t) {
+            $fechaStr = $t->fecha->format('Y-m-d');
+            if (!isset($agrupado[$fechaStr])) {
+                $agrupado[$fechaStr] = [
+                    'fecha' => $fechaStr,
+                    'total_horas' => 0,
+                    'cantidad_tareas' => 0,
+                    'tareas' => [],
+                ];
+            }
+            $horasDecimal = round($t->duracion_minutos / 60, 2);
+            $agrupado[$fechaStr]['total_horas'] += $horasDecimal;
+            $agrupado[$fechaStr]['cantidad_tareas']++;
+            $agrupado[$fechaStr]['tareas'][] = [
+                'id' => $t->id,
+                'fecha' => $t->fecha->format('Y-m-d'),
+                'cliente' => [
+                    'id' => $t->cliente->id,
+                    'nombre' => $t->cliente->nombre,
+                ],
+                'tipo_tarea' => [
+                    'id' => $t->tipoTarea->id,
+                    'descripcion' => $t->tipoTarea->descripcion,
+                ],
+                'horas' => $horasDecimal,
+                'sin_cargo' => $t->sin_cargo,
+                'presencial' => $t->presencial,
+                'descripcion' => $t->observacion ?? '',
+            ];
+        }
+
+        $grupos = array_values($agrupado);
+        usort($grupos, function ($a, $b) {
+            return $b['fecha'] <=> $a['fecha'];
         });
 
         foreach ($grupos as &$g) {

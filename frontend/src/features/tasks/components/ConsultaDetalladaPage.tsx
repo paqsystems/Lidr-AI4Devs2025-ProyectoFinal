@@ -19,6 +19,7 @@ import {
   Employee,
 } from '../services/task.service';
 import { TaskPagination } from './TaskPagination';
+import { buildExportFileName, exportDetailToExcel } from '../utils/exportToExcel';
 import { t } from '../../../shared/i18n';
 import './ConsultaDetalladaPage.css';
 
@@ -131,6 +132,12 @@ export function ConsultaDetalladaPage(): React.ReactElement {
     setPage(1);
   };
 
+  const hasData = data.length > 0;
+  const handleExportExcel = () => {
+    const filename = buildExportFileName(appliedFilters.fechaDesde, appliedFilters.fechaHasta);
+    exportDetailToExcel(data, filename, isSupervisor && !isCliente);
+  };
+
   return (
     <div className="consulta-detallada-container" data-testid="report.detail.container">
       <header className="consulta-detallada-header">
@@ -231,13 +238,32 @@ export function ConsultaDetalladaPage(): React.ReactElement {
 
       {!errorMessage && (
         <>
-          <div
-            className="consulta-detallada-total"
-            data-testid="report.detail.totalHours"
-            role="status"
-          >
-            {t('report.detail.totalHoras', 'Total horas del período')}:{' '}
-            <strong>{totalHoras.toFixed(2)}</strong>
+          <div className="consulta-detallada-total-row">
+            <div
+              className="consulta-detallada-total"
+              data-testid="report.detail.totalHours"
+              role="status"
+            >
+              {t('report.detail.totalHoras', 'Total horas del período')}:{' '}
+              <strong>{totalHoras.toFixed(2)}</strong>
+            </div>
+            <div className="consulta-detallada-export" data-testid="report.detail.export">
+              {!hasData && !loading && (
+                <span className="consulta-detallada-export-no-data" data-testid="exportarExcel.mensajeSinDatos">
+                  {t('report.export.noData', 'No hay datos para exportar')}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                disabled={!hasData || loading}
+                className="consulta-detallada-btn-export"
+                data-testid="exportarExcel.boton"
+                aria-label={t('report.export.aria', 'Exportar a Excel')}
+              >
+                {t('report.export.button', 'Exportar a Excel')}
+              </button>
+            </div>
           </div>
 
           {loading ? (

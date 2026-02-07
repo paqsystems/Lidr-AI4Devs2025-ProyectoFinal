@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\BulkToggleCloseRequest;
 use App\Http\Requests\Api\V1\CreateTaskRequest;
 use App\Http\Requests\Api\V1\UpdateTaskRequest;
 use App\Services\TaskService;
@@ -111,18 +112,37 @@ class TaskController extends Controller
             ], 403);
         }
 
+        $fechaDesde = $request->query('fecha_desde');
+        $fechaHasta = $request->query('fecha_hasta');
+        if ($fechaDesde !== null && $fechaDesde !== '' && $fechaHasta !== null && $fechaHasta !== '' && $fechaDesde > $fechaHasta) {
+            return response()->json([
+                'error' => 1305,
+                'respuesta' => 'La fecha desde no puede ser posterior a fecha hasta',
+                'resultado' => (object) [],
+            ], 422);
+        }
+
+        $cerradoParam = $request->query('cerrado');
+        $cerrado = null;
+        if ($cerradoParam === 'true' || $cerradoParam === '1') {
+            $cerrado = true;
+        } elseif ($cerradoParam === 'false' || $cerradoParam === '0') {
+            $cerrado = false;
+        }
+
         try {
             $filters = [
                 'page' => $request->query('page', 1),
                 'per_page' => $request->query('per_page', 15),
-                'fecha_desde' => $request->query('fecha_desde'),
-                'fecha_hasta' => $request->query('fecha_hasta'),
+                'fecha_desde' => $fechaDesde,
+                'fecha_hasta' => $fechaHasta,
                 'cliente_id' => $request->query('cliente_id'),
                 'tipo_tarea_id' => $request->query('tipo_tarea_id'),
                 'usuario_id' => $request->query('usuario_id'),
                 'busqueda' => $request->query('busqueda'),
                 'ordenar_por' => $request->query('ordenar_por', 'fecha'),
                 'orden' => $request->query('orden', 'desc'),
+                'cerrado' => $cerrado,
             ];
 
             $result = $this->taskService->listTasks($user, $filters);
@@ -139,6 +159,33 @@ class TaskController extends Controller
                 'resultado' => (object) [],
             ], 500);
         }
+    }
+
+    /**
+     * Procesamiento masivo: invertir estado cerrado de tareas seleccionadas (TR-042, TR-043).
+     * POST /api/v1/tasks/bulk-toggle-close
+     * Solo supervisores. Body: { "task_ids": [1, 2, 3] }
+     */
+    public function bulkToggleClose(BulkToggleCloseRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $empleado = Usuario::where('user_id', $user->id)->first();
+        if (!$empleado || !$empleado->supervisor) {
+            return response()->json([
+                'error' => 4030,
+                'respuesta' => 'Solo los supervisores pueden ejecutar el proceso masivo',
+                'resultado' => (object) [],
+            ], 403);
+        }
+
+        $taskIds = $request->validated()['task_ids'];
+        $result = $this->taskService->bulkToggleClose($taskIds);
+        $count = $result['processed'];
+        return response()->json([
+            'error' => 0,
+            'respuesta' => 'Se procesaron ' . $count . ' registro' . ($count !== 1 ? 's' : ''),
+            'resultado' => $result,
+        ], 200);
     }
 
     /**

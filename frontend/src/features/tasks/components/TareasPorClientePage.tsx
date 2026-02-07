@@ -15,6 +15,7 @@ import {
 } from '../services/task.service';
 import { t } from '../../../shared/i18n';
 import { getUserData } from '../../../shared/utils/tokenStorage';
+import { buildExportFileName, exportGroupedToExcel, type GroupedExportGroup } from '../utils/exportToExcel';
 import './TareasPorClientePage.css';
 
 export interface TareasPorClienteFilters {
@@ -99,6 +100,26 @@ export function TareasPorClientePage(): React.ReactElement {
     setExpandedClienteId((prev) => (prev === clienteId ? null : clienteId));
   };
 
+  const hasData = grupos.length > 0;
+  const handleExportExcel = () => {
+    const exportGroups: GroupedExportGroup[] = grupos.map((g) => ({
+      groupTitle: g.nombre,
+      totalHoras: g.total_horas,
+      cantidadTareas: g.cantidad_tareas,
+      tareas: g.tareas.map((t) => ({
+        fecha: t.fecha,
+        cliente: g.nombre,
+        tipoTarea: t.tipo_tarea.descripcion,
+        horas: t.horas,
+        sinCargo: false,
+        presencial: false,
+        descripcion: t.descripcion ?? '',
+      })),
+    }));
+    const filename = buildExportFileName(appliedFilters.fechaDesde, appliedFilters.fechaHasta, 'por-cliente');
+    exportGroupedToExcel(exportGroups, filename);
+  };
+
   return (
     <div className="tareas-por-cliente-container" data-testid="report.byClient.container">
       <header className="tareas-por-cliente-header">
@@ -153,16 +174,35 @@ export function TareasPorClientePage(): React.ReactElement {
 
       {!errorMessage && (
         <>
-          <div
-            className="tareas-por-cliente-total"
-            data-testid="report.byClient.totalGeneral"
-            role="status"
-          >
-            {t('report.byClient.totalHoras', 'Total horas')}:{' '}
-            <strong>{totalGeneralHoras.toFixed(2)}</strong>
-            {' · '}
-            {t('report.byClient.totalTareas', 'Total tareas')}:{' '}
-            <strong>{totalGeneralTareas}</strong>
+          <div className="tareas-por-cliente-total-row">
+            <div
+              className="tareas-por-cliente-total"
+              data-testid="report.byClient.totalGeneral"
+              role="status"
+            >
+              {t('report.byClient.totalHoras', 'Total horas')}:{' '}
+              <strong>{totalGeneralHoras.toFixed(2)}</strong>
+              {' · '}
+              {t('report.byClient.totalTareas', 'Total tareas')}:{' '}
+              <strong>{totalGeneralTareas}</strong>
+            </div>
+            <div className="tareas-por-cliente-export">
+              {!hasData && !loading && (
+                <span className="tareas-por-cliente-export-no-data" data-testid="exportarExcel.mensajeSinDatos">
+                  {t('report.export.noData', 'No hay datos para exportar')}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                disabled={!hasData || loading}
+                className="tareas-por-cliente-btn-export"
+                data-testid="exportarExcel.boton"
+                aria-label={t('report.export.aria', 'Exportar a Excel')}
+              >
+                {t('report.export.button', 'Exportar a Excel')}
+              </button>
+            </div>
           </div>
 
           {loading ? (

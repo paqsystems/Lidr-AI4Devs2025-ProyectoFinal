@@ -81,6 +81,8 @@ export interface TaskListParams {
   busqueda?: string;
   ordenar_por?: string;
   orden?: 'asc' | 'desc';
+  /** TR-040: filtro estado cerrado (true/false; omitir = todos) */
+  cerrado?: boolean | null;
 }
 
 /**
@@ -99,6 +101,13 @@ export interface TaskListResult {
     total_horas: number;
   };
 }
+
+/**
+ * Resultado de getTasks / getAllTasks
+ */
+export type GetTasksResult =
+  | { success: true; data: TaskListItem[]; pagination: TaskListResult['pagination']; totales: TaskListResult['totales']; errorCode?: number; errorMessage?: string }
+  | { success: false; errorCode?: number; errorMessage?: string };
 
 /**
  * Item de consulta detallada (TR-044): empleado solo si supervisor
@@ -185,6 +194,147 @@ export interface ByClientGroup {
 export interface GetByClientReportResult {
   success: boolean;
   grupos?: ByClientGroup[];
+  totalGeneralHoras?: number;
+  totalGeneralTareas?: number;
+  errorCode?: number;
+  errorMessage?: string;
+}
+
+/**
+ * Parámetros para GET /reports/by-employee (TR-045)
+ */
+export interface ByEmployeeReportParams {
+  fecha_desde?: string;
+  fecha_hasta?: string;
+  tipo_cliente_id?: number | null;
+  cliente_id?: number | null;
+  usuario_id?: number | null;
+}
+
+/**
+ * Tarea dentro de un grupo por empleado (TR-045)
+ */
+export interface ByEmployeeTaskItem {
+  id: number;
+  fecha: string;
+  cliente: { id: number; nombre: string };
+  tipo_tarea: { id: number; descripcion: string };
+  horas: number;
+  sin_cargo: boolean;
+  presencial: boolean;
+  descripcion: string;
+}
+
+/**
+ * Grupo por empleado en reporte TR-045
+ */
+export interface ByEmployeeGroup {
+  usuario_id: number;
+  nombre: string;
+  code: string;
+  total_horas: number;
+  cantidad_tareas: number;
+  tareas: ByEmployeeTaskItem[];
+}
+
+/**
+ * Resultado de getReportByEmployee (TR-045)
+ */
+export interface GetByEmployeeReportResult {
+  success: boolean;
+  grupos?: ByEmployeeGroup[];
+  totalGeneralHoras?: number;
+  totalGeneralTareas?: number;
+  errorCode?: number;
+  errorMessage?: string;
+}
+
+/**
+ * Parámetros para GET /reports/by-task-type (TR-047)
+ */
+export interface ByTaskTypeReportParams {
+  fecha_desde?: string;
+  fecha_hasta?: string;
+  tipo_cliente_id?: number | null;
+  cliente_id?: number | null;
+  usuario_id?: number | null;
+}
+
+/**
+ * Tarea dentro de un grupo por tipo de tarea (TR-047)
+ */
+export interface ByTaskTypeTaskItem {
+  id: number;
+  fecha: string;
+  cliente: { id: number; nombre: string };
+  tipo_tarea: { id: number; descripcion: string };
+  horas: number;
+  sin_cargo: boolean;
+  presencial: boolean;
+  descripcion: string;
+}
+
+/**
+ * Grupo por tipo de tarea en reporte TR-047
+ */
+export interface ByTaskTypeGroup {
+  tipo_tarea_id: number;
+  descripcion: string;
+  total_horas: number;
+  cantidad_tareas: number;
+  tareas: ByTaskTypeTaskItem[];
+}
+
+/**
+ * Resultado de getReportByTaskType (TR-047)
+ */
+export interface GetByTaskTypeReportResult {
+  success: boolean;
+  grupos?: ByTaskTypeGroup[];
+  totalGeneralHoras?: number;
+  totalGeneralTareas?: number;
+  errorCode?: number;
+  errorMessage?: string;
+}
+
+/**
+ * Parámetros para GET /reports/by-date (TR-048)
+ */
+export interface ByDateReportParams {
+  fecha_desde?: string;
+  fecha_hasta?: string;
+}
+
+/**
+ * Tarea dentro de un grupo por fecha (TR-048)
+ */
+export interface ByDateTaskItem {
+  id: number;
+  fecha: string;
+  cliente: { id: number; nombre: string };
+  tipo_tarea: { id: number; descripcion: string };
+  horas: number;
+  sin_cargo: boolean;
+  presencial: boolean;
+  descripcion: string;
+}
+
+/**
+ * Grupo por fecha en reporte TR-048
+ */
+export interface ByDateGroup {
+  fecha: string;
+  total_horas: number;
+  cantidad_tareas: number;
+  tareas: ByDateTaskItem[];
+}
+
+/**
+ * Resultado de getReportByDate (TR-048)
+ */
+export interface GetByDateReportResult {
+  success: boolean;
+  grupos?: ByDateGroup[];
   totalGeneralHoras?: number;
   totalGeneralTareas?: number;
   errorCode?: number;
@@ -712,6 +862,8 @@ export async function getAllTasks(params: TaskListParams = {}): Promise<GetTasks
   if (params.busqueda) searchParams.set('busqueda', params.busqueda);
   if (params.ordenar_por) searchParams.set('ordenar_por', params.ordenar_por);
   if (params.orden) searchParams.set('orden', params.orden);
+  if (params.cerrado === true) searchParams.set('cerrado', 'true');
+  if (params.cerrado === false) searchParams.set('cerrado', 'false');
 
   const queryString = searchParams.toString();
   const url = `${API_BASE_URL}/v1/tasks/all${queryString ? `?${queryString}` : ''}`;
@@ -748,6 +900,72 @@ export async function getAllTasks(params: TaskListParams = {}): Promise<GetTasks
     };
   } catch (error) {
     console.error('Error en getAllTasks:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Resultado de bulkToggleClose (TR-042)
+ */
+export interface BulkToggleCloseResult {
+  success: boolean;
+  processed?: number;
+  errorCode?: number;
+  errorMessage?: string;
+}
+
+/**
+ * Procesamiento masivo: invertir estado cerrado de tareas seleccionadas (TR-042, TR-043).
+ *
+ * @param taskIds IDs de tareas a procesar
+ * @returns processed count o error (1212 selección vacía, 403 no supervisor)
+ */
+export async function bulkToggleClose(taskIds: number[]): Promise<BulkToggleCloseResult> {
+  const token = getToken();
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+  if (!Array.isArray(taskIds) || taskIds.length === 0) {
+    return {
+      success: false,
+      errorCode: 1212,
+      errorMessage: 'Debe seleccionar al menos una tarea',
+    };
+  }
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/tasks/bulk-toggle-close`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ task_ids: taskIds }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      const err = data as ApiError;
+      return {
+        success: false,
+        errorCode: err.error,
+        errorMessage: err.respuesta,
+      };
+    }
+    const res = data as ApiResponse<{ processed: number; task_ids: number[] }>;
+    return {
+      success: true,
+      processed: res.resultado.processed,
+    };
+  } catch (error) {
+    console.error('Error en bulkToggleClose:', error);
     return {
       success: false,
       errorCode: 9999,
@@ -889,6 +1107,222 @@ export async function getReportByClient(
     };
   } catch (error) {
     console.error('Error en getReportByClient:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene reporte agrupado por empleado (TR-045). Solo supervisores.
+ *
+ * @param params fecha_desde, fecha_hasta, tipo_cliente_id, cliente_id, usuario_id (opcional)
+ * @returns grupos, totalGeneralHoras, totalGeneralTareas o error (1305 período inválido, 403 no supervisor)
+ */
+export async function getReportByEmployee(
+  params: ByEmployeeReportParams = {}
+): Promise<GetByEmployeeReportResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
+  if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
+  if (params.tipo_cliente_id != null && params.tipo_cliente_id !== '') searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
+  if (params.cliente_id != null && params.cliente_id !== '') searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.usuario_id != null && params.usuario_id !== '') searchParams.set('usuario_id', String(params.usuario_id));
+
+  const queryString = searchParams.toString();
+  const url = `${API_BASE_URL}/v1/reports/by-employee${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const result = data as ApiResponse<{
+      grupos: ByEmployeeGroup[];
+      total_general_horas: number;
+      total_general_tareas: number;
+    }>;
+    const r = result.resultado;
+
+    return {
+      success: true,
+      grupos: r.grupos,
+      totalGeneralHoras: r.total_general_horas,
+      totalGeneralTareas: r.total_general_tareas,
+    };
+  } catch (error) {
+    console.error('Error en getReportByEmployee:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene reporte agrupado por tipo de tarea (TR-047). Solo supervisores.
+ *
+ * @param params fecha_desde, fecha_hasta, tipo_cliente_id, cliente_id, usuario_id (opcional)
+ * @returns grupos, totalGeneralHoras, totalGeneralTareas o error (1305 período inválido, 403 no supervisor)
+ */
+export async function getReportByTaskType(
+  params: ByTaskTypeReportParams = {}
+): Promise<GetByTaskTypeReportResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
+  if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
+  if (params.tipo_cliente_id != null && params.tipo_cliente_id !== '') searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
+  if (params.cliente_id != null && params.cliente_id !== '') searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.usuario_id != null && params.usuario_id !== '') searchParams.set('usuario_id', String(params.usuario_id));
+
+  const queryString = searchParams.toString();
+  const url = `${API_BASE_URL}/v1/reports/by-task-type${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const result = data as ApiResponse<{
+      grupos: ByTaskTypeGroup[];
+      total_general_horas: number;
+      total_general_tareas: number;
+    }>;
+    const r = result.resultado;
+
+    return {
+      success: true,
+      grupos: r.grupos,
+      totalGeneralHoras: r.total_general_horas,
+      totalGeneralTareas: r.total_general_tareas,
+    };
+  } catch (error) {
+    console.error('Error en getReportByTaskType:', error);
+    return {
+      success: false,
+      errorCode: 9999,
+      errorMessage: t('tasks.service.errors.connection', 'Error de conexión. Intente nuevamente.'),
+    };
+  }
+}
+
+/**
+ * Obtiene reporte agrupado por fecha (TR-048). Empleado, supervisor y cliente (datos filtrados por rol).
+ *
+ * @param params fecha_desde, fecha_hasta
+ * @returns grupos, totalGeneralHoras, totalGeneralTareas o error (1305 período inválido)
+ */
+export async function getReportByDate(
+  params: ByDateReportParams = {}
+): Promise<GetByDateReportResult> {
+  const token = getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      errorCode: 4001,
+      errorMessage: t('tasks.service.errors.notAuthenticated', 'No autenticado'),
+    };
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
+  if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
+
+  const queryString = searchParams.toString();
+  const url = `${API_BASE_URL}/v1/reports/by-date${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorData = data as ApiError;
+      return {
+        success: false,
+        errorCode: errorData.error,
+        errorMessage: errorData.respuesta,
+      };
+    }
+
+    const result = data as ApiResponse<{
+      grupos: ByDateGroup[];
+      total_general_horas: number;
+      total_general_tareas: number;
+    }>;
+    const r = result.resultado;
+
+    return {
+      success: true,
+      grupos: r.grupos,
+      totalGeneralHoras: r.total_general_horas,
+      totalGeneralTareas: r.total_general_tareas,
+    };
+  } catch (error) {
+    console.error('Error en getReportByDate:', error);
     return {
       success: false,
       errorCode: 9999,

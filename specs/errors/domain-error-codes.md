@@ -81,6 +81,7 @@ Todos los errores siguen el formato estándar:
 | 1209 | Observación excede longitud máxima | 422 | `observacion` | La observación no puede exceder 1000 caracteres |
 | 1210 | Duración debe estar en tramos de 15 minutos | 422 | `duracion_minutos` | La duración debe ser múltiplo de 15 (15, 30, 45, 60, etc.) |
 | 1211 | Observación requerida | 422 | `observacion` | El campo observación es obligatorio |
+| 1212 | Debe seleccionar al menos una tarea | 422 | `task_ids` | Debe seleccionar al menos una tarea (proceso masivo) |
 
 ### 1300-1399: Validación de Filtros y Paginación
 

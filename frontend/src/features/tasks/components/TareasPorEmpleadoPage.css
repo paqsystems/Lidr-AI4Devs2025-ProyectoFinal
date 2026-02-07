@@ -1,9 +1,9 @@
 /**
- * Estilos: TareasPorClientePage (TR-046)
- * Consulta agrupada por cliente con filtros, accordion y total general.
+ * Estilos: TareasPorEmpleadoPage (TR-045)
+ * Consulta agrupada por empleado con filtros, accordion y total general.
  */
 
-.tareas-por-cliente-container {
+.tareas-por-empleado-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem;
@@ -11,17 +11,17 @@
   min-height: 100vh;
 }
 
-.tareas-por-cliente-header {
+.tareas-por-empleado-header {
   margin-bottom: 1.5rem;
 }
 
-.tareas-por-cliente-title {
+.tareas-por-empleado-title {
   margin: 0;
   font-size: 1.5rem;
   color: #1f2937;
 }
 
-.tareas-por-cliente-filters {
+.tareas-por-empleado-filters {
   background: white;
   padding: 1rem;
   border-radius: 8px;
@@ -29,14 +29,14 @@
   margin-bottom: 1rem;
 }
 
-.tareas-por-cliente-filters-row {
+.tareas-por-empleado-filters-row {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 1rem 1.5rem;
 }
 
-.tareas-por-cliente-label {
+.tareas-por-empleado-label {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -44,7 +44,7 @@
   color: #374151;
 }
 
-.tareas-por-cliente-label input[type="date"] {
+.tareas-por-empleado-label input[type="date"] {
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -52,7 +52,16 @@
   min-width: 140px;
 }
 
-.tareas-por-cliente-btn-apply {
+.tareas-por-empleado-cliente select,
+.tareas-por-empleado-empleado select {
+  min-width: 180px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.tareas-por-empleado-btn-apply {
   padding: 0.5rem 1rem;
   background-color: #2563eb;
   color: white;
@@ -62,16 +71,16 @@
   cursor: pointer;
 }
 
-.tareas-por-cliente-btn-apply:hover:not(:disabled) {
+.tareas-por-empleado-btn-apply:hover:not(:disabled) {
   background-color: #1d4ed8;
 }
 
-.tareas-por-cliente-btn-apply:disabled {
+.tareas-por-empleado-btn-apply:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.tareas-por-cliente-error {
+.tareas-por-empleado-error {
   padding: 1rem;
   background-color: #fef2f2;
   color: #b91c1c;
@@ -79,7 +88,7 @@
   margin-bottom: 1rem;
 }
 
-.tareas-por-cliente-total-row {
+.tareas-por-empleado-total-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -87,23 +96,23 @@
   margin-bottom: 1rem;
 }
 
-.tareas-por-cliente-total {
+.tareas-por-empleado-total {
   font-size: 1rem;
   color: #374151;
 }
 
-.tareas-por-cliente-export {
+.tareas-por-empleado-export {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.tareas-por-cliente-export-no-data {
+.tareas-por-empleado-export-no-data {
   font-size: 0.875rem;
   color: #6b7280;
 }
 
-.tareas-por-cliente-btn-export {
+.tareas-por-empleado-btn-export {
   padding: 0.5rem 1rem;
   background-color: #059669;
   color: white;
@@ -113,17 +122,17 @@
   cursor: pointer;
 }
 
-.tareas-por-cliente-btn-export:hover:not(:disabled) {
+.tareas-por-empleado-btn-export:hover:not(:disabled) {
   background-color: #047857;
 }
 
-.tareas-por-cliente-btn-export:disabled {
+.tareas-por-empleado-btn-export:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.tareas-por-cliente-loading,
-.tareas-por-cliente-empty {
+.tareas-por-empleado-loading,
+.tareas-por-empleado-empty {
   padding: 2rem;
   text-align: center;
   color: #6b7280;
@@ -132,20 +141,20 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.tareas-por-cliente-groups {
+.tareas-por-empleado-groups {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.tareas-por-cliente-group {
+.tareas-por-empleado-group {
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
-.tareas-por-cliente-group-header {
+.tareas-por-empleado-group-header {
   width: 100%;
   display: flex;
   align-items: center;
@@ -160,50 +169,50 @@
   transition: background-color 0.15s;
 }
 
-.tareas-por-cliente-group-header:hover {
+.tareas-por-empleado-group-header:hover {
   background-color: #f9fafb;
 }
 
-.tareas-por-cliente-group-title {
+.tareas-por-empleado-group-title {
   flex: 1;
   font-weight: 600;
   color: #1f2937;
 }
 
-.tareas-por-cliente-group-meta {
+.tareas-por-empleado-group-meta {
   font-size: 0.875rem;
   color: #6b7280;
 }
 
-.tareas-por-cliente-group-chevron {
+.tareas-por-empleado-group-chevron {
   font-size: 0.75rem;
   color: #9ca3af;
 }
 
-.tareas-por-cliente-group-detail {
+.tareas-por-empleado-group-detail {
   padding: 0 1.25rem 1.25rem;
   border-top: 1px solid #e5e7eb;
 }
 
-.tareas-por-cliente-detail-table {
+.tareas-por-empleado-detail-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
 
-.tareas-por-cliente-detail-table th,
-.tareas-por-cliente-detail-table td {
+.tareas-por-empleado-detail-table th,
+.tareas-por-empleado-detail-table td {
   padding: 0.5rem 0.75rem;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.tareas-por-cliente-detail-table th {
+.tareas-por-empleado-detail-table th {
   background-color: #f9fafb;
   font-weight: 600;
   color: #374151;
 }
 
-.tareas-por-cliente-detail-table tbody tr:hover {
+.tareas-por-empleado-detail-table tbody tr:hover {
   background-color: #f9fafb;
 }

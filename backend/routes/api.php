@@ -75,6 +75,12 @@ Route::prefix('v1')->group(function () {
                 ->name('api.v1.reports.detail');
             Route::get('/by-client', [ReportController::class, 'byClient'])
                 ->name('api.v1.reports.byClient');
+            Route::get('/by-employee', [ReportController::class, 'byEmployee'])
+                ->name('api.v1.reports.byEmployee');
+            Route::get('/by-task-type', [ReportController::class, 'byTaskType'])
+                ->name('api.v1.reports.byTaskType');
+            Route::get('/by-date', [ReportController::class, 'byDate'])
+                ->name('api.v1.reports.byDate');
         });
         
         // Rutas de clientes (solo supervisores) @see TR-008(MH), TR-009(MH), TR-010(MH)
@@ -154,6 +160,10 @@ Route::prefix('v1')->group(function () {
             // GET /api/v1/tasks/employees - Obtener lista de empleados (solo supervisores)
             Route::get('/employees', [TaskController::class, 'getEmployees'])
                 ->name('api.v1.tasks.employees');
+
+            // POST /api/v1/tasks/bulk-toggle-close - Proceso masivo cerrar/reabrir (TR-042, TR-043)
+            Route::post('/bulk-toggle-close', [TaskController::class, 'bulkToggleClose'])
+                ->name('api.v1.tasks.bulkToggleClose');
 
             // GET /api/v1/tasks/{id} - Obtener tarea para edición (TR-029)
             Route::get('/{id}', [TaskController::class, 'show'])

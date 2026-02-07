@@ -158,6 +158,34 @@ export function Dashboard(): React.ReactElement {
             >
               Tareas por Cliente
             </button>
+            <button
+              onClick={() => navigate('/informes/tareas-por-fecha')}
+              className="profile-link-button"
+              data-testid="app.tareasPorFechaLink"
+              aria-label="Tareas por fecha"
+            >
+              Tareas por Fecha
+            </button>
+            {isSupervisor && (
+              <button
+                onClick={() => navigate('/informes/tareas-por-empleado')}
+                className="profile-link-button"
+                data-testid="app.tareasPorEmpleadoLink"
+                aria-label="Tareas por empleado"
+              >
+                Tareas por Empleado
+              </button>
+            )}
+            {isSupervisor && (
+              <button
+                onClick={() => navigate('/informes/tareas-por-tipo')}
+                className="profile-link-button"
+                data-testid="app.tareasPorTipoLink"
+                aria-label="Tareas por tipo"
+              >
+                Tareas por Tipo
+              </button>
+            )}
             {isSupervisor && (
               <>
                 <button
@@ -191,6 +219,14 @@ export function Dashboard(): React.ReactElement {
                   aria-label="Tipos de tarea"
                 >
                   Tipos de Tarea
+                </button>
+                <button
+                  onClick={() => navigate('/tareas/proceso-masivo')}
+                  className="profile-link-button"
+                  data-testid="app.procesoMasivoLink"
+                  aria-label="Proceso masivo de tareas"
+                >
+                  Proceso Masivo
                 </button>
               </>
             )}

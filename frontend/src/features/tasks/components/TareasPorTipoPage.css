@@ -1,9 +1,9 @@
 /**
- * Estilos: ConsultaDetalladaPage (TR-044)
- * Consulta detallada de tareas con filtros y tabla.
+ * Estilos: TareasPorTipoPage (TR-047)
+ * Consulta agrupada por tipo de tarea con filtros, accordion y total general.
  */
 
-.consulta-detallada-container {
+.tareas-por-tipo-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem;
@@ -11,17 +11,17 @@
   min-height: 100vh;
 }
 
-.consulta-detallada-header {
+.tareas-por-tipo-header {
   margin-bottom: 1.5rem;
 }
 
-.consulta-detallada-title {
+.tareas-por-tipo-title {
   margin: 0;
   font-size: 1.5rem;
   color: #1f2937;
 }
 
-.consulta-detallada-filters {
+.tareas-por-tipo-filters {
   background: white;
   padding: 1rem;
   border-radius: 8px;
@@ -29,14 +29,14 @@
   margin-bottom: 1rem;
 }
 
-.consulta-detallada-filters-row {
+.tareas-por-tipo-filters-row {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 1rem 1.5rem;
 }
 
-.consulta-detallada-label {
+.tareas-por-tipo-label {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -44,8 +44,7 @@
   color: #374151;
 }
 
-.consulta-detallada-label input[type="date"],
-.consulta-detallada-label select {
+.tareas-por-tipo-label input[type="date"] {
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -53,15 +52,16 @@
   min-width: 140px;
 }
 
-.consulta-detallada-label select {
+.tareas-por-tipo-cliente select,
+.tareas-por-tipo-empleado select {
   min-width: 180px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
 }
 
-.consulta-detallada-label-text {
-  margin-bottom: 0.25rem;
-}
-
-.consulta-detallada-btn-apply {
+.tareas-por-tipo-btn-apply {
   padding: 0.5rem 1rem;
   background-color: #2563eb;
   color: white;
@@ -71,16 +71,16 @@
   cursor: pointer;
 }
 
-.consulta-detallada-btn-apply:hover:not(:disabled) {
+.tareas-por-tipo-btn-apply:hover:not(:disabled) {
   background-color: #1d4ed8;
 }
 
-.consulta-detallada-btn-apply:disabled {
+.tareas-por-tipo-btn-apply:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.consulta-detallada-error {
+.tareas-por-tipo-error {
   padding: 1rem;
   background-color: #fef2f2;
   color: #b91c1c;
@@ -88,7 +88,7 @@
   margin-bottom: 1rem;
 }
 
-.consulta-detallada-total-row {
+.tareas-por-tipo-total-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -96,23 +96,23 @@
   margin-bottom: 1rem;
 }
 
-.consulta-detallada-total {
+.tareas-por-tipo-total {
   font-size: 1rem;
   color: #374151;
 }
 
-.consulta-detallada-export {
+.tareas-por-tipo-export {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.consulta-detallada-export-no-data {
+.tareas-por-tipo-export-no-data {
   font-size: 0.875rem;
   color: #6b7280;
 }
 
-.consulta-detallada-btn-export {
+.tareas-por-tipo-btn-export {
   padding: 0.5rem 1rem;
   background-color: #059669;
   color: white;
@@ -122,17 +122,17 @@
   cursor: pointer;
 }
 
-.consulta-detallada-btn-export:hover:not(:disabled) {
+.tareas-por-tipo-btn-export:hover:not(:disabled) {
   background-color: #047857;
 }
 
-.consulta-detallada-btn-export:disabled {
+.tareas-por-tipo-btn-export:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.consulta-detallada-loading,
-.consulta-detallada-empty {
+.tareas-por-tipo-loading,
+.tareas-por-tipo-empty {
   padding: 2rem;
   text-align: center;
   color: #6b7280;
@@ -141,47 +141,78 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.consulta-detallada-table-wrapper {
-  overflow-x: auto;
+.tareas-por-tipo-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tareas-por-tipo-group {
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  margin-bottom: 1rem;
+  overflow: hidden;
 }
 
-.consulta-detallada-table {
+.tareas-por-tipo-group-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.tareas-por-tipo-group-header:hover {
+  background-color: #f9fafb;
+}
+
+.tareas-por-tipo-group-title {
+  flex: 1;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.tareas-por-tipo-group-meta {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.tareas-por-tipo-group-chevron {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.tareas-por-tipo-group-detail {
+  padding: 0 1.25rem 1.25rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.tareas-por-tipo-detail-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
 
-.consulta-detallada-table th,
-.consulta-detallada-table td {
-  padding: 0.75rem 1rem;
+.tareas-por-tipo-detail-table th,
+.tareas-por-tipo-detail-table td {
+  padding: 0.5rem 0.75rem;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.consulta-detallada-table th {
+.tareas-por-tipo-detail-table th {
   background-color: #f9fafb;
   font-weight: 600;
   color: #374151;
 }
 
-.consulta-detallada-table tbody tr:hover {
+.tareas-por-tipo-detail-table tbody tr:hover {
   background-color: #f9fafb;
-}
-
-.consulta-detallada-th-sort {
-  background: none;
-  border: none;
-  font: inherit;
-  font-weight: 600;
-  color: #374151;
-  cursor: pointer;
-  padding: 0;
-}
-
-.consulta-detallada-th-sort:hover {
-  color: #2563eb;
 }

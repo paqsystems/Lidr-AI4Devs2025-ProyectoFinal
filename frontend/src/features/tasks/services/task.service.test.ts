@@ -1,10 +1,13 @@
 /**
- * Tests unitarios: task.service (getTasks, getTask, updateTask, deleteTask)
+ * Tests unitarios: task.service (getTasks, getTask, updateTask, deleteTask, getAllTasks, bulkToggleClose)
  *
  * @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
  * @see TR-029(MH)-edición-de-tarea-propia.md
  * @see TR-030(MH)-eliminación-de-tarea-propia.md
  * @see TR-031(MH)-edición-de-tarea-supervisor.md
+ * @see TR-040(SH)-filtrado-de-tareas-para-proceso-masivo.md
+ * @see TR-042(SH)-procesamiento-masivo-de-tareas-cerrarreabrir.md
+ * @see TR-043(SH)-validación-de-selección-para-procesamiento.md
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -14,6 +17,8 @@ import {
   getTask,
   updateTask,
   deleteTask,
+  getAllTasks,
+  bulkToggleClose,
   getDetailReport,
   getReportByClient,
 } from './task.service';
@@ -491,6 +496,134 @@ describe('task.service', () => {
     it('retorna error cuando no hay token', async () => {
       vi.mocked(getToken).mockReturnValueOnce(null);
       const result = await getReportByClient({});
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(4001);
+    });
+  });
+
+  describe('getAllTasks — TR-034, TR-040', () => {
+    it('incluye parámetro cerrado en la URL cuando se pasa cerrado: true', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            error: 0,
+            respuesta: 'OK',
+            resultado: {
+              data: [],
+              pagination: { current_page: 1, per_page: 15, total: 0, last_page: 1 },
+              totales: { cantidad_tareas: 0, total_horas: 0 },
+            },
+          }),
+      });
+      await getAllTasks({ cerrado: true });
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/tasks/all'),
+        expect.any(Object)
+      );
+      const url = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(url).toContain('cerrado=true');
+    });
+
+    it('retorna error 1305 cuando el backend responde rango de fechas inválido', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 422,
+        json: () =>
+          Promise.resolve({
+            error: 1305,
+            respuesta: 'La fecha desde no puede ser posterior a fecha hasta',
+            resultado: {},
+          }),
+      });
+      const result = await getAllTasks({ fecha_desde: '2026-02-01', fecha_hasta: '2026-01-01' });
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(1305);
+    });
+
+    it('retorna error 403 cuando el usuario no es supervisor', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+        json: () =>
+          Promise.resolve({
+            error: 4030,
+            respuesta: 'Solo los supervisores pueden acceder a todas las tareas',
+            resultado: {},
+          }),
+      });
+      const result = await getAllTasks({});
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(4030);
+    });
+  });
+
+  describe('bulkToggleClose — TR-042, TR-043', () => {
+    it('retorna processed cuando la API responde 200', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            error: 0,
+            respuesta: 'Se procesaron 2 registros',
+            resultado: { processed: 2, task_ids: [1, 2] },
+          }),
+      });
+      const result = await bulkToggleClose([1, 2]);
+      expect(result.success).toBe(true);
+      expect(result.processed).toBe(2);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/tasks/bulk-toggle-close'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ task_ids: [1, 2] }),
+        })
+      );
+    });
+
+    it('retorna error 1212 cuando task_ids está vacío (validación frontend)', async () => {
+      const result = await bulkToggleClose([]);
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(1212);
+      expect(result.errorMessage).toContain('Debe seleccionar al menos una tarea');
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('retorna error 1212 cuando el backend responde selección vacía', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 422,
+        json: () =>
+          Promise.resolve({
+            error: 1212,
+            respuesta: 'Debe seleccionar al menos una tarea',
+            resultado: {},
+          }),
+      });
+      const result = await bulkToggleClose([1]);
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(1212);
+    });
+
+    it('retorna error 403 cuando el usuario no es supervisor', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+        json: () =>
+          Promise.resolve({
+            error: 4030,
+            respuesta: 'Solo los supervisores pueden ejecutar el proceso masivo',
+            resultado: {},
+          }),
+      });
+      const result = await bulkToggleClose([1, 2]);
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe(4030);
+    });
+
+    it('retorna error cuando no hay token', async () => {
+      vi.mocked(getToken).mockReturnValueOnce(null);
+      const result = await bulkToggleClose([1]);
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe(4001);
     });

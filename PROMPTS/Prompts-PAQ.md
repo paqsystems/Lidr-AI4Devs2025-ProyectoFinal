@@ -268,3 +268,20 @@ Historias aplicadas: HU-008 (listado clientes – compleja), HU-009 a HU-012 (cr
 - **HU-012 (asignación tipos de tarea a cliente):** La narrativa correcta es "… para que **ese cliente sólo use esos tipos de tarea, además de los genéricos**" (un tipo no genérico puede usarlo más de un cliente; no "solo ese cliente pueda usar esos tipos").
 - **Eliminación de cliente (TR-011):** Al eliminar un cliente, los registros en `PQ_PARTES_CLIENTE_TIPO_TAREA` se eliminan automáticamente por **CASCADE** en la FK `fk_ctt_cliente`; no hace falta borrarlos en código.
 
+---
+
+## Prompt 11 - Generar nueva historia de usuario (menú lateral de navegación)
+
+**Instrucción utilizada (2026-02-07):**
+
+Quiero que generes una nueva historia de usuario, con el numero 056, de tipo SH, que reubique los botones para invocar cada proceso en la pantalla de dashboard, como opciones de menú en la parte lateral izquierda. Comentame si necesito que te explicite ahora o más adelante, el orden de presentación que desearia.
+
+**Acción del agente:**
+- Crear HU-056(SH) en `docs/hu-historias/HU-056(SH)-menú-lateral-de-navegación.md`.
+- Épica: Dashboard / Navegación. Rol: Empleado / Empleado Supervisor / Cliente.
+- Criterios: menú lateral fijo izquierdo; opciones actuales del dashboard reubicadas como ítems del menú; visibilidad según rol; menú colapsable/responsive; estado activo; dashboard sin bloque de botones; data-testid para E2E.
+- Incluir en la HU una nota: el orden de presentación de los ítems del menú puede definirse en refinamiento o más adelante; si el usuario lo indica después, se documenta en la TR o en criterios refinados.
+- Documentar en `.cursor/Docs/HU-056(SH)-menú-lateral-de-navegación.md`.
+
+**Respuesta sobre el orden:** No es necesario explicitar ahora el orden; puede definirse más adelante en refinamiento o en la TR derivada (TR-056). Si se define después, se incorpora como criterio de aceptación explícito.
+

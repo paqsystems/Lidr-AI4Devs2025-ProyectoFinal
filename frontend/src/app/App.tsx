@@ -13,7 +13,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginForm, ForgotPasswordPage, ResetPasswordPage } from '../features/auth';
 import { ProfileView } from '../features/user';
-import { TaskForm, TaskList, TaskListAll, TaskEditPage, ConsultaDetalladaPage, TareasPorClientePage } from '../features/tasks';
+import { TaskForm, TaskList, TaskListAll, TaskEditPage, ProcesoMasivoPage, ConsultaDetalladaPage, TareasPorClientePage, TareasPorEmpleadoPage, TareasPorTipoPage, TareasPorFechaPage } from '../features/tasks';
 import { ClientesPage, ClientesNuevaPage, ClientesEditarPage, ClienteDetallePage } from '../features/clients';
 import { EmpleadosPage, EmpleadosNuevoPage, EmpleadosEditarPage, EmpleadosDetallePage } from '../features/employees';
 import { TiposClientePage, TiposClienteNuevaPage, TiposClienteEditarPage } from '../features/tipoCliente';
@@ -77,6 +77,26 @@ export function App(): React.ReactElement {
           <Route
             path="informes/tareas-por-cliente"
             element={<TareasPorClientePage />}
+          />
+          <Route
+            path="informes/tareas-por-empleado"
+            element={
+              <SupervisorRoute>
+                <TareasPorEmpleadoPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="informes/tareas-por-tipo"
+            element={
+              <SupervisorRoute>
+                <TareasPorTipoPage />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="informes/tareas-por-fecha"
+            element={<TareasPorFechaPage />}
           />
           <Route
             path="clientes"
@@ -211,6 +231,14 @@ export function App(): React.ReactElement {
             element={
               <SupervisorRoute>
                 <TaskListAll />
+              </SupervisorRoute>
+            }
+          />
+          <Route
+            path="tareas/proceso-masivo"
+            element={
+              <SupervisorRoute>
+                <ProcesoMasivoPage />
               </SupervisorRoute>
             }
           />

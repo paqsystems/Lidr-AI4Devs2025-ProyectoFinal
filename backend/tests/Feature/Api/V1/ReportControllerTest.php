@@ -17,9 +17,15 @@ use Tests\TestCase;
  * Tests de Integración: ReportController
  * - GET /api/v1/reports/detail (TR-044 Consulta detallada)
  * - GET /api/v1/reports/by-client (TR-046 Consulta agrupada por cliente)
+ * - GET /api/v1/reports/by-employee (TR-045 Consulta agrupada por empleado)
+ * - GET /api/v1/reports/by-task-type (TR-047 Consulta agrupada por tipo de tarea)
+ * - GET /api/v1/reports/by-date (TR-048 Consulta agrupada por fecha)
  *
  * @see TR-044(MH)-consulta-detallada-de-tareas.md
+ * @see TR-045(SH)-consulta-agrupada-por-empleado.md
  * @see TR-046(MH)-consulta-agrupada-por-cliente.md
+ * @see TR-047(SH)-consulta-agrupada-por-tipo-de-tarea.md
+ * @see TR-048(SH)-consulta-agrupada-por-fecha.md
  */
 class ReportControllerTest extends TestCase
 {
@@ -287,6 +293,198 @@ class ReportControllerTest extends TestCase
     public function by_client_requires_authentication(): void
     {
         $response = $this->getJson('/api/v1/reports/by-client?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(401);
+    }
+
+    // ========================================
+    // TR-045: GET /api/v1/reports/by-employee
+    // ========================================
+
+    /** @test */
+    public function by_employee_supervisor_retorna_200_con_grupos(): void
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-employee?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Reporte por empleado obtenido correctamente',
+            ])
+            ->assertJsonStructure([
+                'resultado' => [
+                    'grupos' => [
+                        '*' => [
+                            'usuario_id',
+                            'nombre',
+                            'code',
+                            'total_horas',
+                            'cantidad_tareas',
+                            'tareas',
+                        ],
+                    ],
+                    'total_general_horas',
+                    'total_general_tareas',
+                ],
+            ]);
+    }
+
+    /** @test */
+    public function by_employee_empleado_no_supervisor_retorna_403(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-employee?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(403);
+    }
+
+    /** @test */
+    public function by_employee_periodo_invalido_retorna_422_1305(): void
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-employee?fecha_desde=2026-01-31&fecha_hasta=2026-01-01');
+
+        $response->assertStatus(422)->assertJson(['error' => 1305]);
+    }
+
+    /** @test */
+    public function by_employee_requires_authentication(): void
+    {
+        $response = $this->getJson('/api/v1/reports/by-employee?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(401);
+    }
+
+    // ============================================
+    // TR-047: GET /api/v1/reports/by-task-type
+    // ============================================
+
+    /** @test */
+    public function by_task_type_supervisor_retorna_200_con_grupos(): void
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-task-type?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Reporte por tipo de tarea obtenido correctamente',
+            ])
+            ->assertJsonStructure([
+                'resultado' => [
+                    'grupos' => [
+                        '*' => [
+                            'tipo_tarea_id',
+                            'descripcion',
+                            'total_horas',
+                            'cantidad_tareas',
+                            'tareas',
+                        ],
+                    ],
+                    'total_general_horas',
+                    'total_general_tareas',
+                ],
+            ]);
+    }
+
+    /** @test */
+    public function by_task_type_empleado_no_supervisor_retorna_403(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-task-type?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(403);
+    }
+
+    /** @test */
+    public function by_task_type_periodo_invalido_retorna_422_1305(): void
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-task-type?fecha_desde=2026-01-31&fecha_hasta=2026-01-01');
+
+        $response->assertStatus(422)->assertJson(['error' => 1305]);
+    }
+
+    /** @test */
+    public function by_task_type_requires_authentication(): void
+    {
+        $response = $this->getJson('/api/v1/reports/by-task-type?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(401);
+    }
+
+    // ========================================
+    // TR-048: GET /api/v1/reports/by-date
+    // ========================================
+
+    /** @test */
+    public function by_date_supervisor_retorna_200_con_grupos(): void
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-date?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'error' => 0,
+                'respuesta' => 'Reporte por fecha obtenido correctamente',
+            ])
+            ->assertJsonStructure([
+                'resultado' => [
+                    'grupos' => [
+                        '*' => [
+                            'fecha',
+                            'total_horas',
+                            'cantidad_tareas',
+                            'tareas',
+                        ],
+                    ],
+                    'total_general_horas',
+                    'total_general_tareas',
+                ],
+            ]);
+    }
+
+    /** @test */
+    public function by_date_empleado_retorna_200(): void
+    {
+        $user = User::where('code', 'JPEREZ')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-date?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
+
+        $response->assertStatus(200)->assertJson(['error' => 0]);
+    }
+
+    /** @test */
+    public function by_date_periodo_invalido_retorna_422_1305(): void
+    {
+        $user = User::where('code', 'MGARCIA')->first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/reports/by-date?fecha_desde=2026-01-31&fecha_hasta=2026-01-01');
+
+        $response->assertStatus(422)->assertJson(['error' => 1305]);
+    }
+
+    /** @test */
+    public function by_date_requires_authentication(): void
+    {
+        $response = $this->getJson('/api/v1/reports/by-date?fecha_desde=2026-01-01&fecha_hasta=2026-01-31');
 
         $response->assertStatus(401);
     }
