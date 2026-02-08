@@ -145,3 +145,143 @@ Acción:
 
 Verificar si se cumple con todo lo que requiere la “entrega-1” en .cursor/consignas.md
 
+## Prompt 8 - Generar archivo de tareas a partir de una historia de usuario
+
+
+Actuá como ingeniero senior responsable del diseño del MVP.
+
+Usá SOLO la regla
+".cursor/rules/13-user-story-to-task-breakdown.md"
+como fuente de verdad.
+
+Tarea:
+A partir de la Historia de Usuario provista,
+generar el plan completo de tareas/tickets
+y guardarlo como archivo Markdown.
+El TR generado debe incluir al final las secciones de trazabilidad (archivos/comandos/notas/pendientes), inicialmente vacías.
+
+Archivo:
+- Ruta: docs/hu-tareas/
+- Nombre: igual al nombre del HU, reemplazando "HU" por "TR".
+- Si existe, regenerarlo desde cero (overwrite total).
+
+Prohibido:
+- modificar otros archivos,
+- inventar features,
+- omitir tests, docs o tareas de calidad.
+
+Permitido:
+- declarar supuestos explícitos.
+
+Historia de Usuario:
+---
+[HU]
+---
+
+## Prompt 9 - Ejecutar una tarea específica
+
+Implementá la TR funcional ubicada en:
+"docs/tareas/[NOMBRE_DEL_TR].md"
+
+Esta TR es la FUENTE DE VERDAD del alcance.
+
+Reglas generales:
+- Implementar estrictamente las tareas definidas en la TR.
+- No inventar funcionalidades fuera del alcance.
+- No modificar HU ni TR sin documentarlo.
+- Respetar las reglas del proyecto y de Cursor (.cursor/rules).
+
+Implementación:
+- Backend, Frontend, Tests y Documentación según lo indicado en la TR.
+- Usar el layout de carpetas definido en el proyecto.
+- Mantener consistencia con TRs ya implementadas.
+
+Tests:
+- Implementar unit tests, integration tests y E2E Playwright si la TR lo indica.
+- En E2E:
+  - Interacciones reales del usuario.
+  - Assertions con expect sobre estado visible.
+  - Prohibido usar waits ciegos (waitForTimeout, sleep, etc.).
+  - Usar selectores estables (data-testid, roles accesibles).
+
+Seguridad y calidad:
+- Respetar validaciones, permisos y reglas de negocio.
+- No revelar información sensible en mensajes de error.
+- Mantener código claro y documentado.
+
+Cierre obligatorio (trazabilidad):
+- Actualizar el mismo archivo TR agregando o completando las secciones:
+  - ## Archivos creados/modificados
+  - ## Comandos ejecutados
+  - ## Notas y decisiones
+  - ## Pendientes / follow-ups
+- Listar paths relativos al repositorio, agrupados por tipo (Backend, Frontend, DB, Tests, Docs).
+- Registrar el uso de IA en docs/ia-log.md.
+
+Restricción:
+- No ejecutar tareas fuera del alcance de esta TR.
+
+---
+
+## Prompt 10 - TR-033 Update (correcciones tras pruebas)
+
+Cuando se detecten errores o mejoras probando el proceso TR-033:
+
+1. Documentarlos en un archivo con el mismo nombre de la tarea TR-033 más el agregado **"-update"** (ej.: `docs/hu-tareas/TR-033(MH)-visualización-de-lista-de-tareas-propias-update.md`).
+2. Resolver en la programación cada punto documentado.
+3. Cuando pasen todos los testings (automáticos y manuales) y el usuario dé confirmación, actualizar el documento TR original y eliminar el archivo "-update".
+
+**Consignas típicas TR-033 Update (ejemplo):**
+1. Los datos para filtrar no están bien alineados.
+2. Se repiten los títulos "Clientes" y "Tipo de tarea".
+3. En la lista de Clientes: considerar la opción "Todos".
+4. Si se elige en cliente la opción "Todos", que en la lista de tipo de tareas aparezca todos los registros (genéricos y no genéricos).
+5. En la lista de tipos de tareas: considerar la opción "Todos".
+6. Si el usuario es de nivel supervisor, agregar el filtro "Empleado".
+7. Si aparece el filtro "Empleado", que también admita la opción "Todos".
+
+---
+
+## Prompts recientes (TR-008 a TR-012 – Clientes)
+
+### Aplicar prompt HU → TR (04 - Prompts-HU-a-Tareas.md)
+
+- **HU Simple:** Usar el bloque "HU Simple": regla `.cursor/rules/13-user-story-to-task-breakdown.md`, generar TR en `docs/hu-tareas/` con nombre HU reemplazando "HU" por "TR", secciones de trazabilidad al final vacías.
+- **HU Compleja:** Usar "HU Complejas" en dos pasos: (1) Refinar HU, criterios, reglas, permisos, supuestos, sin generar tareas; (2) Con el refinamiento validado, generar el plan de tareas en `docs/hu-tareas/TR-[TITULO].md` con cobertura mínima (datos, backend, frontend, tests unit/integration/E2E Playwright, docs, ia-log).
+
+Historias aplicadas: HU-008 (listado clientes – compleja), HU-009 a HU-012 (creación, edición, eliminación, asignación tipos de tarea – simples).
+
+### Ejecutar una TR (05 - Ejecucion-de-una-TR / Prompt 9)
+
+- Implementar la TR en `docs/hu-tareas/TR-XXX.md` como fuente de verdad.
+- Backend, frontend, tests y documentación según la TR.
+- Cierre: actualizar en la TR las secciones Archivos creados/modificados, Comandos ejecutados, Notas y decisiones, Pendientes; registrar en `docs/ia-log.md`.
+- Listar archivos afectados en el chat para revisión (paths relativos al repo).
+
+### Tests E2E (Playwright)
+
+- Para que los E2E pasen hace falta **entorno en ejecución**: backend (`php artisan serve`) y frontend (`npm run dev`). Sin ellos, los E2E fallan por timeout/conexión.
+- Ejecutar con un worker y timeout amplio cuando sea necesario: `npx playwright test tests/e2e/... --project=chromium --workers=1 --timeout=90000`.
+
+### Aclaraciones de producto
+
+- **HU-012 (asignación tipos de tarea a cliente):** La narrativa correcta es "… para que **ese cliente sólo use esos tipos de tarea, además de los genéricos**" (un tipo no genérico puede usarlo más de un cliente; no "solo ese cliente pueda usar esos tipos").
+- **Eliminación de cliente (TR-011):** Al eliminar un cliente, los registros en `PQ_PARTES_CLIENTE_TIPO_TAREA` se eliminan automáticamente por **CASCADE** en la FK `fk_ctt_cliente`; no hace falta borrarlos en código.
+
+---
+
+## Prompt 11 - Generar nueva historia de usuario (menú lateral de navegación)
+
+**Instrucción utilizada (2026-02-07):**
+
+Quiero que generes una nueva historia de usuario, con el numero 056, de tipo SH, que reubique los botones para invocar cada proceso en la pantalla de dashboard, como opciones de menú en la parte lateral izquierda. Comentame si necesito que te explicite ahora o más adelante, el orden de presentación que desearia.
+
+**Acción del agente:**
+- Crear HU-056(SH) en `docs/hu-historias/HU-056(SH)-menú-lateral-de-navegación.md`.
+- Épica: Dashboard / Navegación. Rol: Empleado / Empleado Supervisor / Cliente.
+- Criterios: menú lateral fijo izquierdo; opciones actuales del dashboard reubicadas como ítems del menú; visibilidad según rol; menú colapsable/responsive; estado activo; dashboard sin bloque de botones; data-testid para E2E.
+- Incluir en la HU una nota: el orden de presentación de los ítems del menú puede definirse en refinamiento o más adelante; si el usuario lo indica después, se documenta en la TR o en criterios refinados.
+- Documentar en `.cursor/Docs/HU-056(SH)-menú-lateral-de-navegación.md`.
+
+**Respuesta sobre el orden:** No es necesario explicitar ahora el orden; puede definirse más adelante en refinamiento o en la TR derivada (TR-056). Si se define después, se incorpora como criterio de aceptación explícito.
+

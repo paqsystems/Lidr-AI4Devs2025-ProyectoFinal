@@ -99,7 +99,8 @@ Este repo mantiene la documentación mínima en `/docs`:
 - Unit tests: lógica de dominio/servicios.
 - Integration tests: API + DB (o repositorio) con fixtures.
 - E2E: al menos 1 caso del flujo principal.
-- Mantener instrucciones de ejecución en `docs/testing.md`.
+- **Por cada tarea/historia en frontend:** añadir ambos tipos — unitarios (Vitest en `src/`) y E2E (Playwright en `tests/e2e/`). Al cerrar: ejecutar `npm run test:all` en `frontend/`.
+- Mantener instrucciones y checklist en `docs/testing.md`.
 
 ### 6.4 Trazabilidad
 Cada cambio relevante debe dejar rastro:

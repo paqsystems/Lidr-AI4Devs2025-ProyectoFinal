@@ -41,7 +41,7 @@ Reglas internas de implementación BackEnd para cumplir el contrato de APIs y lo
 - Definir esquema usando Laravel Migrations con Schema Builder.
 - Cada cambio de estructura genera una migration nueva y versionada.
 - Migrations deben ser reversibles (método `down()`).
-- Ver detalles en `/.cursor/rules/03-data-access-orm-sql.md`.
+- Ver detalles en `/.cursor/rules/09-data-access-orm-sql.md`.
 
 ### Modelos Eloquent
 - Definir `$fillable` explícitamente.
@@ -68,6 +68,60 @@ Reglas internas de implementación BackEnd para cumplir el contrato de APIs y lo
 - Ninguna escritura a BD sin Request validado.
 - Mensajes claros en `respuesta`.
 - Validación -> error 1000-1999 + HTTP 422.
+
+---
+
+## Documentación de Código (Obligatoria)
+
+**Regla fundamental:** **TODAS las clases, métodos y propiedades deben documentarse** durante la codificación.
+
+### Reglas Obligatorias
+
+- ✅ **Todas las clases** (públicas, privadas, internas) deben tener PHPDoc
+- ✅ **Todos los métodos** (públicos, privados, protegidos, estáticos) deben tener PHPDoc
+- ✅ **Todas las propiedades** (públicas, privadas, protegidas, constantes) deben tener PHPDoc
+
+### Formato PHPDoc
+
+Usar PHPDoc estándar con:
+- `@param` para parámetros de métodos
+- `@return` para valores de retorno
+- `@throws` para excepciones (si aplica)
+- `@var` para propiedades
+
+### Ejemplo
+
+```php
+/**
+ * Servicio para gestionar el registro de tareas diarias.
+ * 
+ * Este servicio maneja la lógica de negocio relacionada con la creación,
+ * actualización y consulta de registros de tareas.
+ */
+class RegistroTareaService
+{
+    /**
+     * ID del usuario autenticado que realiza la operación.
+     * 
+     * @var int
+     */
+    private int $usuarioId;
+
+    /**
+     * Crea un nuevo registro de tarea para el usuario autenticado.
+     * 
+     * @param array $datos Datos del registro de tarea
+     * @return RegistroTarea El registro de tarea creado
+     * @throws ValidationException Si los datos no son válidos
+     */
+    public function crearRegistroTarea(array $datos): RegistroTarea
+    {
+        // Implementación...
+    }
+}
+```
+
+**Referencia completa:** Ver `specs/governance/code-documentation-rules.md` para reglas detalladas y más ejemplos.
 
 ---
 
@@ -128,12 +182,12 @@ Reglas internas de implementación BackEnd para cumplir el contrato de APIs y lo
 ---
 
 ## Seguridad
-Ver `/.cursor/rules/02-security-sessions-tokens.md`.
+Ver `/.cursor/rules/08-security-sessions-tokens.md`.
 
 ---
 
 ## ORM/SQL complejo
-Ver `/.cursor/rules/03-data-access-orm-sql.md`.
+Ver `/.cursor/rules/09-data-access-orm-sql.md`.
 
 **Regla importante:** NO usar subqueries en WHERE para verificar existencia. Usar LEFT JOIN + verificación de NULL en su lugar.
 

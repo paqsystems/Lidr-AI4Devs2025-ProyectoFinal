@@ -10,7 +10,7 @@ Este documento consolida todas las reglas de negocio del sistema, organizadas po
 - **Validaciones estándar:** Todas las validaciones estándar de un login (código no vacío, contraseña no vacía, formato válido)
 - **Usuario activo:** El usuario debe estar activo (`activo = true`)
 - **Usuario no inhabilitado:** El usuario no debe estar inhabilitado (`inhabilitado = false`)
-- **Código asociado:** El usuario debe tener asociado un código de cliente o asistente (según el tipo de usuario)
+- **Código asociado:** El usuario debe tener asociado un código de cliente o empleado (según el tipo de usuario)
 
 **Implementación:**
 - Verificar en tabla `PQ_PARTES_usuario` o `PQ_PARTES_cliente` según el tipo de autenticación
@@ -53,9 +53,9 @@ if ($tiposGenericos === 0 && $tiposAsignados === 0) {
 
 ---
 
-## 3. Asistente (Usuario/Empleado)
+## 3. Empleado
 
-### 3.1 Campos Obligatorios al Cargar Asistente
+### 3.1 Campos Obligatorios al Cargar Empleado
 - **Código:** Obligatorio (único) - Campo `code`
 - **Descripción:** Obligatorio - Campo `nombre`
 - **Inhabilitado:** Atributo booleano (default: false)
@@ -108,7 +108,7 @@ if ($request->is_default) {
 ### 6.1 Validaciones Obligatorias
 Una tarea debe verificar que:
 
-1. **Código de asistente:** Contenga un `usuario_id` válido (obligatorio)
+1. **Código de empleado:** Contenga un `usuario_id` válido (obligatorio)
 2. **Código de cliente:** Contenga un `cliente_id` válido (obligatorio)
 3. **Tipo de tarea:** Contenga un `tipo_tarea_id` válido (obligatorio)
 4. **Fecha válida:** La fecha sea una fecha válida en formato YYYY-MM-DD
@@ -121,7 +121,7 @@ Una tarea debe verificar que:
 ### 6.2 Validación de Atributos Inhabilitados
 - **No mostrar inhabilitados:** Que no aparezca para asignar a una tarea ningún atributo con estado `inhabilitado = true`:
   - Cliente (`inhabilitado = false`)
-  - Asistente (`inhabilitado = false`)
+  - Empleado (`inhabilitado = false`)
   - Tipo de tarea (`inhabilitado = false`)
 
 **Implementación en selects:**
@@ -136,8 +136,8 @@ $tiposTarea = TipoTarea::where('activo', true)
     ->where('inhabilitado', false)
     ->get();
 
-// Al listar asistentes para select (solo supervisores):
-$asistentes = Usuario::where('activo', true)
+// Al listar empleados para select (solo supervisores):
+$empleados = Usuario::where('activo', true)
     ->where('inhabilitado', false)
     ->get();
 ```
@@ -207,8 +207,8 @@ const canProcess = selectedTasks.length > 0 && selectedTasks.some(task => !task.
 - **Filtros ocultos:** No debe aparecer "cliente" ni "tipo de cliente" como posibilidad de filtro (ya está filtrado automáticamente)
 
 #### 8.2.2 Usuario No Supervisor
-- **Filtro automático:** Si el usuario no es un asistente supervisor, solo puede ver las tareas que realizó (`usuario_id = usuario_autenticado.id`)
-- **Filtros ocultos:** No debe aparecer la opción "asistente" como posibilidad de filtro (ya está filtrado automáticamente)
+- **Filtro automático:** Si el usuario no es un empleado supervisor, solo puede ver las tareas que realizó (`usuario_id = usuario_autenticado.id`)
+- **Filtros ocultos:** No debe aparecer la opción "empleado" como posibilidad de filtro (ya está filtrado automáticamente)
 
 ### 8.3 Resultado Vacío
 - **Mensaje informativo:** Si el resultado de la obtención de datos es vacío, avisar al usuario
@@ -230,7 +230,7 @@ if ($tareas->isEmpty()) {
 ## 9. Integridad Referencial
 
 ### 9.1 Regla de Eliminación
-- **No eliminar si está referenciado:** No se puede eliminar un cliente, asistente, tipo de tarea ni tipo de cliente, si están referenciados en otras tablas
+- **No eliminar si está referenciado:** No se puede eliminar un cliente, empleado, tipo de tarea ni tipo de cliente, si están referenciados en otras tablas
 
 **Implementación:**
 ```php
@@ -240,10 +240,10 @@ if ($tareasAsociadas > 0) {
     throw new BusinessRuleException('No se puede eliminar un cliente que tiene tareas asociadas', 2112);
 }
 
-// Al intentar eliminar asistente:
+// Al intentar eliminar empleado:
 $tareasAsociadas = RegistroTarea::where('usuario_id', $usuarioId)->count();
 if ($tareasAsociadas > 0) {
-    throw new BusinessRuleException('No se puede eliminar un asistente que tiene tareas asociadas', 2113);
+    throw new BusinessRuleException('No se puede eliminar un empleado que tiene tareas asociadas', 2113);
 }
 
 // Al intentar eliminar tipo de tarea:
@@ -293,7 +293,7 @@ if ($clientesAsociados > 0) {
 | 2110 | No se puede modificar una tarea cerrada | 403 | Edición de tarea |
 | 2111 | No se puede eliminar una tarea cerrada | 403 | Eliminación de tarea |
 | 2112 | No se puede eliminar un cliente con tareas asociadas | 422 | Eliminación de cliente |
-| 2113 | No se puede eliminar un asistente con tareas asociadas | 422 | Eliminación de asistente |
+| 2113 | No se puede eliminar un empleado con tareas asociadas | 422 | Eliminación de empleado |
 | 2114 | No se puede eliminar un tipo de tarea en uso | 422 | Eliminación de tipo de tarea |
 | 2115 | No se puede eliminar un tipo de cliente con clientes asociados | 422 | Eliminación de tipo de cliente |
 | 2116 | El cliente debe tener al menos un tipo de tarea disponible | 422 | Creación/actualización de cliente |

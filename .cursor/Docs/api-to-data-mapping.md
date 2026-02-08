@@ -37,10 +37,10 @@ Este archivo mapea cada endpoint de la API a sus operaciones correspondientes en
 
 ## Relación con Otros Documentos
 - Implementa el flujo E2E definido en `specs/flows/e2e-core-flow.md`
-- Sigue las reglas de acceso a datos en `.cursor/rules/03-data-access-orm-sql.md`
+- Sigue las reglas de acceso a datos en `.cursor/rules/09-data-access-orm-sql.md`
 - Refleja el modelo de datos en `docs/domain/DATA_MODEL.md`
 - Usa los códigos de error definidos en `specs/errors/domain-error-codes.md`
-- Alineado con el contrato de API en `.cursor/rules/01-api-contract.md`
+- Alineado con el contrato de API en `.cursor/rules/06-api-contract.md`
 
 ## Uso
 Este documento debe ser consultado por:

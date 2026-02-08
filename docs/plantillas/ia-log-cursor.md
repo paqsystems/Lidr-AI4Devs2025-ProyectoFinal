@@ -27,7 +27,7 @@ Este documento registra las interacciones y decisiones tomadas con asistentes de
 - `docs/deploy-ci-cd.md`
 - `docs/ia-log.md`
 - `AGENTS.md`
-- `.cursor/rules/01-mvp-entregables.mdc`
+- `.cursor/rules/02-mvp-entregables.md`
 
 **Herramienta Utilizada:** Cursor AI Assistant
 

@@ -9,11 +9,25 @@ Este paquete contiene **solo reglas y especificaciones**. **NO** debe implementa
 
 ### Reglas para Cursor (primario)
 Copiar a:
-- `/.cursor/rules/00-backend-policy.md`
-- `/.cursor/rules/01-api-contract.md`
-- `/.cursor/rules/02-security-sessions-tokens.md`
-- `/.cursor/rules/03-data-access-orm-sql.md`
-- `/.cursor/rules/04-ticketing-domain.md`
+- `/.cursor/rules/01-project-context.md`
+- `/.cursor/rules/02-mvp-entregables.md`
+- `/.cursor/rules/03-general-quality.md`
+- `/.cursor/rules/04-custom-rules.md`
+- `/.cursor/rules/05-backend-policy.md`
+- `/.cursor/rules/06-api-contract.md`
+- `/.cursor/rules/07-frontend-norms.md`
+- `/.cursor/rules/08-security-sessions-tokens.md`
+- `/.cursor/rules/09-data-access-orm-sql.md`
+- `/.cursor/rules/10-i18n-and-testid.md`
+- `/.cursor/rules/11-playwright-testing-rules.md`
+- `/.cursor/rules/12-ticketing-domain.md`
+- `/.cursor/rules/13-user-story-to-task-breakdown.md`
+- `/.cursor/rules/14-dbml-sync-rule.md`
+- `/.cursor/rules/15-task-execution-traceability.md`
+- `/.cursor/rules/16-hu-simple-vs-hu-compleja.md`
+- `/.cursor/rules/16-prompt-dispatcher.md`
+- `/.cursor/rules/20-sql-server-datetime-format.md`
+- `/.cursor/rules/21-Iniciar-tunel-SSH-para-MySql.md`
 
 > Si tu instalación de Cursor usa un único archivo `.cursorrules`, concatená el contenido de los archivos anteriores en ese archivo (manteniendo el orden).
 
@@ -24,11 +38,25 @@ Copiar a:
 - `/docs/api/TICKETING_API_SPEC.md`
 
 ## Orden recomendado de lectura para Cursor
-1. 00-backend-policy.md
-2. 01-api-contract.md
-3. 02-security-sessions-tokens.md
-4. 03-data-access-orm-sql.md
-5. 04-ticketing-domain.md
+1. 01-project-context.md
+2. 02-mvp-entregables.md
+3. 03-general-quality.md
+4. 04-custom-rules.md
+5. 05-backend-policy.md
+6. 06-api-contract.md
+7. 07-frontend-norms.md
+8. 08-security-sessions-tokens.md
+9. 09-data-access-orm-sql.md
+10. 10-i18n-and-testid.md
+11. 11-playwright-testing-rules.md
+12. 12-ticketing-domain.md
+13. 13-user-story-to-task-breakdown.md
+14. 14-dbml-sync-rule.md
+15. 15-task-execution-traceability.md
+16. 16-hu-simple-vs-hu-compleja.md
+17. 16-prompt-dispatcher.md
+18. 20-sql-server-datetime-format.md
+19. 21-Iniciar-tunel-SSH-para-MySql.md
 
 Luego usar `/docs/*` como material ampliado.
 
@@ -90,7 +118,7 @@ El MVP se considera funcionalmente completo cuando todas las historias MUST-HAVE
 ### Gestión base (Supervisor)
 - [ ] ABM de Clientes (HU-008 a HU-012)
 - [ ] ABM de Tipos de Cliente (HU-014 a HU-017)
-- [ ] ABM de Empleados/Asistentes (HU-018 a HU-021)
+- [ ] ABM de Empleados (HU-018 a HU-021)
 - [ ] ABM de Tipos de Tarea con reglas de genérico y por defecto (HU-023 a HU-026)
 
 ### Registro de tareas
@@ -141,7 +169,7 @@ El MVP se considera funcionalmente completo cuando todas las historias MUST-HAVE
 - **Visualización gráfica:** Ver `database/modelo-datos.dbml` para el modelo en formato DBML (compatible con dbdiagram.io)
 
 📄 Ver `specs/models/` para especificaciones detalladas de cada modelo:
-- `usuario-model.md` - Modelo de Usuario (Empleado/Asistente)
+- `usuario-model.md` - Modelo de Empleado
 - `registro-tarea-model.md` - Modelo de Registro de Tarea
 - `cliente-model.md` - Modelo de Cliente
 - `tipo-cliente-model.md` - Modelo de Tipo de Cliente
@@ -190,12 +218,12 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 - `PUT /api/v1/tipos-cliente/{id}` - Actualizar tipo de cliente
 - `DELETE /api/v1/tipos-cliente/{id}` - Eliminar tipo de cliente
 
-**Gestión de Asistentes/Empleados (Solo Supervisores):**
-- `GET /api/v1/asistentes` - Listar asistentes
-- `POST /api/v1/asistentes` - Crear asistente
-- `GET /api/v1/asistentes/{id}` - Obtener asistente
-- `PUT /api/v1/asistentes/{id}` - Actualizar asistente
-- `DELETE /api/v1/asistentes/{id}` - Eliminar asistente
+**Gestión de Empleados (Solo Supervisores):**
+- `GET /api/v1/empleados` - Listar empleados
+- `POST /api/v1/empleados` - Crear empleado
+- `GET /api/v1/empleados/{id}` - Obtener empleado
+- `PUT /api/v1/empleados/{id}` - Actualizar empleado
+- `DELETE /api/v1/empleados/{id}` - Eliminar empleado
 
 **Gestión de Tipos de Tarea (Solo Supervisores):**
 - `GET /api/v1/tipos-tarea` - Listar tipos de tarea
@@ -218,7 +246,7 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 
 **Informes y Consultas:**
 - `GET /api/v1/informes/detalle` - Consulta detallada de tareas (filtrado automático por rol)
-- `GET /api/v1/informes/por-asistente` - Consulta agrupada por asistente (filtrado automático por rol)
+- `GET /api/v1/informes/por-empleado` - Consulta agrupada por empleado (filtrado automático por rol)
 - `GET /api/v1/informes/por-cliente` - Consulta agrupada por cliente (filtrado automático por rol)
 - `GET /api/v1/informes/por-tipo` - Consulta agrupada por tipo de tarea (filtrado automático por rol)
 - `GET /api/v1/informes/por-fecha` - Consulta agrupada por fecha (filtrado automático por rol)
@@ -232,7 +260,7 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 **Dashboard:**
 - `GET /api/v1/dashboard/resumen` - Resumen ejecutivo del dashboard (filtrado automático por rol)
 - `GET /api/v1/dashboard/por-cliente` - Resumen por cliente (filtrado automático por rol)
-- `GET /api/v1/dashboard/por-asistente` - Resumen por asistente (filtrado automático por rol)
+- `GET /api/v1/dashboard/por-empleado` - Resumen por empleado (filtrado automático por rol)
 
 > **Nota:** Todos los endpoints de dashboard aplican filtros automáticos según el rol del usuario autenticado (mismas reglas que Informes y Consultas).
 
@@ -281,12 +309,14 @@ La API REST está documentada mediante especificaciones detalladas en `specs/end
 
 Cada ticket técnico referencia las historias de usuario relacionadas y está clasificado según su prioridad (MUST-HAVE o SHOULD-HAVE).
 
+**Trazabilidad de ejecución:** Durante el desarrollo del MVP, la evidencia de ejecución y cambios se documenta al pie de cada TR para facilitar la trazabilidad y la evaluación.
+
 ### Testing
 
 **Estrategia de Testing:**
-- Tests unitarios: Lógica de negocio y componentes
-- Tests de integración: API + Base de datos
-- Tests E2E: Flujo principal completo con **Playwright**
+- Tests unitarios: Lógica de negocio y componentes (ubicados en `backend/tests/Unit/`)
+- Tests de integración: API + Base de datos (ubicados en `backend/tests/Feature/`)
+- Tests E2E: Flujo principal completo con **Playwright** (ubicados en `frontend/tests/e2e/`)
 
 **Playwright (E2E):**
 - ✅ Instalado y configurado en `frontend/`
@@ -313,21 +343,11 @@ npm run test:e2e:headed # Ver navegador
 
 ### Pull Requests
 
-Los cambios de la **Entrega 1 - Documentación Técnica** se encuentran en la rama  `feature-entrega1-[INICIALES]`.
+**Entrega 1 – Documentación Técnica**  
+Los cambios están en la rama `feature-entrega1-PAQ`. PR hacia `main` con documentación técnica (producto, arquitectura, modelo de datos, historias, tickets, especificaciones de API, Playwright). Ver `docs/_ENTREGA-1/INSTRUCCIONES-PR-ENTREGA-1.md`.
 
-**Pull Request:** Se creará un PR hacia `main` con todos los artefactos de documentación técnica.
-
-**Contenido del PR:**
-- Documentación de producto
-- Arquitectura del sistema
-- Modelo de datos completo
-- 55 historias de usuario con criterios de aceptación
-- 33 tickets técnicos derivados
-- 41 especificaciones de endpoints de API
-- Reglas de negocio y validaciones
-- Especificaciones de modelos backend
-- Documentación de estructura de frontend
-- Configuración de Playwright para tests E2E
+**Entrega 2 – Código funcional (primer MVP ejecutable)**  
+Los cambios están en la rama `feature-entrega2-PAQ`. PR hacia `main` con backend, frontend y BD conectados, flujo principal "casi" completo (auth, tareas, clientes, informes, dashboard) y suite de tests. Ver `docs/_ENTREGA-2/VERIFICACION-ENTREGA-2.md` y `docs/_ENTREGA-2/INSTRUCCIONES-PR-ENTREGA-2.md`.
 
 ---
 
@@ -336,7 +356,10 @@ Los cambios de la **Entrega 1 - Documentación Técnica** se encuentran en la ra
 ```
 ├── backend/              # Backend Laravel
 │   ├── app/Models/       # Modelos Eloquent
-│   └── database/         # Migraciones
+│   ├── database/         # Migraciones
+│   └── tests/            # Tests PHPUnit
+│       ├── Unit/         # Tests unitarios
+│       └── Feature/      # Tests de integración
 ├── frontend/             # Frontend React
 │   └── src/
 │       ├── shared/       # Componentes UI base e i18n
@@ -382,8 +405,10 @@ La operatoria básica fue :
 - realicé el primer PR
 - pedí generar un documento MANUAL-PROGRAMADOR.md para ver si un tercero puede seguir el proyecto sin explicación humana
 
-Cómo me sentí con el proceso : 
+## Cómo me sentí con el proceso : 
 - me sentí muy cómodo.
 - como soy más analista de sistemas que programador, creo entender bien la diferencia de funciones entre la IA y yo, y poder hacer las ordenes, seguimientos y controles como si la IA fuese un programador humano.
 - Sólo siento que me sobrepasa la cantidad de información que genera. Debo contemplar reservar una importante suma de tiempo para poder controlar y revisar todo lo que genera.
 - Por normativa propia y ampliado ahora por el punto anterior, procuro realizar pasos pequeños cada vez, para poder hacer un mejor seguimiento y evitar "alucinaciones" de la IA
+- en ningún momento generé código manualmente. Tampoco solicité cambios en el código desde el prompt, sino que siempre modifiqué especificaciones y le pedí que adecué el código a la misma.
+- en forma muy artesanal, en casos de ajustes, correcciones o modificaciones procuré usar el concepto de spec-kit : generar un documento con el mismo nombre del TR a modificar con el agregado "-update"; documenté ahí todos los pasos como una tarea nueva; al quedar debidamente probado, solicité integrar ese documento al original. Desgraciadamente omití conservar una copia como ejemplo.

@@ -6,6 +6,24 @@ de negocio básica sea confiable, sin sobre–dimensionar la estrategia de testi
 
 ---
 
+## Convención: dos tipos de test por tarea/historia
+
+**Cada vez que se implemente una tarea o historia (TR/HU), se deben añadir los dos tipos de test en frontend:**
+
+| Tipo | Herramienta | Ubicación | Qué valida |
+|------|-------------|-----------|------------|
+| **Unitarios** | Vitest | `frontend/src/**/*.{test,spec}.{ts,tsx}` | Lógica, servicios, utilidades, componentes aislados. |
+| **E2E** | Playwright | `frontend/tests/e2e/*.spec.ts` | Flujo de usuario en navegador (login, pantallas, formularios). |
+
+**Ejecución recomendada al cerrar una tarea:** correr ambos con un solo comando (ver más abajo).
+
+**Checklist al programar próximos tests (por tarea/historia):**
+1. ¿Hay lógica o servicio en frontend? → Añadir o ampliar tests en `src/` (Vitest).
+2. ¿Hay pantalla o flujo que el usuario recorre? → Añadir o ampliar spec en `tests/e2e/` (Playwright).
+3. Al terminar la tarea → Ejecutar `npm run test:all` en `frontend/` (y `php artisan test` en backend si aplica).
+
+---
+
 ## Tipos de Tests
 
 ### Tests Unitarios
@@ -42,14 +60,31 @@ Login → Registro de tarea → Visualización de tareas.
 - ✅ **Playwright** (instalado y configurado en `frontend/`)
 - Configuración: `frontend/playwright.config.ts`
 - Tests ubicados en: `frontend/tests/e2e/`
-- Documentación: `docs/frontend/testing.md` y `.cursor/rules/06-playwright-testing-rules.md`
+- Documentación: `docs/frontend/testing.md` y `.cursor/rules/11-playwright-testing-rules.md`
 
-**Ejecutar tests E2E:**
+**Ejecutar tests en frontend:**
 ```bash
 cd frontend
-npm run test:e2e          # Todos los tests
-npm run test:e2e:ui      # Con UI interactiva
-npm run test:e2e:headed # Ver navegador
+# Opción recomendada al cerrar una tarea: unitarios + E2E
+npm run test:all             # Vitest (run) + Playwright E2E
+
+# Por separado
+npm run test                 # Vitest (modo watch)
+npm run test:run             # Vitest una sola vez
+npm run test:e2e             # Solo Playwright E2E
+npm run test:e2e:ui          # E2E con UI interactiva
+npm run test:e2e:headed      # E2E con navegador visible
+```
+
+**Ejecutar tests en backend:**
+```bash
+cd backend
+php artisan test
+```
+
+**Ejecutar todo (backend + frontend unitarios + frontend E2E):**
+```bash
+cd backend && php artisan test && cd ../frontend && npm run test:all
 ```
 
 ---
@@ -60,6 +95,12 @@ npm run test:e2e:headed # Ver navegador
 - No se incluyen pruebas de seguridad avanzadas.
 - No se automatiza visual regression.
 
+### Estado vacío en consultas (HU-050 / TR-050)
+En las pantallas de consulta (Consulta Detallada, Tareas por Cliente), cuando no hay resultados se muestra un mensaje informativo ("No se encontraron tareas para los filtros seleccionados") en lugar de tabla o lista vacía. Los E2E en `consulta-detallada.spec.ts` y `tareas-por-cliente.spec.ts` incluyen escenarios que verifican este mensaje cuando el período no tiene datos (p. ej. período 2030).
+
+### Dashboard (TR-051)
+Los E2E en `dashboard.spec.ts` requieren que el **backend esté en marcha** (`php artisan serve` en `backend/`) para que las pruebas que consumen GET /api/v1/dashboard pasen. Si el backend no está disponible, el dashboard mostrará mensaje de error y los tests que exigen KPIs fallarán.
+
 ---
 
 ## Estructura de Tests (Ejemplo)
@@ -67,8 +108,8 @@ npm run test:e2e:headed # Ver navegador
 ### Backend
 backend/
 tests/
-unit/
-integration/
+  Unit/          # Tests unitarios (lógica de negocio, servicios)
+  Feature/       # Tests de integración (API + base de datos)
 
 
 ### Frontend

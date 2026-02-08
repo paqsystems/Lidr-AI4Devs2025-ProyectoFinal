@@ -77,7 +77,7 @@ Accept: application/json
 {
   "error": 2118,
   "respuesta": "No se puede asignar un tipo de tarea genérico a un cliente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

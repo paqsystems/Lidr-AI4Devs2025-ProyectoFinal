@@ -5,11 +5,12 @@
 Este documento contiene el catálogo completo de historias de usuario para el MVP del sistema de registro de tareas para consultorías y empresas de servicios. El documento está organizado por épicas funcionales y clasifica cada historia como **MUST-HAVE** (indispensable para el flujo E2E) o **SHOULD-HAVE** (mejoras opcionales).
 
 Este documento cubre las siguientes áreas funcionales:
+- Infraestructura y base del sistema
 - Autenticación y acceso al sistema
 - Configuración de usuario
 - Gestión de clientes (ABM)
 - Gestión de tipos de cliente (ABM)
-- Gestión de asistentes/empleados (ABM)
+- Gestión de empleados (ABM)
 - Gestión de tipos de tarea (ABM)
 - Registro de tareas
 - Proceso masivo de tareas
@@ -28,8 +29,9 @@ Este documento cubre las siguientes áreas funcionales:
 
 ### Entidades Principales
 
-- **Usuario/Empleado/Asistente**: Representa a los empleados/asistentes/agentes que cargan las tareas al sistema. Tiene atributos: `id`, `code` (único), `nombre`, `email` (único), `password_hash`, `supervisor` (boolean), `activo`, `inhabilitado` (boolean).
-- **Cliente**: Representa a los clientes para los cuales se registran tareas. Tiene atributos: `id`, `nombre`, `tipo_cliente_id` (FK), `code` (único, obligatorio), `email` (único, opcional), `password_hash` (opcional), `activo`, `inhabilitado` (boolean).
+- **User (Tabla de Autenticación)**: Tabla `USERS` (sin prefijo PQ_PARTES_). Es la tabla central de autenticación del sistema. Tiene atributos: `id`, `code` (único, obligatorio), `password_hash` (obligatorio), `activo`, `inhabilitado` (boolean), `created_at`, `updated_at`. Después del login exitoso, se determina si el `User` corresponde a un Cliente (tabla `PQ_PARTES_CLIENTES`) o a un Empleado (tabla `PQ_PARTES_USUARIOS`).
+- **Empleado**: Representa a los empleados que cargan las tareas al sistema. Tabla física: `PQ_PARTES_USUARIOS`. Tiene atributos: `id`, `user_id` (FK → User, obligatorio, único), `code` (único, obligatorio, debe coincidir con User.code), `nombre`, `email` (único, opcional), `supervisor` (boolean), `activo`, `inhabilitado` (boolean), `created_at`, `updated_at`. Cada registro debe tener una relación 1:1 con la tabla `USERS`.
+- **Cliente**: Representa a los clientes para los cuales se registran tareas. Tabla física: `PQ_PARTES_CLIENTES`. Tiene atributos: `id`, `user_id` (FK → User, opcional, único), `nombre`, `tipo_cliente_id` (FK), `code` (único, obligatorio, debe coincidir con User.code si tiene user_id), `email` (único, opcional), `activo`, `inhabilitado` (boolean), `created_at`, `updated_at`. Si tiene `user_id` configurado, puede autenticarse y consultar tareas relacionadas (solo lectura).
 - **TipoCliente**: Catálogo de tipos de cliente (ej: "Corporativo", "PyME", "Startup"). Tiene atributos: `id`, `code` (único, obligatorio), `descripcion`, `activo`, `inhabilitado` (boolean).
 - **TipoTarea**: Catálogo de tipos de tarea. Tiene atributos: `id`, `code` (único, obligatorio), `descripcion`, `is_generico` (boolean), `is_default` (boolean), `activo`, `inhabilitado` (boolean).
 - **RegistroTarea**: Registro de una tarea realizada. Tiene atributos: `id`, `usuario_id` (FK), `cliente_id` (FK), `tipo_tarea_id` (FK), `fecha`, `duracion_minutos`, `sin_cargo` (boolean), `presencial` (boolean), `observacion` (obligatorio), `cerrado` (boolean), `created_at`, `updated_at`.
@@ -47,15 +49,97 @@ Este documento cubre las siguientes áreas funcionales:
 ### Supuestos Adicionales
 
 - El sistema es mono-tenant (una sola empresa).
-- La autenticación se realiza mediante código de usuario y contraseña (no email para empleados).
-- Los clientes pueden autenticarse si tienen `code` y `password_hash` configurados.
+- La autenticación se realiza contra la tabla `USERS` (sin prefijo PQ_PARTES_) mediante código y contraseña.
+- Después del login exitoso, se determina si el `User` corresponde a un Cliente (tabla `PQ_PARTES_CLIENTES`) o a un Usuario (tabla `PQ_PARTES_USUARIOS`).
+- Los clientes pueden autenticarse si tienen `user_id` configurado (relación con `USERS`).
+- Los valores de autenticación (`tipo_usuario`, `user_code`, `usuario_id`/`cliente_id`, `es_supervisor`) se conservan durante todo el ciclo del proceso (desde login hasta logout).
+- Un `User.code` solo puede estar asociado a un Cliente O a un Usuario, no a ambos.
 - Todos los campos de estado (`activo`, `inhabilitado`) se validan en conjunto: un registro debe estar `activo = true` y `inhabilitado = false` para ser considerado habilitado.
+
+---
+
+## Épica 0: Infraestructura y Base del Sistema
+
+### HU-00 – Generación de la base de datos inicial a partir del modelo definido
+
+**Rol:** Administrador del sistema (infraestructura / plataforma)  
+**Clasificación:** MUST-HAVE  
+**Historia:** Como administrador del sistema, quiero generar la base de datos inicial a partir del modelo de datos definido, para disponer de una estructura consistente, versionada y reproducible que habilite el desarrollo, prueba y validación del resto del MVP.
+
+**Contexto / Justificación:**
+Esta historia de usuario es una **HU técnica habilitadora**.
+
+Su objetivo no es aportar funcionalidad de negocio directa, sino establecer la infraestructura mínima necesaria para:
+- implementar historias funcionales,
+- ejecutar tests automatizados,
+- garantizar consistencia entre entornos,
+- permitir la reproducción completa del sistema desde el repositorio.
+
+Debe ejecutarse **antes** del desarrollo de las historias funcionales del sistema.
+
+**In Scope:**
+- Generación del esquema completo de base de datos según el modelo definido en `docs/modelo-datos.md` y `database/modelo-datos.dbml`.
+- **Uso del MCP de SQL Server (mssql-toolbox o mssql) configurado** para ejecutar la creación de tablas, índices, foreign keys y restricciones directamente en la base de datos.
+- Creación de migraciones Laravel versionadas (up / down) que reflejen el esquema generado, para mantener sincronización entre el código y la base de datos.
+- Aplicación de las convenciones del proyecto:
+  - Prefijo de tablas `PQ_PARTES_` (excepto la tabla `USERS` que no lleva prefijo).
+  - Nomenclatura de campos en snake_case.
+  - Índices con prefijo `idx_`.
+- Generación de datos mínimos (seeders Laravel) para permitir la ejecución de tests automatizados:
+  - Al menos un usuario administrador/supervisor.
+  - Al menos un cliente de prueba.
+  - Al menos un tipo de cliente.
+  - Al menos un tipo de tarea genérico (con `is_default = true`).
+- Verificación de que la base de datos puede recrearse desde cero en un entorno limpio.
+- Documentación del proceso de creación y ejecución de migraciones.
+
+**Out of Scope:**
+- Implementación de lógica de negocio.
+- Desarrollo de endpoints o pantallas funcionales.
+- Optimización avanzada de performance (índices adicionales más allá de los requeridos por integridad referencial).
+- Uso de datos reales de producción.
+- Configuración de backups automáticos.
+
+**Suposiciones:**
+- El modelo de datos inicial ya fue definido y validado en `docs/modelo-datos.md`.
+- El entorno dispone de acceso a la base de datos SQL Server mediante el MCP configurado (`mssql-toolbox` o `mssql` en `mcp.json`).
+- El motor de base de datos es SQL Server (compatible con las herramientas de migración Laravel).
+- Laravel está configurado y listo para generar migraciones.
+
+**Criterios de aceptación:**
+- La base de datos puede generarse completamente desde cero a partir del repositorio.
+- Todas las tablas respetan las convenciones del proyecto (prefijo `PQ_PARTES_`, excepto `USERS`).
+- Todas las tablas, campos, índices y foreign keys del modelo están implementados correctamente.
+- Existen migraciones Laravel versionadas con capacidad de rollback (métodos `up()` y `down()`).
+- Las migraciones pueden ejecutarse tanto mediante Laravel (`php artisan migrate`) como mediante el MCP (para verificación y ejecución directa).
+- Existen seeders con datos mínimos para permitir la ejecución de tests automatizados.
+- El proceso es reproducible en entornos local y de testing.
+- La ejecución no requiere pasos manuales fuera del repositorio y el MCP configurado.
+- Se documenta el proceso de creación y ejecución de migraciones.
+
+**Notas técnicas:**
+- **Uso de MCP:** Se utilizará el servidor MCP de SQL Server configurado (`mssql-toolbox` o `mssql`) para ejecutar las sentencias SQL de creación de tablas, índices y restricciones. Esto permite verificación directa y ejecución controlada desde el entorno de desarrollo.
+- **Migraciones Laravel:** Aunque la creación inicial puede realizarse mediante MCP, las migraciones Laravel deben generarse para mantener versionado y permitir rollback. Las migraciones deben reflejar exactamente el esquema creado.
+- **Sincronización:** El esquema en la base de datos debe estar sincronizado con el modelo definido en `docs/modelo-datos.md` y `database/modelo-datos.dbml`.
+
+**Dependencias:**
+- No depende de historias funcionales.
+- Es bloqueante para el desarrollo del resto de las historias del MVP.
+- Requiere que el modelo de datos esté completamente definido y validado.
+
+**Resultado Esperado:**
+- Base de datos inicial creada correctamente con todas las tablas, índices y restricciones del modelo.
+- Migraciones Laravel versionadas en el repositorio (`database/migrations/`).
+- Seeders con datos mínimos en el repositorio (`database/seeders/`).
+- Infraestructura de datos lista para el desarrollo de historias funcionales.
+- Documentación del proceso de creación y ejecución.
+- Evidencia verificable para validación del MVP.
 
 ---
 
 ## Épica 1: Autenticación y Acceso
 
-### HU-001 – Login de empleado/asistente
+### HU-001 – Login de empleado
 
 **Rol:** Empleado / Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
@@ -65,19 +149,27 @@ Este documento cubre las siguientes áreas funcionales:
 - El usuario puede ingresar su código de usuario y contraseña.
 - El sistema valida que el código de usuario no esté vacío.
 - El sistema valida que la contraseña no esté vacía.
-- El sistema valida que el usuario exista en la base de datos.
-- El sistema valida que el usuario esté activo (`activo = true`).
-- El sistema valida que el usuario no esté inhabilitado (`inhabilitado = false`).
-- El sistema valida que la contraseña coincida con el hash almacenado.
-- Si las credenciales son válidas, el sistema genera un token de autenticación (Sanctum).
+- El sistema valida que el `User` exista en la tabla `USERS` (sin prefijo PQ_PARTES_).
+- El sistema valida que el `User` esté activo (`activo = true`) y no inhabilitado (`inhabilitado = false`) en `USERS`.
+- El sistema valida que la contraseña coincida con el hash almacenado en `USERS`.
+- Después del login exitoso, el sistema busca el `User.code` en `PQ_PARTES_USUARIOS.code`.
+- El sistema determina que `tipo_usuario = "usuario"`.
+- El sistema obtiene el `usuario_id` del registro en `PQ_PARTES_USUARIOS`.
+- El sistema verifica que el usuario esté activo y no inhabilitado en `PQ_PARTES_USUARIOS`.
+- El sistema obtiene el valor de `supervisor` de `PQ_PARTES_USUARIOS` para determinar `es_supervisor`.
+- Si las credenciales son válidas, el sistema genera un token de autenticación (Sanctum) que incluye: `user_id`, `user_code`, `tipo_usuario`, `usuario_id`, `cliente_id` (null), `es_supervisor`.
 - El token se almacena en el frontend (localStorage o sessionStorage).
+- Los valores de autenticación se conservan durante todo el ciclo del proceso (hasta logout).
 - El usuario es redirigido al dashboard principal.
 - Si las credenciales son inválidas, se muestra un mensaje de error claro.
 - El mensaje de error no revela si el usuario existe o no (seguridad).
 
 **Notas de reglas de negocio:**
-- Validar `activo = true` y `inhabilitado = false` en conjunto.
+- La autenticación se realiza contra la tabla `USERS` (sin prefijo PQ_PARTES_).
+- Validar `activo = true` y `inhabilitado = false` en conjunto tanto en `USERS` como en `PQ_PARTES_USUARIOS`.
 - El código de usuario debe existir y no ser NULL.
+- Un `User.code` solo puede estar asociado a un Cliente O a un Usuario, no a ambos.
+- El `code` en `PQ_PARTES_USUARIOS` debe coincidir con el `code` en `USERS`.
 
 **Dependencias:** Ninguna (historia base del flujo E2E).
 
@@ -93,19 +185,25 @@ Este documento cubre las siguientes áreas funcionales:
 - El cliente puede ingresar su código y contraseña.
 - El sistema valida que el código no esté vacío.
 - El sistema valida que la contraseña no esté vacía.
-- El sistema valida que el cliente exista en la base de datos.
-- El sistema valida que el cliente esté activo (`activo = true`).
-- El sistema valida que el cliente no esté inhabilitado (`inhabilitado = false`).
-- El sistema valida que el cliente tenga `code` y `password_hash` configurados.
-- El sistema valida que la contraseña coincida con el hash almacenado.
-- Si las credenciales son válidas, el sistema genera un token de autenticación.
+- El sistema valida que el `User` exista en la tabla `USERS` (sin prefijo PQ_PARTES_).
+- El sistema valida que el `User` esté activo (`activo = true`) y no inhabilitado (`inhabilitado = false`) en `USERS`.
+- El sistema valida que la contraseña coincida con el hash almacenado en `USERS`.
+- Después del login exitoso, el sistema busca el `User.code` en `PQ_PARTES_CLIENTES.code`.
+- El sistema determina que `tipo_usuario = "cliente"`.
+- El sistema obtiene el `cliente_id` del registro en `PQ_PARTES_CLIENTES`.
+- El sistema verifica que el cliente esté activo y no inhabilitado en `PQ_PARTES_CLIENTES`.
+- El sistema establece `es_supervisor = false` (siempre para clientes).
+- Si las credenciales son válidas, el sistema genera un token de autenticación que incluye: `user_id`, `user_code`, `tipo_usuario`, `usuario_id` (null), `cliente_id`, `es_supervisor` (false).
 - El token se almacena en el frontend.
+- Los valores de autenticación se conservan durante todo el ciclo del proceso (hasta logout).
 - El cliente es redirigido a su vista de consulta de tareas.
 - Si las credenciales son inválidas, se muestra un mensaje de error claro.
 
 **Notas de reglas de negocio:**
-- Solo los clientes con `code` y `password_hash` configurados pueden autenticarse.
-- Validar `activo = true` y `inhabilitado = false` en conjunto.
+- La autenticación se realiza contra la tabla `USERS` (sin prefijo PQ_PARTES_).
+- Solo los clientes con `user_id` configurado (relación con `USERS`) pueden autenticarse.
+- Validar `activo = true` y `inhabilitado = false` en conjunto tanto en `USERS` como en `PQ_PARTES_CLIENTES`.
+- El `code` en `PQ_PARTES_CLIENTES` debe coincidir con el `code` en `USERS` si tiene `user_id`.
 
 **Dependencias:** HU-001 (comparte lógica de autenticación).
 
@@ -269,7 +367,8 @@ Este documento cubre las siguientes áreas funcionales:
   - Nombre/Descripción (obligatorio)
   - Tipo de Cliente (obligatorio, selector)
   - Email (opcional, único si se proporciona)
-  - Contraseña (opcional, solo si se proporciona email para autenticación)
+  - Habilitar acceso al sistema (checkbox, por defecto: false) - Si se marca, se debe proporcionar contraseña
+  - Contraseña (obligatorio si se habilita acceso al sistema)
   - Activo (checkbox, por defecto: true)
   - Inhabilitado (checkbox, por defecto: false)
 - El sistema valida que el código no esté vacío.
@@ -279,16 +378,21 @@ Este documento cubre las siguientes áreas funcionales:
 - El sistema valida que el tipo de cliente esté activo y no inhabilitado.
 - El sistema valida que el email tenga formato válido (si se proporciona).
 - El sistema valida que el email sea único (si se proporciona).
-- El sistema valida que si se proporciona email, también se proporcione contraseña (o viceversa, según regla de negocio).
+- Si se habilita el acceso al sistema, el sistema valida que el código no exista en `USERS`.
+- Si se habilita el acceso al sistema, el sistema valida que se proporcione contraseña.
 - El sistema valida la regla: debe existir al menos un tipo de tarea genérico O el cliente debe tener al menos un tipo de tarea asignado (validación post-creación o durante creación si se asignan tipos).
-- Al guardar, el sistema crea el cliente en la base de datos.
+- Si se habilita el acceso al sistema, al guardar, el sistema crea primero un registro en `USERS` con: `code` (del cliente), `password_hash` (de la contraseña proporcionada), `activo` (del cliente), `inhabilitado` (del cliente).
+- Al guardar, el sistema crea el cliente en `PQ_PARTES_CLIENTES` con: `user_id` (FK al `USERS` creado, si se habilita acceso), `code` (debe coincidir con `User.code` si tiene `user_id`), y los demás campos.
+- El sistema valida que el `code` del cliente coincida con el `code` del `User` creado (si se habilita acceso).
 - Se muestra un mensaje de confirmación.
 - El usuario es redirigido al listado de clientes o puede crear otro.
 
 **Notas de reglas de negocio:**
 - `code` es obligatorio y único.
 - `tipo_cliente_id` es obligatorio.
-- Si se proporciona `email`, también debe proporcionarse `password_hash` (y viceversa).
+- Si se habilita el acceso al sistema, se debe crear un registro en `USERS`.
+- El `user_id` en `PQ_PARTES_CLIENTES` es opcional pero si existe debe referenciar a `USERS.id`.
+- El `code` en `PQ_PARTES_CLIENTES` debe coincidir exactamente con el `code` en `USERS` si tiene `user_id`.
 - Regla de tipos de tarea: el cliente debe tener al menos un tipo de tarea genérico disponible o un tipo asignado.
 
 **Dependencias:** HU-008, HU-015 (tipos de cliente deben existir), HU-020 (tipos de tarea deben existir).
@@ -306,10 +410,14 @@ Este documento cubre las siguientes áreas funcionales:
 - Se carga el formulario con los datos actuales del cliente.
 - El código de cliente no es modificable (solo lectura).
 - El supervisor puede modificar: nombre, tipo de cliente, email, estado activo, estado inhabilitado.
+- Si el cliente tiene acceso al sistema (`user_id` configurado), se puede cambiar la contraseña.
+- Se puede habilitar o deshabilitar el acceso al sistema (si se deshabilita, se elimina la relación con `USERS`).
 - El sistema valida que el nombre no esté vacío.
 - El sistema valida que el tipo de cliente exista y esté activo/no inhabilitado.
 - El sistema valida que el email tenga formato válido (si se proporciona).
 - El sistema valida que el email sea único (si se proporciona y cambió).
+- Si se cambia la contraseña, el sistema actualiza el `password_hash` en `USERS` (no en `PQ_PARTES_CLIENTES`).
+- Si se cambia el estado `activo` o `inhabilitado`, el sistema actualiza ambos: `USERS` (si tiene `user_id`) y `PQ_PARTES_CLIENTES`.
 - El sistema valida la regla de tipos de tarea (igual que en creación).
 - Al guardar, el sistema actualiza el cliente en la base de datos.
 - Se muestra un mensaje de confirmación.
@@ -317,6 +425,8 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Notas de reglas de negocio:**
 - El `code` no debe ser modificable.
+- La contraseña se almacena en `USERS`, no en `PQ_PARTES_CLIENTES`.
+- Los cambios de estado deben sincronizarse entre `USERS` y `PQ_PARTES_CLIENTES` (si tiene `user_id`).
 - Las mismas validaciones que en creación aplican.
 
 **Dependencias:** HU-009.
@@ -497,16 +607,16 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-## Épica 5: Gestión de Asistentes/Empleados (ABM)
+## Épica 5: Gestión de Empleados (ABM)
 
-### HU-018 – Listado de asistentes/empleados
+### HU-018 – Listado de empleados
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero ver el listado de todos los asistentes/empleados para gestionarlos.
+**Historia:** Como supervisor quiero ver el listado de todos los empleados para gestionarlos.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder a la sección "Asistentes" o "Empleados".
+- El supervisor puede acceder a la sección "Empleados".
 - Se muestra una tabla con todos los usuarios/empleados.
 - La tabla muestra: código, nombre, email, supervisor (sí/no), estado (activo/inactivo), inhabilitado (sí/no).
 - Los usuarios se listan paginados (si hay muchos).
@@ -525,14 +635,14 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### HU-019 – Creación de asistente/empleado
+### HU-019 – Creación de empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero crear un nuevo asistente/empleado para que pueda acceder al sistema y registrar tareas.
+**Historia:** Como supervisor quiero crear un nuevo empleado para que pueda acceder al sistema y registrar tareas.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder al formulario de creación de asistente.
+- El supervisor puede acceder al formulario de creación de empleado.
 - El formulario tiene los siguientes campos:
   - Código (obligatorio, único)
   - Nombre (obligatorio)
@@ -544,94 +654,105 @@ Este documento cubre las siguientes áreas funcionales:
   - Inhabilitado (checkbox, por defecto: false)
 - El sistema valida que el código no esté vacío.
 - El sistema valida que el código sea único.
+- El sistema valida que el código no exista en `USERS`.
 - El sistema valida que el nombre no esté vacío.
 - El sistema valida que el email tenga formato válido (si se proporciona).
 - El sistema valida que el email sea único (si se proporciona).
 - El sistema valida que la contraseña no esté vacía.
 - El sistema valida que la contraseña y confirmación coincidan.
 - El sistema valida la complejidad de la contraseña (si aplica).
-- Al guardar, el sistema crea el usuario en la base de datos con el `password_hash` generado.
+- Al guardar, el sistema crea primero un registro en `USERS` con: `code` (del empleado), `password_hash` (de la contraseña proporcionada), `activo` (del empleado), `inhabilitado` (del empleado).
+- Al guardar, el sistema crea el empleado en `PQ_PARTES_USUARIOS` con: `user_id` (FK al `USERS` creado), `code` (debe coincidir con `User.code`), y los demás campos.
+- El sistema valida que el `code` del empleado coincida con el `code` del `User` creado.
 - Se muestra un mensaje de confirmación.
-- El usuario es redirigido al listado de asistentes o puede crear otro.
+- El usuario es redirigido al listado de empleados o puede crear otro.
 
 **Notas de reglas de negocio:**
 - `code` es obligatorio y único.
 - `nombre` es obligatorio.
-- `password_hash` se genera a partir de la contraseña en texto plano.
+- La creación de un empleado requiere la creación simultánea de un registro en `USERS`.
+- El `user_id` en `PQ_PARTES_USUARIOS` es obligatorio y debe referenciar a `USERS.id`.
+- El `code` en `PQ_PARTES_USUARIOS` debe coincidir exactamente con el `code` en `USERS`.
+- `password_hash` se genera a partir de la contraseña en texto plano y se almacena en `USERS`.
 
 **Dependencias:** HU-018.
 
 ---
 
-### HU-020 – Edición de asistente/empleado
+### HU-020 – Edición de empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero editar la información de un asistente/empleado existente para mantener actualizados sus datos.
+**Historia:** Como supervisor quiero editar la información de un empleado existente para mantener actualizados sus datos.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder a la edición de un asistente desde el listado.
+- El supervisor puede acceder a la edición de un empleado desde el listado.
 - Se carga el formulario con los datos actuales.
-- El código del asistente no es modificable (solo lectura).
+- El código del empleado no es modificable (solo lectura).
 - El supervisor puede modificar: nombre, email, supervisor, estado activo, estado inhabilitado.
 - El supervisor puede cambiar la contraseña (opcional, con campos separados).
 - El sistema valida que el nombre no esté vacío.
 - El sistema valida que el email tenga formato válido (si se proporciona).
 - El sistema valida que el email sea único (si se proporciona y cambió).
 - Si se cambia la contraseña, se validan las mismas reglas que en creación.
+- Si se cambia la contraseña, el sistema actualiza el `password_hash` en `USERS` (no en `PQ_PARTES_USUARIOS`).
+- Si se cambia el estado `activo` o `inhabilitado`, el sistema actualiza ambos: `USERS` y `PQ_PARTES_USUARIOS`.
+- El sistema valida que el `code` no se pueda modificar (es identificador único y debe coincidir con `User.code`).
 - Al guardar, el sistema actualiza el usuario en la base de datos.
 - Se muestra un mensaje de confirmación.
 - Los cambios se reflejan en el listado.
 
 **Notas de reglas de negocio:**
 - El `code` no debe ser modificable.
+- La contraseña se almacena en `USERS`, no en `PQ_PARTES_USUARIOS`.
+- Los cambios de estado deben sincronizarse entre `USERS` y `PQ_PARTES_USUARIOS`.
 - La contraseña solo se actualiza si se proporciona una nueva.
 
 **Dependencias:** HU-019.
 
 ---
 
-### HU-021 – Eliminación de asistente/empleado
+### HU-021 – Eliminación de empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** MUST-HAVE  
-**Historia:** Como supervisor quiero eliminar un asistente/empleado que ya no trabaja para mantener el catálogo actualizado.
+**Historia:** Como supervisor quiero eliminar un empleado que ya no trabaja para mantener el catálogo actualizado.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder a la opción de eliminar un asistente desde el listado o detalle.
-- Antes de eliminar, el sistema verifica si el asistente tiene tareas asociadas.
-- Si el asistente tiene tareas asociadas, se muestra un error y no se permite la eliminación.
-- Si el asistente no tiene tareas asociadas, se muestra un diálogo de confirmación.
-- El diálogo muestra el código y nombre del asistente a eliminar.
+- El supervisor puede acceder a la opción de eliminar un empleado desde el listado o detalle.
+- Antes de eliminar, el sistema verifica si el empleado tiene tareas asociadas.
+- Si el empleado tiene tareas asociadas, se muestra un error y no se permite la eliminación.
+- Si el empleado no tiene tareas asociadas, se muestra un diálogo de confirmación.
+- El diálogo muestra el código y nombre del empleado a eliminar.
 - El usuario debe confirmar la eliminación.
-- Al confirmar, el sistema elimina el asistente de la base de datos.
+- Al confirmar, el sistema elimina el empleado de la base de datos.
 - Se muestra un mensaje de confirmación.
-- El asistente desaparece del listado.
+- El empleado desaparece del listado.
 
 **Notas de reglas de negocio:**
-- No se puede eliminar un asistente si tiene tareas asociadas (integridad referencial).
+- No se puede eliminar un empleado si tiene tareas asociadas (integridad referencial).
 - Código de error: 2113.
 
 **Dependencias:** HU-020.
 
 ---
 
-### HU-022 – Visualización de detalle de asistente/empleado
+### HU-022 – Visualización de detalle de empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** SHOULD-HAVE  
-**Historia:** Como supervisor quiero ver el detalle completo de un asistente/empleado incluyendo estadísticas básicas de tareas registradas.
+**Historia:** Como supervisor quiero ver el detalle completo de un empleado incluyendo estadísticas básicas de tareas registradas.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder al detalle de un asistente desde el listado.
-- Se muestra toda la información del asistente: código, nombre, email, supervisor, estado.
-- Se muestra la cantidad total de tareas registradas por el asistente (opcional).
+- El supervisor puede acceder al detalle de un empleado desde el listado.
+- Se muestra toda la información del empleado: código, nombre, email, supervisor, estado.
+- Se muestra la cantidad total de tareas registradas por el empleado (opcional).
 - Se muestra la fecha de creación y última actualización (opcional).
-- El supervisor puede editar el asistente desde el detalle.
-- El supervisor puede eliminar el asistente desde el detalle (si no tiene tareas).
+- El supervisor puede editar el empleado desde el detalle.
+- El supervisor puede eliminar el empleado desde el detalle (si no tiene tareas).
 
 **Notas de reglas de negocio:**
-- Mostrar información completa y contextual del asistente.
+- Mostrar información completa y contextual del empleado.
 
 **Dependencias:** HU-020.
 
@@ -1119,7 +1240,7 @@ Este documento cubre las siguientes áreas funcionales:
 **Criterios de aceptación:**
 - El supervisor puede filtrar por rango de fechas (fecha desde, fecha hasta).
 - El supervisor puede filtrar por cliente (todos o cliente específico).
-- El supervisor puede filtrar por asistente (todos o asistente específico).
+- El supervisor puede filtrar por empleado (todos o empleado específico).
 - El supervisor puede filtrar por estado (Cerrados / Abiertos).
 - El sistema valida que `fecha_desde <= fecha_hasta`.
 - Al hacer clic en "Aplicar Filtros", se cargan las tareas que cumplen los criterios.
@@ -1217,19 +1338,19 @@ Este documento cubre las siguientes áreas funcionales:
 **Criterios de aceptación:**
 - El usuario puede acceder a la sección "Consulta Detallada" o "Detalle de Tareas".
 - Se muestra una tabla con todas las tareas según los permisos del usuario:
-  - Empleado: solo sus tareas
-  - Supervisor: todas las tareas
-  - Cliente: solo tareas donde es el cliente
-- La tabla muestra: asistente (si supervisor), cliente, fecha, tipo de tarea, horas (decimal), sin cargo, presencial, descripción.
+  - **Empleado (NO supervisor):** Solo sus propias tareas (donde `usuario_id` coincide con su `usuario_id`).
+  - **Supervisor:** Todas las tareas de todos los usuarios.
+  - **Cliente:** Solo tareas donde es el cliente (donde `cliente_id` coincide con su `cliente_id`).
+- La tabla muestra: empleado (si supervisor), cliente, fecha, tipo de tarea, horas (decimal), sin cargo, presencial, descripción.
 - El usuario puede aplicar filtros:
   - Período (fecha desde, fecha hasta)
   - Tipo de cliente (todos o específico, solo para supervisor)
   - Cliente (todos o específico, filtrado automático para cliente)
-  - Asistente (todos o específico, solo para supervisor, filtrado automático para empleado)
+  - Empleado (todos o específico, solo para supervisor, filtrado automático para empleado normal)
 - Los filtros se aplican con botón "Aplicar Filtros".
 - La tabla se actualiza con los resultados filtrados.
 - Se muestra el total de horas del período filtrado.
-- Se puede ordenar por columnas (fecha, cliente, asistente, etc.).
+- Se puede ordenar por columnas (fecha, cliente, empleado, etc.).
 - Se puede paginar si hay muchos resultados.
 
 **Notas de reglas de negocio:**
@@ -1241,22 +1362,22 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### HU-045 – Consulta agrupada por asistente
+### HU-045 – Consulta agrupada por empleado
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** SHOULD-HAVE  
-**Historia:** Como supervisor quiero consultar tareas agrupadas por asistente para analizar la dedicación de cada empleado.
+**Historia:** Como supervisor quiero consultar tareas agrupadas por empleado para analizar la dedicación de cada empleado.
 
 **Criterios de aceptación:**
-- El supervisor puede acceder a la sección "Tareas por Asistente".
+- El supervisor puede acceder a la sección "Tareas por Empleado".
 - Se muestran los mismos filtros que en consulta detallada.
-- Los resultados se agrupan por asistente.
+- Los resultados se agrupan por empleado.
 - Cada grupo muestra:
-  - Nombre del asistente
+  - Nombre del empleado
   - Total de horas en formato decimal
   - Cantidad de tareas
 - Cada grupo es expandible (accordion o similar).
-- Al expandir un grupo, se muestra el detalle de todas las tareas de ese asistente.
+- Al expandir un grupo, se muestra el detalle de todas las tareas de ese empleado.
 - El detalle muestra las mismas columnas que la consulta detallada.
 - Se puede colapsar el grupo para ocultar el detalle.
 - Se muestra el total general de horas y tareas.
@@ -1287,7 +1408,7 @@ Este documento cubre las siguientes áreas funcionales:
   - Cantidad de tareas
 - Cada grupo es expandible (accordion o similar).
 - Al expandir un grupo, se muestra el detalle de todas las tareas de ese cliente.
-- El detalle muestra: fecha, tipo de tarea, horas, asistente (si supervisor), descripción.
+- El detalle muestra: fecha, tipo de tarea, horas, empleado (si supervisor), descripción.
 - Se puede colapsar el grupo para ocultar el detalle.
 - Se muestra el total general de horas y tareas.
 - Los grupos se ordenan por total de horas (mayor a menor).
@@ -1296,7 +1417,10 @@ Este documento cubre las siguientes áreas funcionales:
 - Agrupación por `cliente_id`.
 - Totalización de horas en formato decimal.
 - Ordenamiento por dedicación total descendente.
-- Para clientes: solo se muestran sus propias tareas (filtro automático).
+- **Filtros automáticos según rol:**
+  - **Cliente:** Solo tareas donde `cliente_id` coincide con su `cliente_id` (filtro automático).
+  - **Empleado (NO supervisor):** Solo tareas donde `usuario_id` coincide con su `usuario_id` (filtro automático).
+  - **Supervisor:** Todas las tareas (sin filtro automático).
 
 **Dependencias:** HU-044.
 
@@ -1339,13 +1463,17 @@ Este documento cubre las siguientes áreas funcionales:
 **Criterios de aceptación:**
 - El usuario puede acceder a la sección "Tareas por Fecha".
 - Se muestran filtros de período (fecha desde, fecha hasta).
+- Los resultados se filtran automáticamente según los permisos del usuario:
+  - **Empleado (NO supervisor):** Solo sus propias tareas (donde `usuario_id` coincide con su `usuario_id`).
+  - **Supervisor:** Todas las tareas de todos los usuarios.
+  - **Cliente:** Solo tareas donde es el cliente (donde `cliente_id` coincide con su `cliente_id`).
 - Los resultados se agrupan por fecha.
 - Cada grupo muestra:
   - Fecha (formato legible)
   - Total de horas en formato decimal
   - Cantidad de tareas
 - Cada grupo es expandible.
-- Al expandir un grupo, se muestra el detalle de todas las tareas de esa fecha.
+- Al expandir un grupo, se muestra el detalle de todas las tareas de esa fecha (según permisos del usuario).
 - El detalle muestra las mismas columnas que la consulta detallada.
 - Se puede colapsar el grupo.
 - Se muestra el total general.
@@ -1355,6 +1483,10 @@ Este documento cubre las siguientes áreas funcionales:
 - Agrupación por `fecha`.
 - Totalización de horas en formato decimal.
 - Ordenamiento cronológico.
+- **Filtros automáticos según rol:**
+  - **Cliente:** Solo tareas donde `cliente_id` coincide con su `cliente_id`.
+  - **Empleado (NO supervisor):** Solo tareas donde `usuario_id` coincide con su `usuario_id`.
+  - **Supervisor:** Todas las tareas.
 
 **Dependencias:** HU-044.
 
@@ -1370,7 +1502,11 @@ Este documento cubre las siguientes áreas funcionales:
 - El usuario puede hacer clic en un botón "Exportar a Excel" en cualquier consulta.
 - El botón está habilitado solo si hay resultados para exportar.
 - Si no hay resultados, se muestra un mensaje: "No hay datos para exportar" y el botón está deshabilitado.
-- Al hacer clic, se genera un archivo Excel con los datos de la consulta.
+- Los datos exportados respetan los permisos del usuario:
+  - **Empleado (NO supervisor):** Solo sus propias tareas (donde `usuario_id` coincide con su `usuario_id`).
+  - **Supervisor:** Todas las tareas de todos los usuarios.
+  - **Cliente:** Solo tareas donde es el cliente (donde `cliente_id` coincide con su `cliente_id`).
+- Al hacer clic, se genera un archivo Excel con los datos de la consulta (filtrados según permisos).
 - El archivo se descarga automáticamente.
 - El nombre del archivo es descriptivo (ej: "Tareas_2025-01-01_2025-01-31.xlsx").
 - El archivo contiene:
@@ -1384,6 +1520,7 @@ Este documento cubre las siguientes áreas funcionales:
 - El botón debe estar deshabilitado si `resultados.length === 0`.
 - El formato de horas debe ser decimal en el Excel.
 - El nombre del archivo debe incluir información del período o filtros aplicados.
+- **Los datos exportados deben respetar los mismos filtros automáticos que las consultas en pantalla.**
 
 **Dependencias:** HU-044, HU-045, HU-046, HU-047, HU-048.
 
@@ -1396,15 +1533,20 @@ Este documento cubre las siguientes áreas funcionales:
 **Historia:** Como usuario quiero recibir un mensaje claro cuando no hay resultados para los filtros aplicados para entender que la consulta funcionó pero no hay datos.
 
 **Criterios de aceptación:**
-- Si una consulta no devuelve resultados, se muestra un mensaje informativo: "No se encontraron tareas para los filtros seleccionados".
+- Si una consulta no devuelve resultados (después de aplicar filtros automáticos según rol), se muestra un mensaje informativo: "No se encontraron tareas para los filtros seleccionados".
 - No se muestra una tabla vacía.
 - El botón de exportar a Excel está deshabilitado.
 - El mensaje es claro y sugiere ajustar los filtros.
 - El mensaje se muestra en lugar de la tabla de resultados.
+- Los filtros automáticos según rol se aplican antes de verificar si hay resultados:
+  - **Cliente:** Solo tareas donde `cliente_id` coincide con su `cliente_id`.
+  - **Empleado (NO supervisor):** Solo tareas donde `usuario_id` coincide con su `usuario_id`.
+  - **Supervisor:** Todas las tareas.
 
 **Notas de reglas de negocio:**
-- Validación en backend: si `resultados.isEmpty()`, retornar mensaje informativo.
+- Validación en backend: si `resultados.isEmpty()` después de aplicar filtros automáticos, retornar mensaje informativo.
 - No mostrar lista vacía ni habilitar exportación.
+- Los filtros automáticos según rol son obligatorios y se aplican siempre.
 
 **Dependencias:** HU-044.
 
@@ -1421,9 +1563,9 @@ Este documento cubre las siguientes áreas funcionales:
 **Criterios de aceptación:**
 - El usuario puede acceder al dashboard desde el menú principal o como página de inicio post-login.
 - El dashboard muestra información según el rol del usuario:
-  - **Empleado:** Resumen de sus propias tareas (total de horas del mes, cantidad de tareas, top clientes).
-  - **Supervisor:** Resumen de todas las tareas (total de horas del mes, cantidad de tareas, top clientes, top asistentes).
-  - **Cliente:** Resumen de tareas recibidas (total de horas del mes, cantidad de tareas, distribución por tipo).
+  - **Empleado (NO supervisor):** Resumen de sus propias tareas (donde `usuario_id` coincide con su `usuario_id`) - total de horas del mes, cantidad de tareas, top clientes.
+  - **Supervisor:** Resumen de todas las tareas de todos los empleados - total de horas del mes, cantidad de tareas, top clientes, top empleados.
+  - **Cliente:** Resumen de tareas recibidas (donde `cliente_id` coincide con su `cliente_id`) - total de horas del mes, cantidad de tareas, distribución por tipo.
 - Se muestra un período por defecto (mes actual o último mes).
 - El usuario puede cambiar el período (selector de mes o rango de fechas).
 - Los datos se actualizan automáticamente al cambiar el período.
@@ -1437,9 +1579,12 @@ Este documento cubre las siguientes áreas funcionales:
 - El dashboard es responsive y se adapta a diferentes tamaños de pantalla.
 
 **Notas de reglas de negocio:**
-- Los datos se filtran automáticamente según el rol del usuario.
+- **Filtros automáticos según rol (obligatorios):**
+  - **Cliente:** Solo tareas donde `cliente_id` coincide con su `cliente_id`.
+  - **Empleado (NO supervisor):** Solo tareas donde `usuario_id` coincide con su `usuario_id`.
+  - **Supervisor:** Todas las tareas (sin filtro automático).
 - El período por defecto es el mes actual.
-- Los KPIs se calculan en tiempo real desde la base de datos.
+- Los KPIs se calculan en tiempo real desde la base de datos aplicando los filtros automáticos según rol.
 
 **Dependencias:** HU-001 (autenticación), HU-044 (consultas base).
 
@@ -1453,7 +1598,11 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Criterios de aceptación:**
 - El dashboard muestra una sección "Dedicación por Cliente".
-- Se muestra una lista o tabla con los clientes y sus totales de horas del período.
+- Los datos se filtran automáticamente según los permisos del usuario:
+  - **Empleado (NO supervisor):** Solo sus propias tareas (donde `usuario_id` coincide con su `usuario_id`).
+  - **Supervisor:** Todas las tareas de todos los usuarios.
+  - **Cliente:** Solo tareas donde es el cliente (donde `cliente_id` coincide con su `cliente_id`).
+- Se muestra una lista o tabla con los clientes y sus totales de horas del período (según permisos).
 - Se muestran los top N clientes (ej: top 5 o top 10, según diseño).
 - Cada cliente muestra:
   - Nombre del cliente
@@ -1462,34 +1611,38 @@ Este documento cubre las siguientes áreas funcionales:
   - Porcentaje del total (opcional)
 - Los clientes se ordenan por total de horas (mayor a menor).
 - El usuario puede hacer clic en un cliente para ver el detalle (redirección a consulta por cliente).
-- Se muestra un total general de horas.
+- Se muestra un total general de horas (calculado según permisos del usuario).
 
 **Notas de reglas de negocio:**
 - Agrupación por `cliente_id`.
 - Ordenamiento por dedicación descendente.
 - Límite de top N para mantener el dashboard simple.
+- **Filtros automáticos según rol (obligatorios):**
+  - **Cliente:** Solo tareas donde `cliente_id` coincide con su `cliente_id`.
+  - **Empleado (NO supervisor):** Solo tareas donde `usuario_id` coincide con su `usuario_id`.
+  - **Supervisor:** Todas las tareas.
 
 **Dependencias:** HU-051.
 
 ---
 
-### HU-053 – Resumen de dedicación por asistente en dashboard (supervisor)
+### HU-053 – Resumen de dedicación por empleado en dashboard (supervisor)
 
 **Rol:** Empleado Supervisor  
 **Clasificación:** SHOULD-HAVE  
-**Historia:** Como supervisor quiero ver un resumen de dedicación por asistente en el dashboard para identificar rápidamente la carga de trabajo de cada empleado.
+**Historia:** Como supervisor quiero ver un resumen de dedicación por empleado en el dashboard para identificar rápidamente la carga de trabajo de cada empleado.
 
 **Criterios de aceptación:**
-- El dashboard del supervisor muestra una sección "Dedicación por Asistente".
-- Se muestra una lista o tabla con los asistentes y sus totales de horas del período.
-- Se muestran los top N asistentes (ej: top 5 o top 10).
-- Cada asistente muestra:
-  - Nombre del asistente
+- El dashboard del supervisor muestra una sección "Dedicación por Empleado".
+- Se muestra una lista o tabla con los empleados y sus totales de horas del período.
+- Se muestran los top N empleados (ej: top 5 o top 10).
+- Cada empleado muestra:
+  - Nombre del empleado
   - Total de horas en formato decimal
   - Cantidad de tareas
   - Porcentaje del total (opcional)
-- Los asistentes se ordenan por total de horas (mayor a menor).
-- El supervisor puede hacer clic en un asistente para ver el detalle (redirección a consulta por asistente).
+- Los empleados se ordenan por total de horas (mayor a menor).
+- El supervisor puede hacer clic en un empleado para ver el detalle (redirección a consulta por empleado).
 - Se muestra un total general de horas.
 
 **Notas de reglas de negocio:**
@@ -1509,9 +1662,10 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Criterios de aceptación:**
 - El dashboard muestra gráficos según el rol:
-  - **Empleado:** Gráfico de distribución de horas por cliente (barras o pie).
-  - **Supervisor:** Gráfico de distribución de horas por cliente y por asistente.
-  - **Cliente:** Gráfico de distribución de horas por tipo de tarea.
+  - **Empleado (NO supervisor):** Gráfico de distribución de horas por cliente (barras o pie) - solo de sus propias tareas (donde `usuario_id` coincide con su `usuario_id`).
+  - **Supervisor:** Gráfico de distribución de horas por cliente y por empleado - todas las tareas de todos los empleados.
+  - **Cliente:** Gráfico de distribución de horas por tipo de tarea - solo tareas donde es el cliente (donde `cliente_id` coincide con su `cliente_id`).
+- Los datos de los gráficos se filtran automáticamente según los permisos del usuario.
 - Los gráficos se actualizan al cambiar el período.
 - Los gráficos son interactivos (opcional: tooltips, clics para filtrar).
 - Los gráficos son responsive y se adaptan al tamaño de pantalla.
@@ -1519,7 +1673,11 @@ Este documento cubre las siguientes áreas funcionales:
 - Los colores son consistentes y accesibles.
 
 **Notas de reglas de negocio:**
-- Los gráficos se generan a partir de los mismos datos que las consultas.
+- Los gráficos se generan a partir de los mismos datos que las consultas (con filtros automáticos según rol).
+- **Filtros automáticos según rol (obligatorios):**
+  - **Cliente:** Solo tareas donde `cliente_id` coincide con su `cliente_id`.
+  - **Empleado (NO supervisor):** Solo tareas donde `usuario_id` coincide con su `usuario_id`.
+  - **Supervisor:** Todas las tareas.
 - Los gráficos deben ser accesibles (textos alternativos, contraste).
 
 **Dependencias:** HU-051, HU-052.
@@ -1538,10 +1696,15 @@ Este documento cubre las siguientes áreas funcionales:
 - El usuario puede actualizar manualmente con un botón "Actualizar".
 - Durante la actualización, se muestra un indicador de carga.
 - Los datos se refrescan sin recargar toda la página (AJAX/fetch).
+- Los datos actualizados respetan los filtros automáticos según rol:
+  - **Cliente:** Solo tareas donde `cliente_id` coincide con su `cliente_id`.
+  - **Empleado (NO supervisor):** Solo tareas donde `usuario_id` coincide con su `usuario_id`.
+  - **Supervisor:** Todas las tareas.
 
 **Notas de reglas de negocio:**
 - La actualización automática es opcional y puede deshabilitarse (según UX).
 - El intervalo de actualización debe ser configurable.
+- Los filtros automáticos según rol se aplican siempre, incluso en actualizaciones automáticas.
 
 **Dependencias:** HU-051.
 
@@ -1551,7 +1714,8 @@ Este documento cubre las siguientes áreas funcionales:
 
 | ID | Épica | Rol | Clasificación | Breve Descripción |
 |----|-------|-----|---------------|-------------------|
-| HU-001 | Autenticación | Empleado / Supervisor | MUST-HAVE | Login de empleado/asistente |
+| HU-00 | Infraestructura | Administrador | MUST-HAVE | Generación de la base de datos inicial |
+| HU-001 | Autenticación | Empleado / Supervisor | MUST-HAVE | Login de empleado |
 | HU-002 | Autenticación | Cliente | SHOULD-HAVE | Login de cliente |
 | HU-003 | Autenticación | Todos | MUST-HAVE | Logout |
 | HU-004 | Autenticación | Todos | SHOULD-HAVE | Recuperación de contraseña |
@@ -1568,11 +1732,11 @@ Este documento cubre las siguientes áreas funcionales:
 | HU-015 | Gestión Tipos Cliente | Supervisor | MUST-HAVE | Creación de tipo de cliente |
 | HU-016 | Gestión Tipos Cliente | Supervisor | MUST-HAVE | Edición de tipo de cliente |
 | HU-017 | Gestión Tipos Cliente | Supervisor | MUST-HAVE | Eliminación de tipo de cliente |
-| HU-018 | Gestión Asistentes | Supervisor | MUST-HAVE | Listado de asistentes |
-| HU-019 | Gestión Asistentes | Supervisor | MUST-HAVE | Creación de asistente |
-| HU-020 | Gestión Asistentes | Supervisor | MUST-HAVE | Edición de asistente |
-| HU-021 | Gestión Asistentes | Supervisor | MUST-HAVE | Eliminación de asistente |
-| HU-022 | Gestión Asistentes | Supervisor | SHOULD-HAVE | Detalle de asistente |
+| HU-018 | Gestión Empleados | Supervisor | MUST-HAVE | Listado de empleados |
+| HU-019 | Gestión Empleados | Supervisor | MUST-HAVE | Creación de empleado |
+| HU-020 | Gestión Empleados | Supervisor | MUST-HAVE | Edición de empleado |
+| HU-021 | Gestión Empleados | Supervisor | MUST-HAVE | Eliminación de empleado |
+| HU-022 | Gestión Empleados | Supervisor | SHOULD-HAVE | Detalle de empleado |
 | HU-023 | Gestión Tipos Tarea | Supervisor | MUST-HAVE | Listado de tipos de tarea |
 | HU-024 | Gestión Tipos Tarea | Supervisor | MUST-HAVE | Creación de tipo de tarea |
 | HU-025 | Gestión Tipos Tarea | Supervisor | MUST-HAVE | Edición de tipo de tarea |
@@ -1595,7 +1759,7 @@ Este documento cubre las siguientes áreas funcionales:
 | HU-042 | Proceso Masivo | Supervisor | SHOULD-HAVE | Procesamiento masivo de tareas |
 | HU-043 | Proceso Masivo | Supervisor | SHOULD-HAVE | Validación de selección para procesamiento |
 | HU-044 | Informes | Todos | MUST-HAVE | Consulta detallada de tareas |
-| HU-045 | Informes | Supervisor | SHOULD-HAVE | Consulta agrupada por asistente |
+| HU-045 | Informes | Supervisor | SHOULD-HAVE | Consulta agrupada por empleado |
 | HU-046 | Informes | Todos | MUST-HAVE | Consulta agrupada por cliente |
 | HU-047 | Informes | Supervisor | SHOULD-HAVE | Consulta agrupada por tipo de tarea |
 | HU-048 | Informes | Todos | SHOULD-HAVE | Consulta agrupada por fecha |
@@ -1603,7 +1767,7 @@ Este documento cubre las siguientes áreas funcionales:
 | HU-050 | Informes | Todos | MUST-HAVE | Manejo de resultados vacíos en consultas |
 | HU-051 | Dashboard | Todos | MUST-HAVE | Dashboard principal |
 | HU-052 | Dashboard | Todos | MUST-HAVE | Resumen de dedicación por cliente |
-| HU-053 | Dashboard | Supervisor | SHOULD-HAVE | Resumen de dedicación por asistente |
+| HU-053 | Dashboard | Supervisor | SHOULD-HAVE | Resumen de dedicación por empleado |
 | HU-054 | Dashboard | Todos | SHOULD-HAVE | Gráficos y visualizaciones |
 | HU-055 | Dashboard | Todos | SHOULD-HAVE | Actualización automática del dashboard |
 
@@ -1613,17 +1777,23 @@ Este documento cubre las siguientes áreas funcionales:
 
 ### TK-001 – Migraciones y Modelos de Base de Datos
 
-**HU Relacionadas:** HU-001, HU-002, HU-008, HU-009, HU-014, HU-015, HU-018, HU-019, HU-023, HU-024, HU-028, HU-039, HU-044, HU-051
+**HU Relacionadas:** HU-00, HU-001, HU-002, HU-008, HU-009, HU-014, HU-015, HU-018, HU-019, HU-023, HU-024, HU-028, HU-039, HU-044, HU-051
 
 **Descripción:**
-- Crear/actualizar migraciones para todas las tablas: `PQ_PARTES_usuario`, `PQ_PARTES_cliente`, `PQ_PARTES_tipo_cliente`, `PQ_PARTES_tipo_tarea`, `PQ_PARTES_registro_tarea`, `PQ_PARTES_cliente_tipo_tarea`.
+- Crear migración para tabla `USERS` (sin prefijo PQ_PARTES_) con campos: `id`, `code` (único, obligatorio), `password_hash` (obligatorio), `activo`, `inhabilitado`, `created_at`, `updated_at`.
+- Actualizar migración de `PQ_PARTES_USUARIOS`: agregar campo `user_id` (FK → USERS, obligatorio, único), eliminar campo `password_hash`.
+- Actualizar migración de `PQ_PARTES_CLIENTES`: agregar campo `user_id` (FK → USERS, opcional, único), eliminar campo `password_hash`.
+- Crear/actualizar migraciones para todas las tablas: `PQ_PARTES_TIPO_CLIENTE`, `PQ_PARTES_TIPO_TAREA`, `PQ_PARTES_REGISTRO_TAREA`, `PQ_PARTES_CLIENTE_TIPO_TAREA`.
 - Asegurar que todos los campos requeridos estén definidos (incluyendo `code` en TipoTarea y TipoCliente, `cerrado` en RegistroTarea).
-- Definir índices para campos de búsqueda y relaciones.
-- Definir foreign keys y restricciones de integridad referencial.
+- Definir índices: `USERS.code` (UNIQUE), `PQ_PARTES_USUARIOS.user_id` (UNIQUE), `PQ_PARTES_CLIENTES.user_id` (UNIQUE), y otros índices para campos de búsqueda y relaciones.
+- Definir foreign keys: `PQ_PARTES_USUARIOS.user_id → USERS.id`, `PQ_PARTES_CLIENTES.user_id → USERS.id`, y otras restricciones de integridad referencial.
 - Implementar soft delete o campo `inhabilitado` según diseño.
 
 **Entregables:**
-- Archivos de migración Laravel.
+- Archivos de migración Laravel (incluyendo migración de `USERS`).
+- Modelo `User` en `backend/app/Models/User.php`.
+- Actualizar modelo `Usuario` con relación `belongsTo(User::class)`.
+- Actualizar modelo `Cliente` con relación `belongsTo(User::class)` (opcional).
 - Modelos Eloquent con relaciones y validaciones básicas.
 - Seeders para datos de prueba/demo.
 
@@ -1634,15 +1804,22 @@ Este documento cubre las siguientes áreas funcionales:
 **HU Relacionadas:** HU-001, HU-002, HU-003
 
 **Descripción:**
-- Implementar `POST /api/v1/auth/login` para empleados.
-- Implementar `POST /api/v1/auth/login-cliente` para clientes (opcional, si HU-002 es MUST).
+- Implementar `POST /api/v1/auth/login` unificado para empleados y clientes.
+- Validar credenciales contra tabla `USERS` (sin prefijo PQ_PARTES_).
+- Después del login exitoso, determinar tipo de usuario (cliente o usuario) buscando `User.code` en `PQ_PARTES_CLIENTES.code` o `PQ_PARTES_USUARIOS.code`.
+- Obtener datos del usuario/cliente desde `PQ_PARTES_USUARIOS` o `PQ_PARTES_CLIENTES`.
+- Generar token con todos los valores a conservar: `user_id`, `user_code`, `tipo_usuario`, `usuario_id`/`cliente_id`, `es_supervisor`.
 - Implementar `POST /api/v1/auth/logout` para cerrar sesión.
 - Integración con Laravel Sanctum para tokens.
-- Validaciones de credenciales y estado de usuario.
+- Validaciones de credenciales y estado de usuario (tanto en `USERS` como en entidad asociada).
 - Manejo de errores con códigos de dominio.
+- Implementar middleware para conservar valores de autenticación durante el ciclo del proceso.
 
 **Entregables:**
 - Controlador `AuthController`.
+- Servicio `AuthService` con método `determineUserType(User $user)`.
+- Servicio `AuthService` con método `getUserData(User $user, string $tipoUsuario)`.
+- Middleware para extraer y hacer disponibles valores de autenticación del token.
 - Requests de validación.
 - Tests unitarios y de integración.
 
@@ -1654,10 +1831,10 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Descripción:**
 - `GET /api/v1/clientes` - Listado con filtros y paginación.
-- `POST /api/v1/clientes` - Creación de cliente.
+- `POST /api/v1/clientes` - Creación de cliente. Si se habilita acceso al sistema, crear también registro en `USERS`. Validar que el `code` no exista en `USERS` (si se habilita acceso).
 - `GET /api/v1/clientes/{id}` - Detalle de cliente.
-- `PUT /api/v1/clientes/{id}` - Edición de cliente.
-- `DELETE /api/v1/clientes/{id}` - Eliminación de cliente (con validación de referencias).
+- `PUT /api/v1/clientes/{id}` - Edición de cliente. Si se cambia contraseña, actualizar `password_hash` en `USERS`. Sincronizar estados (`activo`, `inhabilitado`) entre `USERS` y `PQ_PARTES_CLIENTES` (si tiene `user_id`). Permitir habilitar/deshabilitar acceso al sistema.
+- `DELETE /api/v1/clientes/{id}` - Eliminación de cliente (con validación de referencias). Si tiene `user_id`, eliminar también registro en `USERS` (o marcar como inhabilitado según diseño).
 - `GET /api/v1/clientes/{id}/tipos-tarea` - Listado de tipos de tarea asignados.
 - `POST /api/v1/clientes/{id}/tipos-tarea` - Asignación de tipos de tarea.
 - `DELETE /api/v1/clientes/{id}/tipos-tarea/{tipo_tarea_id}` - Desasignación de tipos de tarea.
@@ -1666,7 +1843,7 @@ Este documento cubre las siguientes áreas funcionales:
 **Entregables:**
 - Controlador `ClienteController`.
 - Requests de validación.
-- Servicios de negocio para reglas complejas.
+- Servicios de negocio para reglas complejas (incluyendo creación/sincronización con `USERS`).
 - Tests unitarios y de integración.
 
 ---
@@ -1689,21 +1866,22 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### TK-005 – Endpoints de Gestión de Asistentes/Empleados
+### TK-005 – Endpoints de Gestión de Empleados
 
 **HU Relacionadas:** HU-018, HU-019, HU-020, HU-021, HU-022
 
 **Descripción:**
-- `GET /api/v1/asistentes` - Listado con filtros y paginación.
-- `POST /api/v1/asistentes` - Creación de asistente.
-- `GET /api/v1/asistentes/{id}` - Detalle de asistente.
-- `PUT /api/v1/asistentes/{id}` - Edición de asistente.
-- `DELETE /api/v1/asistentes/{id}` - Eliminación (con validación de referencias).
+- `GET /api/v1/empleados` - Listado con filtros y paginación.
+- `POST /api/v1/empleados` - Creación de empleado. Al crear un empleado, crear también registro en `USERS`. Validar que el `code` no exista en `USERS`. Sincronizar estados (`activo`, `inhabilitado`) entre `USERS` y `PQ_PARTES_USUARIOS`.
+- `GET /api/v1/empleados/{id}` - Detalle de empleado.
+- `PUT /api/v1/empleados/{id}` - Edición de empleado. Si se cambia contraseña, actualizar `password_hash` en `USERS` (no en `PQ_PARTES_USUARIOS`). Sincronizar estados (`activo`, `inhabilitado`) entre `USERS` y `PQ_PARTES_USUARIOS`.
+- `DELETE /api/v1/empleados/{id}` - Eliminación (con validación de referencias). Al eliminar empleado, eliminar también registro en `USERS` (o marcar como inhabilitado según diseño).
 - Validaciones de permisos (solo supervisores).
 
 **Entregables:**
-- Controlador `AsistenteController` o `UsuarioController`.
+- Controlador `EmpleadoController` o `UsuarioController`.
 - Requests de validación.
+- Servicios de negocio para creación/sincronización con `USERS`.
 - Middleware de permisos para supervisores.
 - Tests unitarios y de integración.
 
@@ -1826,19 +2004,19 @@ Este documento cubre las siguientes áreas funcionales:
 
 ---
 
-### TK-012 – Componentes UI de Gestión de Asistentes
+### TK-012 – Componentes UI de Gestión de Empleados
 
 **HU Relacionadas:** HU-018, HU-019, HU-020, HU-021, HU-022
 
 **Descripción:**
-- Componente `AsistentesList` con tabla, filtros y paginación.
-- Componente `AsistenteForm` (crear/editar).
-- Componente `AsistenteDetail` (opcional).
+- Componente `EmpleadosList` con tabla, filtros y paginación.
+- Componente `EmpleadoForm` (crear/editar).
+- Componente `EmpleadoDetail` (opcional).
 - Integración con i18n y data-testid.
 - Validaciones en frontend.
 
 **Entregables:**
-- Componentes React en `frontend/src/features/asistentes/`.
+- Componentes React en `frontend/src/features/empleados/`.
 - Tests unitarios de componentes.
 - Integración con servicios API.
 
@@ -1896,7 +2074,7 @@ Este documento cubre las siguientes áreas funcionales:
 - Servicio `AuthService` para autenticación.
 - Servicio `ClienteService` para gestión de clientes.
 - Servicio `TipoClienteService` para gestión de tipos de cliente.
-- Servicio `AsistenteService` para gestión de asistentes.
+- Servicio `EmpleadoService` para gestión de empleados.
 - Servicio `TipoTareaService` para gestión de tipos de tarea.
 - Servicio `TareaService` para gestión de tareas.
 - Servicio `BulkTaskProcessService` para proceso masivo.
@@ -1919,12 +2097,17 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Descripción:**
 - Middleware de autenticación (Sanctum).
+- Middleware para extraer valores de autenticación del token: `tipo_usuario`, `user_code`, `usuario_id`/`cliente_id`, `es_supervisor`.
+- Middleware para hacer disponibles estos valores en el request (ej: `request()->user_type`, `request()->user_code`, etc.).
+- Validar que el `User` asociado al token esté activo y no inhabilitado en `USERS`.
+- Validar que el usuario/cliente asociado esté activo y no inhabilitado en su tabla correspondiente (`PQ_PARTES_USUARIOS` o `PQ_PARTES_CLIENTES`).
 - Middleware de permisos para supervisores.
 - Middleware de validación de roles.
 - Políticas de autorización (Laravel Policies) para tareas (empleado solo sus tareas, supervisor todas).
 
 **Entregables:**
 - Middleware en `backend/app/Http/Middleware/`.
+- Middleware para conservar valores de autenticación durante el ciclo del proceso.
 - Policies en `backend/app/Policies/`.
 - Tests de middleware y políticas.
 
@@ -2004,7 +2187,7 @@ Este documento cubre las siguientes áreas funcionales:
 - ✅ Estructura de tests en `frontend/tests/e2e/`
 - ✅ Test de ejemplo en `frontend/tests/e2e/example.spec.ts`
 - ✅ Documentación en `frontend/tests/e2e/README.md`
-- ✅ Reglas de testing en `.cursor/rules/06-playwright-testing-rules.md`
+- ✅ Reglas de testing en `.cursor/rules/11-playwright-testing-rules.md`
 - ✅ Scripts npm configurados (`test:e2e`, `test:e2e:ui`, `test:e2e:headed`)
 
 **Pendiente:**
@@ -2070,7 +2253,7 @@ Este documento cubre las siguientes áreas funcionales:
 - Seeder de tipos de cliente básicos.
 - Seeder de tipos de tarea (incluyendo uno por defecto y genéricos).
 - Seeder de clientes de ejemplo.
-- Seeder de asistentes/empleados (incluyendo supervisores).
+- Seeder de empleados (incluyendo supervisores).
 - Seeder de tareas de ejemplo.
 - Comando `php artisan db:seed` para poblar datos de prueba.
 
@@ -2141,7 +2324,7 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Descripción:**
 - `GET /api/v1/informes/detalle` - Consulta detallada de tareas con filtros.
-- `GET /api/v1/informes/por-asistente` - Consulta agrupada por asistente.
+- `GET /api/v1/informes/por-empleado` - Consulta agrupada por empleado.
 - `GET /api/v1/informes/por-cliente` - Consulta agrupada por cliente.
 - `GET /api/v1/informes/por-tipo` - Consulta agrupada por tipo de tarea.
 - `GET /api/v1/informes/por-fecha` - Consulta agrupada por fecha.
@@ -2165,7 +2348,7 @@ Este documento cubre las siguientes áreas funcionales:
 
 **Descripción:**
 - Componente `ConsultaDetallePage` para consulta detallada.
-- Componente `ConsultaAgrupadaPage` genérico para consultas agrupadas (por asistente, cliente, tipo, fecha).
+- Componente `ConsultaAgrupadaPage` genérico para consultas agrupadas (por empleado, cliente, tipo, fecha).
 - Componente `FiltrosConsulta` común para todos los tipos de consulta.
 - Componente `TablaResultados` con paginación y ordenamiento.
 - Componente `GrupoExpandible` (accordion) para consultas agrupadas.
@@ -2208,7 +2391,7 @@ Este documento cubre las siguientes áreas funcionales:
 **Descripción:**
 - `GET /api/v1/dashboard/resumen` - Resumen ejecutivo del dashboard.
 - `GET /api/v1/dashboard/por-cliente` - Resumen por cliente (top N).
-- `GET /api/v1/dashboard/por-asistente` - Resumen por asistente (top N, solo supervisor).
+- `GET /api/v1/dashboard/por-empleado` - Resumen por empleado (top N, solo supervisor).
 - Query parameters: `fecha_desde`, `fecha_hasta`, `limit` (para top N).
 - Validación de permisos según rol (filtros automáticos).
 - Cálculo de KPIs (totales, promedios).
@@ -2230,7 +2413,7 @@ Este documento cubre las siguientes áreas funcionales:
 - Componente `DashboardPage` principal.
 - Componente `KPICard` para indicadores clave (total horas, cantidad tareas, promedio).
 - Componente `ResumenPorCliente` para lista de top clientes.
-- Componente `ResumenPorAsistente` para lista de top asistentes (solo supervisor).
+- Componente `ResumenPorEmpleado` para lista de top empleados (solo supervisor).
 - Componente `SelectorPeriodo` para cambiar período.
 - Componente `GraficoDistribucion` para gráficos (Chart.js, Recharts, etc.).
 - Integración con i18n y data-testid.

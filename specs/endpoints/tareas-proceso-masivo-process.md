@@ -77,7 +77,7 @@ Accept: application/json
 {
   "error": 3101,
   "respuesta": "No tiene permisos para acceder a esta funcionalidad",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -87,7 +87,7 @@ Accept: application/json
 {
   "error": 2119,
   "respuesta": "Debe seleccionar al menos una tarea",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

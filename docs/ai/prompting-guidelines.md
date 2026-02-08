@@ -26,7 +26,7 @@ Sé específico en tus solicitudes:
 
 Cuando sea relevante, referencia documentación existente:
 - "Según `specs/endpoints/time-entries-create.md`, agregar..."
-- "Siguiendo las reglas en `.cursor/rules/03-data-access-orm-sql.md`..."
+- "Siguiendo las reglas en `.cursor/rules/09-data-access-orm-sql.md`..."
 
 ---
 
@@ -92,7 +92,7 @@ Referencias:
 **Ejemplo:**
 ```
 Genera un componente React para el formulario de registro de tarea que:
-- Use los test-ids definidos en .cursor/rules/03-i18n-and-testid.mdc
+- Use los test-ids definidos en .cursor/rules/10-i18n-and-testid.md
 - Implemente validaciones según specs/rules/validation-rules.md
 - Use i18n para todos los textos
 - Maneje estados de loading y error
@@ -351,7 +351,7 @@ Genera tests para [componente] que:
 ```
 "Agrega validación de fecha no futura en el formulario de registro de tarea, 
 siguiendo las reglas en specs/rules/validation-rules.md y usando el test-id 
-'task-entry-date-input' definido en .cursor/rules/03-i18n-and-testid.mdc"
+'task-entry-date-input' definido en .cursor/rules/10-i18n-and-testid.md"
 ```
 
 ---
@@ -387,7 +387,7 @@ cat .cursor/rules/*.mdc
 ```
 Genera un componente React TypeScript llamado TaskEntryForm que:
 1. Implemente el formulario de registro de tarea según specs/endpoints/time-entries-create.md
-2. Use todos los test-ids definidos en .cursor/rules/03-i18n-and-testid.mdc
+2. Use todos los test-ids definidos en .cursor/rules/10-i18n-and-testid.md
 3. Implemente validaciones del frontend según docs/frontend/frontend-specifications.md
 4. Use i18n para todos los textos (locales/tasks.json)
 5. Maneje estados de loading, error y success
@@ -402,7 +402,7 @@ Sigue las convenciones:
 Referencias:
 - docs/frontend/frontend-specifications.md
 - specs/endpoints/time-entries-create.md
-- .cursor/rules/02-frontend-norms.mdc
+- .cursor/rules/07-frontend-norms.md
 ```
 
 ### Ejemplo 2: Corrección de Bug

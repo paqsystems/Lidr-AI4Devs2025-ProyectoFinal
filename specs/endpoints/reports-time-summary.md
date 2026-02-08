@@ -105,7 +105,7 @@ Accept: application/json
 {
   "error": 3001,
   "respuesta": "Usuario no autenticado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

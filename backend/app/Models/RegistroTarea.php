@@ -9,22 +9,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Modelo: RegistroTarea
  * 
- * Representa el registro de una tarea realizada por un usuario para un cliente.
+ * Tabla física: PQ_PARTES_REGISTRO_TAREA
  * 
- * Campos importantes:
- * - fecha: Fecha en que se realizó la tarea
- * - duracion_minutos: Duración en minutos (debe ser múltiplo de 15)
- * - sin_cargo: Indica si la tarea es sin cargo para el cliente
- * - presencial: Indica si la tarea es presencial (en el cliente)
- * - observacion: Descripción de la tarea (obligatorio)
- * - cerrado: Indica si la tarea está cerrada (no se puede modificar ni eliminar)
+ * Tabla principal del sistema. Almacena los registros de tareas diarias.
  * 
- * Reglas de negocio:
- * - duracion_minutos debe ser múltiplo de 15 (tramos de 15 minutos)
- * - duracion_minutos debe ser > 0 y <= 1440 (máximo 24 horas)
- * - fecha no puede ser futura (advertencia, no bloquea)
- * - observacion es obligatorio (no puede estar vacío)
- * - Una tarea cerrada (cerrado = true) no se puede modificar ni eliminar
+ * Restricciones:
+ * - duracion_minutos debe ser múltiplo de 15 (15, 30, 45, ..., 1440)
+ * - duracion_minutos <= 1440 (máximo 24 horas)
+ * - observacion es obligatorio
+ * - cerrado = true impide modificación y eliminación
+ * 
+ * @property int $id
+ * @property int $usuario_id FK → PQ_PARTES_USUARIOS
+ * @property int $cliente_id FK → PQ_PARTES_CLIENTES
+ * @property int $tipo_tarea_id FK → PQ_PARTES_TIPOS_TAREA
+ * @property \Carbon\Carbon $fecha Fecha de la tarea
+ * @property int $duracion_minutos Duración en minutos (múltiplo de 15)
+ * @property bool $sin_cargo Indica si es sin cargo
+ * @property bool $presencial Indica si es presencial
+ * @property string $observacion Descripción de la tarea
+ * @property bool $cerrado Indica si está cerrada
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * 
+ * @see docs/modelo-datos.md
+ * @see TR-00(MH)-Generacion-base-datos-inicial.md
  */
 class RegistroTarea extends Model
 {
@@ -33,7 +42,7 @@ class RegistroTarea extends Model
     /**
      * Nombre de la tabla
      */
-    protected $table = 'PQ_PARTES_registro_tarea';
+    protected $table = 'PQ_PARTES_REGISTRO_TAREA';
 
     /**
      * Campos que pueden ser asignados masivamente
@@ -54,9 +63,6 @@ class RegistroTarea extends Model
      * Casts de tipos de datos
      */
     protected $casts = [
-        'usuario_id' => 'integer',
-        'cliente_id' => 'integer',
-        'tipo_tarea_id' => 'integer',
         'fecha' => 'date',
         'duracion_minutos' => 'integer',
         'sin_cargo' => 'boolean',
@@ -65,6 +71,12 @@ class RegistroTarea extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Formato de fecha para SQL Server
+     * @see .cursor/rules/20-sql-server-datetime-format.md
+     */
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     /**
      * Valores por defecto
@@ -100,23 +112,46 @@ class RegistroTarea extends Model
     }
 
     /**
-     * Verificar si la tarea está cerrada
-     * 
-     * @return bool
+     * Verificar si la tarea está cerrada (no modificable)
      */
-    public function isCerrada(): bool
+    public function isCerrado(): bool
     {
         return $this->cerrado === true;
     }
 
     /**
-     * Obtener duración en horas (decimal)
-     * 
-     * @return float
+     * Verificar si la tarea puede ser modificada
      */
-    public function getDuracionHorasAttribute(): float
+    public function puedeSerModificada(): bool
     {
-        return round($this->duracion_minutos / 60, 2);
+        return !$this->cerrado;
+    }
+
+    /**
+     * Verificar si la tarea puede ser eliminada
+     */
+    public function puedeSerEliminada(): bool
+    {
+        return !$this->cerrado;
+    }
+
+    /**
+     * Obtener la duración formateada en horas y minutos
+     * 
+     * @return string Ejemplo: "2h 30m"
+     */
+    public function getDuracionFormateada(): string
+    {
+        $horas = intdiv($this->duracion_minutos, 60);
+        $minutos = $this->duracion_minutos % 60;
+        
+        if ($horas > 0 && $minutos > 0) {
+            return "{$horas}h {$minutos}m";
+        } elseif ($horas > 0) {
+            return "{$horas}h";
+        } else {
+            return "{$minutos}m";
+        }
     }
 
     /**
@@ -138,7 +173,7 @@ class RegistroTarea extends Model
     /**
      * Scope para tareas de un usuario específico
      */
-    public function scopeDelUsuario($query, int $usuarioId)
+    public function scopeDeUsuario($query, int $usuarioId)
     {
         return $query->where('usuario_id', $usuarioId);
     }
@@ -146,25 +181,16 @@ class RegistroTarea extends Model
     /**
      * Scope para tareas de un cliente específico
      */
-    public function scopeDelCliente($query, int $clienteId)
+    public function scopeDeCliente($query, int $clienteId)
     {
         return $query->where('cliente_id', $clienteId);
     }
 
     /**
-     * Scope para filtrar por rango de fechas
+     * Scope para tareas en un rango de fechas
      */
-    public function scopeEnRangoFechas($query, ?string $fechaDesde, ?string $fechaHasta)
+    public function scopeEntreFechas($query, $fechaDesde, $fechaHasta)
     {
-        if ($fechaDesde) {
-            $query->where('fecha', '>=', $fechaDesde);
-        }
-        
-        if ($fechaHasta) {
-            $query->where('fecha', '<=', $fechaHasta);
-        }
-        
-        return $query;
+        return $query->whereBetween('fecha', [$fechaDesde, $fechaHasta]);
     }
 }
-

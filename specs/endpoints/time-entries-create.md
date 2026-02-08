@@ -110,7 +110,7 @@ Accept: application/json
 {
   "error": 3001,
   "respuesta": "Usuario no autenticado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -153,7 +153,7 @@ Accept: application/json
 {
   "error": 4003,
   "respuesta": "Cliente no encontrado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -167,7 +167,7 @@ Accept: application/json
 {
   "error": 4201,
   "respuesta": "Cliente inactivo",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

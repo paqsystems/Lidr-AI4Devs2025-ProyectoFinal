@@ -1,6 +1,6 @@
 # CONTRATO BASE DE APIs — Sistema de Partes (Laravel + Sanctum)
 
-Este documento amplía el contrato base definido en `/.cursor/rules/05-api-contract.md`.
+Este documento amplía el contrato base definido en `/.cursor/rules/06-api-contract.md`.
 
 ## Principios
 - Respuesta uniforme: `error/respuesta/resultado`.

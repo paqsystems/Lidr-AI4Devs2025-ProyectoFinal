@@ -81,6 +81,7 @@ Todos los errores siguen el formato estándar:
 | 1209 | Observación excede longitud máxima | 422 | `observacion` | La observación no puede exceder 1000 caracteres |
 | 1210 | Duración debe estar en tramos de 15 minutos | 422 | `duracion_minutos` | La duración debe ser múltiplo de 15 (15, 30, 45, 60, etc.) |
 | 1211 | Observación requerida | 422 | `observacion` | El campo observación es obligatorio |
+| 1212 | Debe seleccionar al menos una tarea | 422 | `task_ids` | Debe seleccionar al menos una tarea (proceso masivo) |
 
 ### 1300-1399: Validación de Filtros y Paginación
 
@@ -254,7 +255,7 @@ GET /api/v1/tareas/999
 {
   "error": 4005,
   "respuesta": "Tarea no encontrada",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -271,7 +272,7 @@ DELETE /api/v1/tareas/5
 {
   "error": 2104,
   "respuesta": "No se puede eliminar tarea de otro usuario",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -291,7 +292,7 @@ POST /api/v1/auth/login
 {
   "error": 3201,
   "respuesta": "Credenciales inválidas",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -364,7 +365,7 @@ Este catálogo puede extenderse según necesidades futuras:
 
 ## Notas
 
-- Este catálogo está alineado con el contrato de API definido en `.cursor/rules/01-api-contract.md`
+- Este catálogo está alineado con el contrato de API definido en `.cursor/rules/06-api-contract.md`
 - Los códigos deben ser consistentes en toda la aplicación
 - El frontend debe manejar todos los códigos definidos
 - Documentar cualquier código nuevo que se agregue

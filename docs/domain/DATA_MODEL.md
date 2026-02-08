@@ -72,8 +72,8 @@ Valores (alineado a tu práctica):
 
 ## 2) Entidades principales
 
-## 2.1 User (Usuario / Agente)
-Representa agentes internos y (opcionalmente) usuarios externos.
+## 2.1 User (Usuario)
+Representa usuarios internos (empleados) y (opcionalmente) usuarios externos (clientes).
 
 **Campos:**
 - `id`
@@ -291,7 +291,7 @@ Campos con potencial de inyección:
 ## 6) Análisis mínimo para reportes (futuro)
 
 Para métricas:
-- Tickets por estado, por cliente, por agente
+- Tickets por estado, por cliente, por empleado
 - Tiempo hasta primera respuesta (si se implementa)
 - Tiempo hasta cierre
 - Cantidad de derivaciones

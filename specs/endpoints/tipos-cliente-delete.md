@@ -23,7 +23,7 @@ Elimina un tipo de cliente. No se puede eliminar si tiene clientes asociados.
 {
   "error": 0,
   "respuesta": "Tipo de cliente eliminado correctamente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -37,7 +37,7 @@ Elimina un tipo de cliente. No se puede eliminar si tiene clientes asociados.
 {
   "error": 2115,
   "respuesta": "No se puede eliminar un tipo de cliente que tiene clientes asociados",
-  "resultado": null
+  "resultado": {}
 }
 ```
 

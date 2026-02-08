@@ -58,8 +58,12 @@ Permitir que un empleado:
   "resultado": {
     "token": "1|abcdef123456...",
     "user": {
-      "id": 1,
-      "code": "JPEREZ",
+      "user_id": 1,
+      "user_code": "JPEREZ",
+      "tipo_usuario": "usuario",
+      "usuario_id": 5,
+      "cliente_id": null,
+      "es_supervisor": false,
       "nombre": "Juan Pérez",
       "email": "usuario@ejemplo.com"
     }
@@ -67,20 +71,24 @@ Permitir que un empleado:
 }
 ```
 
+**Nota:** Los valores `tipo_usuario`, `user_code`, `usuario_id`/`cliente_id`, y `es_supervisor` se conservan durante todo el ciclo del proceso y están disponibles en cada request autenticado.
+
 **Response Error (401):**
 ```json
 {
   "error": 9002,
   "respuesta": "Credenciales inválidas",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
 **Validaciones:**
 - Código de usuario no puede estar vacío
 - Contraseña no puede estar vacía
-- Usuario debe existir y estar activo
-- Contraseña debe coincidir con el hash almacenado
+- User debe existir en tabla `USERS` y estar activo
+- Contraseña debe coincidir con el hash almacenado en `USERS`
+- User.code debe existir en `PQ_PARTES_CLIENTES` O `PQ_PARTES_USUARIOS`
+- Cliente o Usuario asociado debe estar activo y no inhabilitado
 
 **Criterios de Éxito:**
 - Usuario recibe token de autenticación

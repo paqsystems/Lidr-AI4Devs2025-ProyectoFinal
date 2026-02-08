@@ -35,7 +35,7 @@ Este archivo define el catálogo completo de códigos de error del dominio para 
 - Extensibilidad futura
 
 ## Relación con Otros Documentos
-- Alineado con el contrato de API en `.cursor/rules/01-api-contract.md`
+- Alineado con el contrato de API en `.cursor/rules/06-api-contract.md`
 - Referenciado en el flujo E2E en `specs/flows/e2e-core-flow.md`
 - Usado por desarrolladores del backend para implementar manejo de errores
 - Referencia para el frontend para mostrar mensajes apropiados

@@ -11,11 +11,14 @@
 
 ## Descripción
 
-Autentica un usuario en el sistema mediante código y contraseña. Si las credenciales son válidas, genera un token de acceso que debe ser utilizado en todas las solicitudes subsiguientes.
+Autentica un usuario en el sistema mediante código y contraseña. La autenticación se realiza contra la tabla `USERS` (sin prefijo PQ_PARTES_). Si las credenciales son válidas:
 
-Nota:
-Este mecanismo de autenticación utiliza código de usuario en lugar de correo electrónico, por decisión de diseño.
-Esta elección refleja el uso previsto del sistema en contextos internos o empresariales.
+1. Se determina si el usuario es un **Cliente** (tabla `PQ_PARTES_CLIENTES`) o un **Empleado** (tabla `PQ_PARTES_USUARIOS`)
+2. Se obtienen los datos correspondientes (ID, nombre, email, etc.)
+3. Si es usuario, se verifica si es supervisor
+4. Se genera un token de acceso que incluye toda la información necesaria para el ciclo del proceso
+
+**Nota:** Este mecanismo de autenticación utiliza código de usuario en lugar de correo electrónico, por decisión de diseño. Esta elección refleja el uso previsto del sistema en contextos internos o empresariales.
 
 ---
 
@@ -50,6 +53,7 @@ Accept: application/json
 
 ### Success (200 OK)
 
+**Ejemplo 1: Empleado**
 ```json
 {
   "error": 0,
@@ -57,10 +61,56 @@ Accept: application/json
   "resultado": {
     "token": "1|abcdef1234567890abcdef1234567890",
     "user": {
-      "id": 1,
-      "code" : "JPEREZ",
+      "user_id": 1,
+      "user_code": "JPEREZ",
+      "tipo_usuario": "usuario",
+      "usuario_id": 5,
+      "cliente_id": null,
+      "es_supervisor": false,
       "nombre": "Juan Pérez",
-      "email": "usuario@ejemplo.com"
+      "email": "juan.perez@ejemplo.com"
+    }
+  }
+}
+```
+
+**Ejemplo 2: Cliente**
+```json
+{
+  "error": 0,
+  "respuesta": "Autenticación exitosa",
+  "resultado": {
+    "token": "1|abcdef1234567890abcdef1234567890",
+    "user": {
+      "user_id": 2,
+      "user_code": "CLIENTE01",
+      "tipo_usuario": "cliente",
+      "usuario_id": null,
+      "cliente_id": 10,
+      "es_supervisor": false,
+      "nombre": "Cliente Ejemplo S.A.",
+      "email": "contacto@cliente-ejemplo.com"
+    }
+  }
+}
+```
+
+**Ejemplo 3: Usuario Supervisor**
+```json
+{
+  "error": 0,
+  "respuesta": "Autenticación exitosa",
+  "resultado": {
+    "token": "1|abcdef1234567890abcdef1234567890",
+    "user": {
+      "user_id": 3,
+      "user_code": "MGARCIA",
+      "tipo_usuario": "usuario",
+      "usuario_id": 8,
+      "cliente_id": null,
+      "es_supervisor": true,
+      "nombre": "María García",
+      "email": "maria.garcia@ejemplo.com"
     }
   }
 }
@@ -68,15 +118,22 @@ Accept: application/json
 
 ### Campos de Respuesta
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `error` | integer | Código de error (0 = éxito) |
-| `respuesta` | string | Mensaje legible para el usuario |
-| `resultado.token` | string | Token de autenticación (Sanctum) |
-| `resultado.user.id` | integer | ID del usuario |
-| `resultado.user.code` | string | Código del usuario |
-| `resultado.user.nombre` | string | Nombre completo del usuario |
-| `resultado.user.email` | string | Email del usuario |
+| Campo | Tipo | Descripción | Notas |
+|-------|------|-------------|-------|
+| `error` | integer | Código de error (0 = éxito) | |
+| `respuesta` | string | Mensaje legible para el usuario | |
+| `resultado.token` | string | Token de autenticación (Sanctum) | Debe incluirse en header `Authorization: Bearer {token}` |
+| `resultado.user.user_id` | integer | ID del registro en tabla USERS | Obligatorio |
+| `resultado.user.user_code` | string | Código del usuario autenticado | Valor de `User.code`, obligatorio |
+| `resultado.user.tipo_usuario` | string | Tipo de usuario | `"cliente"` o `"usuario"`, obligatorio |
+| `resultado.user.usuario_id` | integer \| null | ID del usuario (si tipo_usuario = "usuario") | ID de `PQ_PARTES_USUARIOS.id` o `null` |
+| `resultado.user.cliente_id` | integer \| null | ID del cliente (si tipo_usuario = "cliente") | ID de `PQ_PARTES_CLIENTES.id` o `null` |
+| `resultado.user.es_supervisor` | boolean | Indica si es supervisor | `false` para clientes, valor de `supervisor` para usuarios |
+| `resultado.user.nombre` | string | Nombre completo | Nombre del cliente o usuario |
+| `resultado.user.email` | string \| null | Email | Email del cliente o usuario (puede ser null) |
+
+**Valores a conservar durante el ciclo del proceso:**
+Todos los campos de `resultado.user` deben conservarse durante todo el ciclo del proceso (desde login hasta logout) y estar disponibles en cada request autenticado. Ver `docs/modelo-datos.md` para más detalles.
 
 ---
 
@@ -108,7 +165,7 @@ Accept: application/json
 {
   "error": 3201,
   "respuesta": "Credenciales inválidas",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -124,7 +181,7 @@ Accept: application/json
 {
   "error": 9999,
   "respuesta": "Error inesperado del servidor",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -144,18 +201,33 @@ Accept: application/json
 
 ### A Nivel de Negocio
 
-1. **Usuario debe existir:**
-   - Buscar usuario por code en `PQ_PARTES_usuario`
+1. **User debe existir:**
+   - Buscar registro en tabla `USERS` por `code`
    - Si no existe: Error 3202
 
-2. **Usuario debe estar activo y no inhabilitado:**
-   - Verificar campo `activo = true`
-   - Verificar campo `inhabilitado = false`
+2. **User debe estar activo y no inhabilitado:**
+   - Verificar campo `activo = true` en `USERS`
+   - Verificar campo `inhabilitado = false` en `USERS`
    - Si está inactivo o inhabilitado: Error 4203
 
 3. **Contraseña debe coincidir:**
-   - Verificar hash con `Hash::check()`
+   - Verificar hash con `Hash::check($password, $user->password_hash)`
    - Si no coincide: Error 3203
+
+4. **Determinar tipo de usuario:**
+   - Buscar `User.code` en `PQ_PARTES_CLIENTES.code`
+   - Buscar `User.code` en `PQ_PARTES_USUARIOS.code`
+   - Si existe en `PQ_PARTES_CLIENTES`:
+     - `tipo_usuario = "cliente"`
+     - Obtener `cliente_id` del registro
+     - Verificar que el cliente esté activo y no inhabilitado
+     - `es_supervisor = false`
+   - Si existe en `PQ_PARTES_USUARIOS`:
+     - `tipo_usuario = "usuario"`
+     - Obtener `usuario_id` del registro
+     - Verificar que el usuario esté activo y no inhabilitado
+     - Obtener `supervisor` del registro → `es_supervisor = supervisor`
+   - Si no existe en ninguna tabla: Error 3202 (usuario no encontrado)
 
 ---
 
@@ -163,34 +235,89 @@ Accept: application/json
 
 ### Tablas Involucradas
 
-- `PQ_PARTES_usuario`
+- `USERS` (sin prefijo PQ_PARTES_) - Tabla de autenticación
+- `PQ_PARTES_CLIENTES` - Si el usuario es cliente
+- `PQ_PARTES_USUARIOS` - Si el usuario es empleado
 
 ### Consultas
 
 ```php
-// 1. Buscar usuario por code
-$usuario = Usuario::where('code', $code)
+// 1. Buscar User por code en tabla USERS
+$user = User::where('code', $code)
     ->where('activo', true)
     ->where('inhabilitado', false)
     ->first();
 
-// 2. Verificar contraseña
-if (!$usuario || !Hash::check($password, $usuario->password_hash)) {
-    throw new AuthenticationException();
+if (!$user || !Hash::check($password, $user->password_hash)) {
+    throw new AuthenticationException('Credenciales inválidas', 3201);
+}
+
+// 2. Determinar tipo de usuario
+$tipoUsuario = null;
+$clienteId = null;
+$usuarioId = null;
+$esSupervisor = false;
+$nombre = null;
+$email = null;
+
+// Buscar en PQ_PARTES_CLIENTES
+$cliente = Cliente::where('code', $user->code)
+    ->where('activo', true)
+    ->where('inhabilitado', false)
+    ->first();
+
+if ($cliente) {
+    $tipoUsuario = 'cliente';
+    $clienteId = $cliente->id;
+    $usuarioId = null;
+    $esSupervisor = false;
+    $nombre = $cliente->nombre;
+    $email = $cliente->email;
+} else {
+    // Buscar en PQ_PARTES_USUARIOS
+    $usuario = Usuario::where('code', $user->code)
+        ->where('activo', true)
+        ->where('inhabilitado', false)
+        ->first();
+    
+    if (!$usuario) {
+        throw new AuthenticationException('Usuario no encontrado', 3202);
+    }
+    
+    $tipoUsuario = 'usuario';
+    $clienteId = null;
+    $usuarioId = $usuario->id;
+    $esSupervisor = $usuario->supervisor;
+    $nombre = $usuario->nombre;
+    $email = $usuario->email;
 }
 
 // 3. Actualizar último login (opcional)
-$usuario->last_login_at = now();
-$usuario->save();
+$user->last_login_at = now();
+$user->save();
 
-// 4. Generar token
-$token = $usuario->createToken('auth-token')->plainTextToken;
+// 4. Generar token Sanctum asociado al User
+$token = $user->createToken('auth-token')->plainTextToken;
+
+// 5. Preparar respuesta con todos los valores a conservar
+$userData = [
+    'user_id' => $user->id,
+    'user_code' => $user->code,
+    'tipo_usuario' => $tipoUsuario,
+    'usuario_id' => $usuarioId,
+    'cliente_id' => $clienteId,
+    'es_supervisor' => $esSupervisor,
+    'nombre' => $nombre,
+    'email' => $email,
+];
 ```
 
 ### Índices Utilizados
 
-- `idx_usuario_code` (UNIQUE) - Búsqueda por código de usuario
-- `idx_usuario_activo` - Filtro de usuarios activos
+- `USERS.code` (UNIQUE) - Búsqueda por código de usuario
+- `USERS.activo` - Filtro de usuarios activos
+- `PQ_PARTES_CLIENTES.code` (UNIQUE) - Búsqueda de cliente por código
+- `PQ_PARTES_USUARIOS.code` (UNIQUE) - Búsqueda de usuario por código
 
 ---
 

@@ -34,7 +34,7 @@ Accept: application/json
 {
   "error": 0,
   "respuesta": "Sesión cerrada correctamente",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -44,7 +44,7 @@ Accept: application/json
 |-------|------|-------------|
 | `error` | integer | Código de error (0 = éxito) |
 | `respuesta` | string | Mensaje legible para el usuario |
-| `resultado` | null | No aplica para logout |
+| `resultado` | object | Objeto vacío `{}` (no aplica para logout) |
 
 ---
 
@@ -56,7 +56,7 @@ Accept: application/json
 {
   "error": 3001,
   "respuesta": "Usuario no autenticado",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
@@ -70,7 +70,7 @@ Accept: application/json
 {
   "error": 9999,
   "respuesta": "Error inesperado del servidor",
-  "resultado": null
+  "resultado": {}
 }
 ```
 
