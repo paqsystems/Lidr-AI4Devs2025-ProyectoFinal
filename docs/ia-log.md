@@ -1932,3 +1932,33 @@ Documentación – Nueva historia de usuario
 ### Referencias
 - `docs/hu-historias/HU-056(SH)-menú-lateral-de-navegación.md`
 - `PROMPTS/Prompts-PAQ.md` (Prompt 11)
+
+---
+
+## Entrada TR-053, TR-054, TR-055 (Dashboard: dedicación por empleado, gráficos, actualización automática)
+
+### Fecha
+2026-02-07
+
+### Etapa del proyecto
+Implementación TR-053(SH), TR-054(SH), TR-055(SH)
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+"Ejecutá las tareas tr-053 a tr-055"
+
+### Resultado generado por IA
+- **TR-053:** Backend: TaskService añade `porcentaje` a top_empleados. Frontend: sección "Dedicación por Empleado" (solo supervisor) con data-testid dashboard.dedicacionEmpleado, lista con link "Ver detalle" a /informes/tareas-por-empleado?usuario_id=...; TareasPorEmpleadoPage lee usuario_id, fecha_desde, fecha_hasta desde URL.
+- **TR-054:** Recharts instalado; componente GraficoDistribucion (BarChart); Dashboard muestra gráfico por cliente (empleado/supervisor), por empleado (supervisor), por tipo (cliente); data-testid graficoPorCliente, graficoPorEmpleado, graficoPorTipo.
+- **TR-055:** Constante DASHBOARD_REFRESH_INTERVAL_MS 5 min; setInterval para actualización automática; estado lastUpdatedAt y minutesAgo; botón "Actualizar"; indicador "Actualizado hace X min"; limpieza de intervalos al desmontar.
+- E2E: dashboard.spec.ts actualizado (dedicacionEmpleado, link tareas-por-empleado, botonActualizar, ultimaActualizacion). TRs actualizadas con trazabilidad e estado IMPLEMENTADO.
+
+### Ajustes humanos realizados
+- Ninguno.
+
+### Referencias
+- `docs/hu-tareas/TR-053(SH)-resumen-de-dedicación-por-empleado-en-dashboard-supervisor.md`
+- `docs/hu-tareas/TR-054(SH)-gráficos-y-visualizaciones-en-dashboard.md`
+- `docs/hu-tareas/TR-055(SH)-actualización-automática-del-dashboard.md`

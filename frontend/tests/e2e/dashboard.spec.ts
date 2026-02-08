@@ -50,7 +50,7 @@ test.describe('Dashboard principal — TR-051', () => {
     await expect(page.locator('[data-testid="dashboard.topClientes"]')).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.locator('[data-testid="dashboard.topEmpleados"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="dashboard.dedicacionEmpleado"]')).not.toBeVisible();
     await expect(page.locator('[data-testid="dashboard.kpi.totalHoras"]')).toBeVisible();
     await expect(page.locator('[data-testid="dashboard.kpi.cantidadTareas"]')).toBeVisible();
   });
@@ -76,12 +76,12 @@ test.describe('Dashboard principal — TR-051', () => {
     await expect(page.locator('[data-testid="dashboard.topClientes"]')).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.locator('[data-testid="dashboard.topEmpleados"]')).toBeVisible({
+    await expect(page.locator('[data-testid="dashboard.dedicacionEmpleado"]')).toBeVisible({
       timeout: 5000,
     });
   });
 
-  test('cliente accede al dashboard y ve Distribución por tipo (sin Top empleados)', async ({
+  test('cliente accede al dashboard y ve Distribución por tipo (sin Dedicación por Empleado)', async ({
     page,
   }) => {
     await page.fill('[data-testid="auth.login.usuarioInput"]', CLIENTE.code);
@@ -104,7 +104,51 @@ test.describe('Dashboard principal — TR-051', () => {
     await expect(page.locator('[data-testid="dashboard.distribucionTipo"]')).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.locator('[data-testid="dashboard.topEmpleados"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="dashboard.dedicacionEmpleado"]')).not.toBeVisible();
+  });
+
+  test('TR-053: supervisor ve Dedicación por Empleado y enlace Ver detalle lleva a tareas-por-empleado', async ({
+    page,
+  }) => {
+    await page.fill('[data-testid="auth.login.usuarioInput"]', SUPERVISOR.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', SUPERVISOR.password);
+    await Promise.all([
+      page.waitForResponse(
+        (resp) => resp.url().includes('/api/v1/auth/login') && resp.status() === 200
+      ),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+    await expect(page).toHaveURL('/', { timeout: 20000 });
+    await expect(
+      page.locator('[data-testid="dashboard.kpis"]').or(page.locator('[data-testid="dashboard.error"]'))
+    ).toBeVisible({ timeout: 25000 });
+    await expect(page.locator('[data-testid="dashboard.dedicacionEmpleado"]')).toBeVisible();
+    await expect(page.locator('[data-testid="dashboard.dedicacionEmpleado.totalGeneral"]')).toBeVisible();
+    const linkDetalle = page.locator('[data-testid^="dashboard.dedicacionEmpleado.linkDetalle."]').first();
+    if ((await linkDetalle.count()) > 0) {
+      await linkDetalle.click();
+      await expect(page).toHaveURL(/\/informes\/tareas-por-empleado/, { timeout: 10000 });
+    }
+  });
+
+  test('TR-055: botón Actualizar e indicador de última actualización visibles', async ({ page }) => {
+    await page.fill('[data-testid="auth.login.usuarioInput"]', EMPLEADO.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', EMPLEADO.password);
+    await Promise.all([
+      page.waitForResponse(
+        (resp) => resp.url().includes('/api/v1/auth/login') && resp.status() === 200
+      ),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+    await expect(page).toHaveURL('/', { timeout: 20000 });
+    await expect(
+      page.locator('[data-testid="dashboard.kpis"]').or(page.locator('[data-testid="dashboard.error"]'))
+    ).toBeVisible({ timeout: 25000 });
+    await expect(page.locator('[data-testid="dashboard.botonActualizar"]')).toBeVisible();
+    await expect(page.locator('[data-testid="dashboard.ultimaActualizacion"]')).toBeVisible();
+    await expect(page.locator('[data-testid="dashboard.ultimaActualizacion"]')).toContainText(
+      'Actualizado hace'
+    );
   });
 
   test('cambio de período actualiza datos del dashboard', async ({ page }) => {

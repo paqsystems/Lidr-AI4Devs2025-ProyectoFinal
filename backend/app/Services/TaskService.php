@@ -923,6 +923,7 @@ class TaskService
                     'code' => $e['code'],
                     'total_horas' => round($e['total_horas'], 2),
                     'cantidad_tareas' => $e['cantidad_tareas'],
+                    'porcentaje' => $totalHoras > 0 ? round($e['total_horas'] / $totalHoras * 100, 1) : 0,
                 ];
             }
         }

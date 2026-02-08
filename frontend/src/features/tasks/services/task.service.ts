@@ -482,6 +482,7 @@ export interface DashboardTopEmpleado {
   code: string;
   total_horas: number;
   cantidad_tareas: number;
+  porcentaje?: number;
 }
 
 /**

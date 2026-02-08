@@ -126,6 +126,17 @@
   background: #d1d5db;
 }
 
+.dashboard-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dashboard-ultima-actualizacion {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
 .dashboard-kpis .dashboard-kpi-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -262,4 +273,23 @@
   .dashboard-link-detalle {
     grid-column: 1 / -1;
   }
+}
+
+/* TR-054: Gráficos */
+.dashboard-grafico {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-grafico-titulo {
+  margin: 0 0 1rem;
+  color: #333;
+  font-size: 1rem;
+}
+
+.dashboard-grafico-container {
+  min-height: 280px;
 }

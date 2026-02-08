@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   getReportByEmployee,
   ByEmployeeGroup,
@@ -42,11 +43,25 @@ function buildParams(filters: TareasPorEmpleadoFilters): ByEmployeeReportParams 
 }
 
 export function TareasPorEmpleadoPage(): React.ReactElement {
+  const [searchParams] = useSearchParams();
+  const usuarioIdFromUrl = searchParams.get('usuario_id');
+  const fechaDesdeFromUrl = searchParams.get('fecha_desde');
+  const fechaHastaFromUrl = searchParams.get('fecha_hasta');
+
+  const parsedUsuarioId =
+    usuarioIdFromUrl != null ? parseInt(usuarioIdFromUrl, 10) : null;
+  const validInitialFilters: TareasPorEmpleadoFilters = {
+    fechaDesde: fechaDesdeFromUrl ?? defaultFilters.fechaDesde,
+    fechaHasta: fechaHastaFromUrl ?? defaultFilters.fechaHasta,
+    clienteId: defaultFilters.clienteId,
+    usuarioId: parsedUsuarioId != null && !Number.isNaN(parsedUsuarioId) ? parsedUsuarioId : null,
+  };
+
   const [grupos, setGrupos] = useState<ByEmployeeGroup[]>([]);
   const [totalGeneralHoras, setTotalGeneralHoras] = useState(0);
   const [totalGeneralTareas, setTotalGeneralTareas] = useState(0);
-  const [filters, setFilters] = useState<TareasPorEmpleadoFilters>(defaultFilters);
-  const [appliedFilters, setAppliedFilters] = useState<TareasPorEmpleadoFilters>(defaultFilters);
+  const [filters, setFilters] = useState<TareasPorEmpleadoFilters>(validInitialFilters);
+  const [appliedFilters, setAppliedFilters] = useState<TareasPorEmpleadoFilters>(validInitialFilters);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [expandedUsuarioId, setExpandedUsuarioId] = useState<number | null>(null);
