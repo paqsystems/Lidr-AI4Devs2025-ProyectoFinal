@@ -4,13 +4,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Migración: Corregir índice único user_id en PQ_PARTES_CLIENTES (SQL Server).
+ * Migración: Corregir índice único user_id en PQ_PARTES_CLIENTES.
  *
  * En SQL Server, un UNIQUE sobre una columna nullable trata múltiples NULL como duplicados.
  * Reemplazamos el índice único por uno filtrado (solo user_id IS NOT NULL) para permitir
  * muchos clientes sin acceso (user_id NULL). TR-009.
  *
+ * En MySQL, un índice UNIQUE sobre una columna nullable permite múltiples NULL automáticamente,
+ * por lo que no requiere ninguna acción adicional.
+ *
  * @see TR-009(MH)-creación-de-cliente.md
+ * @see docs/version-mysql.md
  */
 return new class extends Migration
 {
@@ -25,7 +29,7 @@ return new class extends Migration
             // Índice único solo para filas con user_id no nulo (un user_id solo puede estar en un cliente)
             DB::statement("CREATE UNIQUE NONCLUSTERED INDEX idx_clientes_user_id ON [{$table}]([user_id]) WHERE [user_id] IS NOT NULL");
         }
-        // Para MySQL/SQLite: el UNIQUE nullable ya permite múltiples NULL; no hacer nada
+        // Para MySQL/SQLite: el UNIQUE nullable ya permite múltiples NULL automáticamente; no hacer nada
     }
 
     public function down(): void

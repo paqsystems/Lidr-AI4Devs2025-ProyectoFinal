@@ -8,20 +8,23 @@ Disponer de una URL pública accesible para evaluación del MVP.
 ## Base de Datos y Migraciones
 
 ### Requisitos
-- **Motor:** SQL Server 2019 (o superior)
-- **Base de datos:** `Lidr`
-- **Driver Laravel:** `sqlsrv` (extensión PHP para SQL Server)
+- **Motor:** MySQL 5.7+ o MariaDB 10.3+ (recomendado MySQL 8.0+)
+- **Base de datos:** Configurada según entorno (ej: `_datosempresa`)
+- **Driver Laravel:** `mysql` (extensión PHP PDO MySQL)
+- **Túnel SSH:** Requerido para conexión remota (ver `docs/version-mysql.md`)
 
 ### Configuración de Conexión (.env)
 
 ```env
-DB_CONNECTION=sqlsrv
-DB_HOST=192.168.41.2
-DB_PORT=1433
-DB_DATABASE=Lidr
-DB_USERNAME=Axoft
-DB_PASSWORD=Axoft
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=_datosempresa
+DB_USERNAME=forge
+DB_PASSWORD=tu_password
 ```
+
+**Nota:** El `DB_HOST=127.0.0.1` indica que se usa un túnel SSH local. El túnel debe estar activo antes de ejecutar migraciones o acceder a la base de datos. Ver instrucciones en `docs/version-mysql.md`.
 
 ### Estructura de Tablas
 
@@ -104,24 +107,38 @@ Los seeders crean los siguientes datos mínimos para testing:
 
 ### Troubleshooting
 
-**Error: Driver SQL Server no encontrado**
+**Error: Driver MySQL no encontrado**
 ```bash
-# Linux/Mac
-sudo pecl install sqlsrv pdo_sqlsrv
+# Linux (Ubuntu/Debian)
+sudo apt-get install php-mysql
+
+# Linux (CentOS/RHEL)
+sudo yum install php-mysql
+
+# Mac (Homebrew)
+brew install php mysql
 
 # Windows
 # Habilitar extensión en php.ini:
-# extension=sqlsrv
-# extension=pdo_sqlsrv
+# extension=pdo_mysql
+# extension=mysqli
 ```
 
 **Error: Conexión rechazada**
-- Verificar que SQL Server permite conexiones remotas
-- Verificar firewall (puerto 1433)
+- Verificar que el túnel SSH está activo y configurado correctamente
+- Verificar que MySQL permite conexiones remotas (si aplica)
+- Verificar firewall (puerto 3306)
 - Verificar credenciales en `.env`
+- Verificar que la base de datos existe en el servidor MySQL
+
+**Error: Túnel SSH no disponible**
+- Establecer túnel SSH antes de ejecutar migraciones
+- Ver instrucciones detalladas en `docs/version-mysql.md`
 
 **Error: Timeout en migraciones**
-- Aumentar `DB_TIMEOUT` en `.env` o en `config/database.php`
+- Verificar conexión de red
+- Aumentar timeout en `config/database.php` si es necesario
+- Verificar que el túnel SSH sigue activo
 
 ---
 
@@ -154,7 +171,7 @@ Pipeline simple:
 Opciones válidas:
 - Backend: Render / Fly.io / Railway
 - Frontend: Vercel / Netlify
-- DB: Postgres administrado
+- DB: MySQL/MariaDB administrado (ej: AWS RDS, DigitalOcean, PlanetScale)
 
 ---
 

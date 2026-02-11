@@ -79,8 +79,8 @@ class TaskServiceTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         $jperezUserId = DB::table('USERS')->where('code', 'JPEREZ')->value('id');
         
@@ -92,8 +92,8 @@ class TaskServiceTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('USERS')->insert([
@@ -101,8 +101,8 @@ class TaskServiceTest extends TestCase
             'password_hash' => Hash::make('password456'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         $mgarciaUserId = DB::table('USERS')->where('code', 'MGARCIA')->value('id');
         
@@ -114,8 +114,8 @@ class TaskServiceTest extends TestCase
             'supervisor' => true,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Crear clientes
@@ -235,8 +235,8 @@ class TaskServiceTest extends TestCase
                 DB::table('PQ_PARTES_CLIENTE_TIPO_TAREA')->insert([
                     'cliente_id' => $cli001Id,
                     'tipo_tarea_id' => $especialId,
-                    'created_at' => DB::raw('GETDATE()'),
-                    'updated_at' => DB::raw('GETDATE()'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
         }

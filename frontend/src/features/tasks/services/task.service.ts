@@ -785,9 +785,9 @@ export async function getTasks(params: TaskListParams = {}): Promise<GetTasksRes
   if (params.per_page != null) searchParams.set('per_page', String(params.per_page));
   if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
   if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
-  if (params.cliente_id != null && params.cliente_id !== '' && params.cliente_id !== undefined) searchParams.set('cliente_id', String(params.cliente_id));
-  if (params.tipo_tarea_id != null && params.tipo_tarea_id !== '' && params.tipo_tarea_id !== undefined) searchParams.set('tipo_tarea_id', String(params.tipo_tarea_id));
-  if (params.usuario_id != null && params.usuario_id !== '' && params.usuario_id !== undefined) searchParams.set('usuario_id', String(params.usuario_id));
+  if (params.cliente_id != null) searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.tipo_tarea_id != null) searchParams.set('tipo_tarea_id', String(params.tipo_tarea_id));
+  if (params.usuario_id != null) searchParams.set('usuario_id', String(params.usuario_id));
   if (params.busqueda) searchParams.set('busqueda', params.busqueda);
   if (params.ordenar_por) searchParams.set('ordenar_por', params.ordenar_por);
   if (params.orden) searchParams.set('orden', params.orden);
@@ -857,9 +857,9 @@ export async function getAllTasks(params: TaskListParams = {}): Promise<GetTasks
   if (params.per_page != null) searchParams.set('per_page', String(params.per_page));
   if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
   if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
-  if (params.cliente_id != null && params.cliente_id !== '' && params.cliente_id !== undefined) searchParams.set('cliente_id', String(params.cliente_id));
-  if (params.tipo_tarea_id != null && params.tipo_tarea_id !== '' && params.tipo_tarea_id !== undefined) searchParams.set('tipo_tarea_id', String(params.tipo_tarea_id));
-  if (params.usuario_id != null && params.usuario_id !== '' && params.usuario_id !== undefined) searchParams.set('usuario_id', String(params.usuario_id));
+  if (params.cliente_id != null) searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.tipo_tarea_id != null) searchParams.set('tipo_tarea_id', String(params.tipo_tarea_id));
+  if (params.usuario_id != null) searchParams.set('usuario_id', String(params.usuario_id));
   if (params.busqueda) searchParams.set('busqueda', params.busqueda);
   if (params.ordenar_por) searchParams.set('ordenar_por', params.ordenar_por);
   if (params.orden) searchParams.set('orden', params.orden);
@@ -997,9 +997,9 @@ export async function getDetailReport(params: DetailReportParams = {}): Promise<
   if (params.per_page != null) searchParams.set('per_page', String(params.per_page));
   if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
   if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
-  if (params.tipo_cliente_id != null && params.tipo_cliente_id !== '' && params.tipo_cliente_id !== undefined) searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
-  if (params.cliente_id != null && params.cliente_id !== '' && params.cliente_id !== undefined) searchParams.set('cliente_id', String(params.cliente_id));
-  if (params.usuario_id != null && params.usuario_id !== '' && params.usuario_id !== undefined) searchParams.set('usuario_id', String(params.usuario_id));
+  if (params.tipo_cliente_id != null) searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
+  if (params.cliente_id != null) searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.usuario_id != null) searchParams.set('usuario_id', String(params.usuario_id));
   if (params.ordenar_por) searchParams.set('ordenar_por', params.ordenar_por);
   if (params.orden) searchParams.set('orden', params.orden);
 
@@ -1138,9 +1138,9 @@ export async function getReportByEmployee(
   const searchParams = new URLSearchParams();
   if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
   if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
-  if (params.tipo_cliente_id != null && params.tipo_cliente_id !== '') searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
-  if (params.cliente_id != null && params.cliente_id !== '') searchParams.set('cliente_id', String(params.cliente_id));
-  if (params.usuario_id != null && params.usuario_id !== '') searchParams.set('usuario_id', String(params.usuario_id));
+  if (params.tipo_cliente_id != null) searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
+  if (params.cliente_id != null) searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.usuario_id != null) searchParams.set('usuario_id', String(params.usuario_id));
 
   const queryString = searchParams.toString();
   const url = `${API_BASE_URL}/v1/reports/by-employee${queryString ? `?${queryString}` : ''}`;
@@ -1211,9 +1211,9 @@ export async function getReportByTaskType(
   const searchParams = new URLSearchParams();
   if (params.fecha_desde) searchParams.set('fecha_desde', params.fecha_desde);
   if (params.fecha_hasta) searchParams.set('fecha_hasta', params.fecha_hasta);
-  if (params.tipo_cliente_id != null && params.tipo_cliente_id !== '') searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
-  if (params.cliente_id != null && params.cliente_id !== '') searchParams.set('cliente_id', String(params.cliente_id));
-  if (params.usuario_id != null && params.usuario_id !== '') searchParams.set('usuario_id', String(params.usuario_id));
+  if (params.tipo_cliente_id != null) searchParams.set('tipo_cliente_id', String(params.tipo_cliente_id));
+  if (params.cliente_id != null) searchParams.set('cliente_id', String(params.cliente_id));
+  if (params.usuario_id != null) searchParams.set('usuario_id', String(params.usuario_id));
 
   const queryString = searchParams.toString();
   const url = `${API_BASE_URL}/v1/reports/by-task-type${queryString ? `?${queryString}` : ''}`;

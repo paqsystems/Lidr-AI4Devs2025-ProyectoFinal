@@ -69,8 +69,8 @@ class ReportControllerTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         $jperezUserId = DB::table('USERS')->where('code', 'JPEREZ')->value('id');
         DB::table('PQ_PARTES_USUARIOS')->insert([
@@ -81,8 +81,8 @@ class ReportControllerTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('USERS')->insert([
@@ -90,8 +90,8 @@ class ReportControllerTest extends TestCase
             'password_hash' => Hash::make('password456'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         $mgarciaUserId = DB::table('USERS')->where('code', 'MGARCIA')->value('id');
         DB::table('PQ_PARTES_USUARIOS')->insert([
@@ -102,8 +102,8 @@ class ReportControllerTest extends TestCase
             'supervisor' => true,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('USERS')->insert([
@@ -111,8 +111,8 @@ class ReportControllerTest extends TestCase
             'password_hash' => Hash::make('cliente123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         $cli001UserId = DB::table('USERS')->where('code', 'CLI001')->value('id');
         DB::table('PQ_PARTES_CLIENTES')->insert([
@@ -123,8 +123,8 @@ class ReportControllerTest extends TestCase
             'tipo_cliente_id' => $tipoClienteId,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $tipoTareaId = DB::table('PQ_PARTES_TIPOS_TAREA')->where('is_generico', true)->value('id');

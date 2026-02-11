@@ -11,7 +11,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getEmpleados, deleteEmpleado, EmpleadoListItem, ERROR_TIENE_TAREAS } from '../services/empleado.service';
+import { getEmpleados, deleteEmpleado, EmpleadoListItem } from '../services/empleado.service';
 import { TaskPagination } from '../../tasks/components/TaskPagination';
 import './EmpleadosPage.css';
 

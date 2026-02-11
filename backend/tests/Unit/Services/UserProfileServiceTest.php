@@ -63,8 +63,8 @@ class UserProfileServiceTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $jperezId = DB::table('USERS')->where('code', 'JPEREZ')->value('id');
@@ -77,8 +77,8 @@ class UserProfileServiceTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Usuario empleado supervisor
@@ -87,8 +87,8 @@ class UserProfileServiceTest extends TestCase
             'password_hash' => Hash::make('password456'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $mgarciaId = DB::table('USERS')->where('code', 'MGARCIA')->value('id');
@@ -101,8 +101,8 @@ class UserProfileServiceTest extends TestCase
             'supervisor' => true,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Usuario cliente
@@ -111,8 +111,8 @@ class UserProfileServiceTest extends TestCase
             'password_hash' => Hash::make('cliente123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $cli001Id = DB::table('USERS')->where('code', 'CLI001')->value('id');
@@ -131,8 +131,8 @@ class UserProfileServiceTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
@@ -142,8 +142,8 @@ class UserProfileServiceTest extends TestCase
             'password_hash' => Hash::make('sinperfil123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 
@@ -212,8 +212,8 @@ class UserProfileServiceTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $sinEmailId = DB::table('USERS')->where('code', 'SINEMAIL')->value('id');
@@ -226,8 +226,8 @@ class UserProfileServiceTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $user = User::where('code', 'SINEMAIL')->first();

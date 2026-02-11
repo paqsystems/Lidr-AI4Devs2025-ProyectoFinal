@@ -3,6 +3,17 @@ alwaysApply: true
 ---
 # description: Normas y Convenciones de Frontend
 
+## ⚠️ OBLIGATORIO ANTES DE MERGE O DEPLOY
+
+**El deploy en Vercel/AWS falla si el build falla.** La rama `main` es la que se despliega.
+
+1. **Ejecutar siempre antes de push/merge:**
+   ```bash
+   cd frontend && npm run build
+   ```
+2. **Si falla:** consultar `.cursor/rules/22-frontend-build-typescript.md` y la tabla de errores comunes más abajo.
+3. **Nunca hacer merge a main** sin que `npm run build` pase en local.
+
 ## Stack Tecnológico
 
 **Framework:** React  
@@ -234,8 +245,17 @@ class ApiService {
 - Tests de integración de servicios
 - Tests E2E del flujo principal (Playwright/Cypress)
 
+## Build y Deploy
+
+**Regla obligatoria:** Antes de push o deploy, ejecutar `npm run build` en `frontend/` y verificar que pase sin errores.
+
+Para requisitos de TypeScript, exclusión de tests, tipado de headers, comparaciones de tipos y componentes reutilizables, ver:
+
+- `.cursor/rules/22-frontend-build-typescript.md` - Reglas de build y TypeScript para deploy
+
 ## Referencias
 
 - `docs/frontend/frontend-specifications.md` - Especificaciones detalladas
 - `docs/frontend/testing.md` - Estrategia de testing frontend
 - `docs/frontend/i18n.md` - Internacionalización
+- `.cursor/rules/22-frontend-build-typescript.md` - Build, TypeScript y compatibilidad con deploy

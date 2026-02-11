@@ -75,6 +75,26 @@ export function TareasPorFechaPage(): React.ReactElement {
     setExpandedFecha((prev) => (prev === fecha ? null : fecha));
   };
 
+  const hasData = grupos.length > 0;
+  const handleExportExcel = () => {
+    const exportGroups: GroupedExportGroup[] = grupos.map((g) => ({
+      groupTitle: g.fecha,
+      totalHoras: g.total_horas,
+      cantidadTareas: g.cantidad_tareas,
+      tareas: g.tareas.map((t) => ({
+        fecha: t.fecha,
+        cliente: t.cliente.nombre,
+        tipoTarea: t.tipo_tarea.descripcion,
+        horas: t.horas,
+        sinCargo: t.sin_cargo,
+        presencial: t.presencial,
+        descripcion: t.descripcion ?? '',
+      })),
+    }));
+    const filename = buildExportFileName(appliedFilters.fechaDesde, appliedFilters.fechaHasta, 'por-fecha');
+    exportGroupedToExcel(exportGroups, filename);
+  };
+
   return (
     <div className="tareas-por-fecha-container" data-testid="tareasPorFecha.page">
       <header className="tareas-por-fecha-header">

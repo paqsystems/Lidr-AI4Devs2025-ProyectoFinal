@@ -48,8 +48,8 @@ class ClienteSeeder extends Seeder
                         'email' => $cliente['email'],
                         'activo' => true,
                         'inhabilitado' => false,
-                        'created_at' => DB::raw('GETDATE()'),
-                        'updated_at' => DB::raw('GETDATE()'),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
                 }
             }
