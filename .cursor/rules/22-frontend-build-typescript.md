@@ -7,7 +7,26 @@ alwaysApply: true
 
 El frontend se despliega en Vercel u otros entornos (AWS, etc.) que ejecutan `npm run build` (tsc + vite build). Cualquier error de TypeScript impide el deploy. Esta regla documenta requisitos y buenas prácticas para garantizar que el build siempre pase.
 
-**Origen:** Errores detectados durante deploy en Vercel (2026-02-11). Ver `docs/ia-log.md` y `lidr - frontend.txt`.
+**Origen:** Errores recurrentes durante deploy (ver `lidr - frontend.txt`). La rama `main` es la que despliega Vercel; todo merge a main debe tener build exitoso.
+
+---
+
+## Tabla Rápida: Errores Comunes en Deploy y Solución
+
+| Error | Archivo típico | Solución |
+|-------|----------------|----------|
+| `Property 'env' does not exist on type 'ImportMeta'` | `auth.service.ts`, `*.service.ts` | Crear/mantener `src/vite-env.d.ts` con `/// <reference types="vite/client" />` |
+| `Cannot find module './X.module.css'` | `Button.tsx`, `DataTable.tsx`, etc. | Declarar `*.module.css` en `vite-env.d.ts` |
+| `'getToken' is declared but its value is never read` | `*.service.test.ts` | Excluir `**/*.test.ts` en `tsconfig.json` |
+| `'ERROR_TIENE_TAREAS' is declared but its value is never read` | `EmpleadosPage.tsx` | Eliminar import no usado |
+| `Property 'Authorization' does not exist on type 'HeadersInit'` | `empleado.service.ts` | Usar `Record<string, string>` para headers |
+| `Cannot find name 'hasData'` / `'handleExportExcel'` | `TareasPorFechaPage.tsx` | Definir variables antes de usarlas (no eliminar por error) |
+| `All imports in import declaration are unused` | `TareasPorFechaPage.tsx` | Usar o eliminar el import |
+| `'getTasks' / 'key' is declared but its value is never read` | `task.service.test.ts` | Excluir tests del build |
+| `types 'number' and 'string' have no overlap` | `task.service.ts` | Usar `!= null` en lugar de `!== ''` para IDs |
+| `Property 'testIdPrefix' does not exist` | `TiposClientePage.tsx` | Agregar `testIdPrefix?: string` a `TaskPaginationProps` |
+| `'FECHA_DESDE' / 'FECHA_HASTA' is declared but never read` | `tareas-por-cliente.spec.ts` | Excluir `**/*.spec.ts` o usar/eliminar variables |
+| `Property 'checkValidity' does not exist on type 'Element'` | `task-create.spec.ts` | Cast: `form as HTMLFormElement \| null` |
 
 ---
 
@@ -189,15 +208,40 @@ return form ? form.checkValidity() : false;
 
 ### Checklist obligatorio antes de push/deploy
 
-1. Ejecutar `npm run build` en `frontend/` y confirmar que pasa sin errores
+1. **Ejecutar** `npm run build` en `frontend/` y **confirmar que pasa** sin errores
 2. Revisar que no queden imports no usados
 3. Si se agregan nuevos servicios con `fetch`, verificar tipado de headers
 4. Si se reutilizan componentes, verificar que las props sean compatibles en todos los usos
 5. Si se modifican parámetros de API (number, string), verificar comparaciones en los servicios
+6. **No hacer merge a `main`** hasta que el build pase en local (Vercel despliega desde `main`)
 
 ### Comando
 ```bash
 cd frontend && npm run build
+```
+
+---
+
+## 10. TareasPorFechaPage: hasData y handleExportExcel
+
+### Problema
+`Cannot find name 'hasData'` / `Cannot find name 'handleExportExcel'` - Variables referenciadas en el JSX pero indefinidas o eliminadas por error.
+
+### Reglas
+- `hasData` y `handleExportExcel` (u otras variables similares para exportar) deben definirse en el componente **antes** del `return`
+- **NO** eliminar estas definiciones al refactorizar; son necesarias para el botón de exportar
+- Si se usa `exportGroupedToExcel`, el import de `buildExportFileName`, `exportGroupedToExcel` y `GroupedExportGroup` debe mantenerse
+
+### Ejemplo
+```typescript
+const hasData = grupos.length > 0;
+const handleExportExcel = () => { /* ... */ };
+
+return (
+  // ...
+  {!hasData && !loading && <span>No hay datos</span>}
+  <button onClick={handleExportExcel} disabled={!hasData || loading}>Exportar</button>
+);
 ```
 
 ---
@@ -216,3 +260,4 @@ cd frontend && npm run build
 | Fecha     | Cambio |
 |-----------|--------|
 | 2026-02-11 | Creación de la regla tras corrección de errores de deploy en Vercel |
+| 2026-02-11 | Recurrente: mismos errores en nuevo deploy. Añadida tabla de errores comunes y sección 10 (TareasPorFechaPage). Reforzada regla 07 con aviso obligatorio. |

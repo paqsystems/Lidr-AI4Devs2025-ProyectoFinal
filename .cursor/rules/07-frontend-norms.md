@@ -3,6 +3,17 @@ alwaysApply: true
 ---
 # description: Normas y Convenciones de Frontend
 
+## ⚠️ OBLIGATORIO ANTES DE MERGE O DEPLOY
+
+**El deploy en Vercel/AWS falla si el build falla.** La rama `main` es la que se despliega.
+
+1. **Ejecutar siempre antes de push/merge:**
+   ```bash
+   cd frontend && npm run build
+   ```
+2. **Si falla:** consultar `.cursor/rules/22-frontend-build-typescript.md` y la tabla de errores comunes más abajo.
+3. **Nunca hacer merge a main** sin que `npm run build` pase en local.
+
 ## Stack Tecnológico
 
 **Framework:** React  

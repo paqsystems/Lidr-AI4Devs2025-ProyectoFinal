@@ -6,6 +6,17 @@ Este documento define las especificaciones técnicas y de diseño para el fronte
 
 ---
 
+## Requisitos de Build y Deploy (OBLIGATORIO)
+
+**Antes de cualquier push, merge a `main` o deploy:**
+
+1. Ejecutar `cd frontend && npm run build` y verificar que termina sin errores.
+2. Si el build falla, consultar `.cursor/rules/22-frontend-build-typescript.md` (incluye tabla de errores frecuentes).
+
+**Errores recurrentes en Vercel:** Ver `lidr - frontend.txt` en el repo para el listado exacto. La regla 22 mapea cada error a su solución.
+
+---
+
 ## Stack Tecnológico
 
 ### Framework

@@ -2090,3 +2090,27 @@ php artisan tinker --execute="DB::select('SHOW TABLES')"
 - `docs/deploy-ci-cd.md` - Configuración actualizada
 - `.cursor/rules/20-mysql-datetime-format.md` - Regla de formato de fechas MySQL
 - `mcp/mysql-toolbox/tools.yaml` - Configuración MCP MySQL
+
+---
+
+## Entrada Reforzamiento de reglas frontend (deploy recurrente)
+
+### Fecha
+2026-02-11
+
+### Etapa del proyecto
+Documentación – Reglas de frontend para deploy
+
+### Contexto
+En un nuevo deploy volvieron a aparecer los mismos errores de TypeScript documentados en `lidr - frontend.txt`. Las correcciones previas estaban en la rama `finalproject-PAQ` pero el deploy de Vercel usa la rama `main`.
+
+### Acción realizada
+Refuerzo de documentación de reglas para que sean ineludibles en futuras programaciones:
+
+1. **`.cursor/rules/07-frontend-norms.md`**: Sección obligatoria al inicio con aviso de ejecutar `npm run build` antes de merge/deploy.
+2. **`.cursor/rules/22-frontend-build-typescript.md`**: Tabla rápida de errores comunes (mapeo error → solución), sección 10 para TareasPorFechaPage (hasData/handleExportExcel), recordatorio de no mergear a main sin build OK.
+3. **`docs/frontend/frontend-specifications.md`**: Nueva sección "Requisitos de Build y Deploy (OBLIGATORIO)" al inicio.
+
+### Referencias
+- `lidr - frontend.txt` - Listado exacto de errores en deploy
+- `.cursor/rules/22-frontend-build-typescript.md` - Regla ampliada con tabla de errores
