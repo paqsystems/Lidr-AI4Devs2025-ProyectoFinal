@@ -285,3 +285,72 @@ Quiero que generes una nueva historia de usuario, con el numero 056, de tipo SH,
 
 **Respuesta sobre el orden:** No es necesario explicitar ahora el orden; puede definirse más adelante en refinamiento o en la TR derivada (TR-056). Si se define después, se incorpora como criterio de aceptación explícito.
 
+---
+
+## Prompt 12 - Migración SQL Server → MySQL
+
+### Fecha
+2026-02-11
+
+### Instrucción utilizada
+
+```
+haz un plan y documentalo en docs/version-mysql.md, para transformar el proyecto para que trabaje sobre una base my sql. sería con la conectividad que figura en el mcp de MySql, recordando que hay que abrir el tunel ssh para poder conectarse.
+```
+
+### Contexto
+
+El proyecto estaba utilizando SQL Server como motor de base de datos y se requería migrar a MySQL utilizando la configuración existente en el MCP, que requiere un túnel SSH para conectarse al servidor remoto.
+
+### Acción del agente
+
+1. **Análisis y planificación:**
+   - Revisión de configuración actual (SQL Server)
+   - Identificación de código específico de SQL Server (migraciones, seeders, tests)
+   - Análisis de configuración MCP MySQL existente
+   - Creación de plan detallado de migración
+
+2. **Documentación del plan:**
+   - Creación de `docs/version-mysql.md` con:
+     - Contexto y objetivos
+     - Configuración del túnel SSH (Windows PowerShell y PuTTY)
+     - Lista completa de cambios requeridos
+     - Diferencias SQL Server vs MySQL
+     - Proceso paso a paso
+     - Checklist de verificación
+     - Troubleshooting
+
+3. **Implementación:**
+   - Actualización de configuración (`.env`, `mcp/mysql-toolbox/tools.yaml`)
+   - Adaptación de migraciones específicas de SQL Server
+   - Actualización de seeders (reemplazo de `GETDATE()` por `now()`)
+   - Actualización de tests (reemplazo de `GETDATE()` por `now()`)
+   - Actualización de documentación (`deploy-ci-cd.md`, nueva regla MySQL)
+
+4. **Ejecución:**
+   - Establecimiento de túnel SSH con datos proporcionados por el usuario
+   - Ejecución de migraciones (`migrate:fresh`)
+   - Ejecución de seeders (`db:seed`)
+   - Verificación de estructura y datos
+
+### Resultado
+
+- Plan completo documentado en `docs/version-mysql.md`
+- Migración exitosa ejecutada
+- 11 tablas creadas correctamente
+- Datos iniciales insertados
+- Código adaptado para MySQL
+- Documentación actualizada
+
+### Archivos clave generados/modificados
+
+- `docs/version-mysql.md` - Documentación completa de migración
+- `backend/.env` - Configuración MySQL
+- Migraciones, seeders y tests adaptados
+- Documentación de despliegue actualizada
+- Nueva regla de formato de fechas MySQL
+
+### Referencias
+- `docs/version-mysql.md` - Plan y documentación completa
+- `docs/ia-log.md` - Entrada de registro de uso de IA
+

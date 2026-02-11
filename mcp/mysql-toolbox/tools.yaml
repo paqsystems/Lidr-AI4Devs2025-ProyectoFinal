@@ -3,7 +3,7 @@ sources:
     kind: mysql
     host: 127.0.0.1
     port: 3306
-    database: _datosempresa
+    database: Lidr_testing
     user: forge
     password: Go4QQnC3vmPQ8YwlOaw7
 

@@ -818,8 +818,9 @@ Los `data-testid` son esenciales para Test-Driven Development con Playwright. Pe
 - `docs/frontend/testing.md` - Testing frontend
 - `docs/frontend/ui-layer-wrappers.md` - Arquitectura de UI Layer Wrappers (OBLIGATORIO)
 - `.cursor/rules/10-i18n-and-testid.md` - Reglas de test-ids y accesibilidad
+- `.cursor/rules/22-frontend-build-typescript.md` - Reglas de build, TypeScript y compatibilidad con deploy (Vercel, AWS)
 
 ---
 
-**Última actualización:** 2025-01-20
+**Última actualización:** 2026-02-11
 

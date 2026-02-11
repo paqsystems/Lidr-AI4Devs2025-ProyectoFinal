@@ -28,4 +28,10 @@
 
 ## Orden de presentación
 
-Puedes indicar **ahora** el orden deseado de las opciones en el menú lateral, o dejarlo para **más adelante** (refinamiento o en la TR derivada de esta HU). Si lo defines después, se documentará en el ticket TR-056 o en criterios de aceptación refinados. Si prefieres definirlo ahora, indica la secuencia (ej. 1) Inicio, 2) Perfil, 3) Consulta Detallada, …) y se incorporará como criterio de aceptación explícito.
+opció de inicio
+separador
+opciones de archivos : clientes, empleados, tipos de clientes, tipos de tareas
+separador
+opciones de partes : carga de tareas, mis tareas, procesamiento masivo
+separador
+opciones de informes : todos los informes definidos

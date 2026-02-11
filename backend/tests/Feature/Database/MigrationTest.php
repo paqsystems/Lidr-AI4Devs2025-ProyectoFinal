@@ -239,8 +239,8 @@ class MigrationTest extends TestCase
             'user_id' => 99999, // No existe en USERS
             'code' => 'TEST_FK',
             'nombre' => 'Test FK',
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 
@@ -256,8 +256,8 @@ class MigrationTest extends TestCase
             'password_hash' => 'hash',
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $userId = DB::table('USERS')->where('code', 'TEST_USER')->value('id');
@@ -269,8 +269,8 @@ class MigrationTest extends TestCase
             'nombre' => 'Test Cliente',
             'tipo_cliente_id' => 99999, // No existe
             'code' => 'TEST_CLI',
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

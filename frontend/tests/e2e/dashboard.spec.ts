@@ -212,4 +212,24 @@ test.describe('Dashboard principal — TR-051', () => {
       await expect(page).toHaveURL(/\/informes\/tareas-por-cliente/, { timeout: 10000 });
     }
   });
+
+  test('TR-056: menú lateral visible; enlaces Inicio y Perfil presentes', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.fill('[data-testid="auth.login.usuarioInput"]', EMPLEADO.code);
+    await page.fill('[data-testid="auth.login.passwordInput"]', EMPLEADO.password);
+    await Promise.all([
+      page.waitForResponse(
+        (resp) => resp.url().includes('/api/v1/auth/login') && resp.status() === 200
+      ),
+      page.click('[data-testid="auth.login.submitButton"]'),
+    ]);
+    await expect(page).toHaveURL('/', { timeout: 20000 });
+    await expect(page.locator('[data-testid="app.layout"]')).toBeVisible();
+    const sidebar = page.locator('[data-testid="app.sidebar"]');
+    await expect(sidebar).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="app.sidebar.inicio"]')).toBeVisible();
+    await expect(page.locator('[data-testid="app.profileLink"]')).toBeVisible();
+    await page.click('[data-testid="app.profileLink"]');
+    await expect(page).toHaveURL('/perfil', { timeout: 5000 });
+  });
 });

@@ -37,7 +37,7 @@ class AuthServiceTest extends TestCase
 
     /**
      * Crear usuarios de prueba para los tests
-     * Usa DB::table con GETDATE() para compatibilidad con SQL Server
+     * Usa DB::table con now() para compatibilidad con MySQL y SQL Server
      * Primero elimina usuarios existentes para evitar conflictos de clave única
      */
     protected function seedTestUsers(): void
@@ -72,8 +72,8 @@ class AuthServiceTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $jperezId = DB::table('USERS')->where('code', 'JPEREZ')->value('id');
@@ -86,8 +86,8 @@ class AuthServiceTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Usuario activo supervisor
@@ -96,8 +96,8 @@ class AuthServiceTest extends TestCase
             'password_hash' => Hash::make('password456'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $mgarciaId = DB::table('USERS')->where('code', 'MGARCIA')->value('id');
@@ -110,8 +110,8 @@ class AuthServiceTest extends TestCase
             'supervisor' => true,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Usuario inactivo en USERS
@@ -120,8 +120,8 @@ class AuthServiceTest extends TestCase
             'password_hash' => Hash::make('password789'),
             'activo' => false,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $inactivoId = DB::table('USERS')->where('code', 'INACTIVO')->value('id');
@@ -134,8 +134,8 @@ class AuthServiceTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Usuario inhabilitado en USERS
@@ -144,8 +144,8 @@ class AuthServiceTest extends TestCase
             'password_hash' => Hash::make('password000'),
             'activo' => true,
             'inhabilitado' => true,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $inhabilitadoId = DB::table('USERS')->where('code', 'INHABILITADO')->value('id');
@@ -158,8 +158,8 @@ class AuthServiceTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Usuario con empleado inactivo en PQ_PARTES_USUARIOS
@@ -168,8 +168,8 @@ class AuthServiceTest extends TestCase
             'password_hash' => Hash::make('password111'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $usuInactivoId = DB::table('USERS')->where('code', 'USUINACTIVO')->value('id');
@@ -182,8 +182,8 @@ class AuthServiceTest extends TestCase
             'supervisor' => false,
             'activo' => false,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // ========================================
@@ -196,8 +196,8 @@ class AuthServiceTest extends TestCase
             'password_hash' => Hash::make('cliente123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $cli001Id = DB::table('USERS')->where('code', 'CLI001')->value('id');
@@ -208,8 +208,8 @@ class AuthServiceTest extends TestCase
             'password_hash' => Hash::make('cliente456'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $cliInactivoId = DB::table('USERS')->where('code', 'CLIINACTIVO')->value('id');
@@ -220,8 +220,8 @@ class AuthServiceTest extends TestCase
             'password_hash' => Hash::make('sinperfil123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Obtener tipo de cliente
@@ -240,8 +240,8 @@ class AuthServiceTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
@@ -254,8 +254,8 @@ class AuthServiceTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => false,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
     }

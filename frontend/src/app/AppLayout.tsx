@@ -1,11 +1,10 @@
 /**
  * Component: AppLayout
  *
- * Layout con header común para todas las pantallas autenticadas.
- * El header permanece visible en todas las rutas (dashboard, perfil, tareas, etc.).
+ * Layout con header común y menú lateral (TR-056) para todas las pantallas autenticadas.
  *
  * @see docs/frontend/frontend-specifications.md (Layout general y navegación)
- * @see TR-033(MH)-visualización-de-lista-de-tareas-propias-update.md (botón Volver)
+ * @see docs/hu-historias/HU-056(SH)-menú-lateral-de-navegación.md
  */
 
 import React, { useState } from 'react';
@@ -13,6 +12,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { getUserData } from '../shared/utils/tokenStorage';
 import { logout } from '../features/auth/services/auth.service';
 import { t } from '../shared/i18n';
+import { Sidebar } from './Sidebar';
 import './AppLayout.css';
 
 export function AppLayout(): React.ReactElement {
@@ -20,6 +20,7 @@ export function AppLayout(): React.ReactElement {
   const location = useLocation();
   const user = getUserData();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -45,6 +46,16 @@ export function AppLayout(): React.ReactElement {
     <div className="app-layout" data-testid="app.layout">
       <header className="app-layout-header" role="banner">
         <div className="app-layout-header-left">
+          <button
+            type="button"
+            className="app-layout-menu-toggle"
+            onClick={() => setIsSidebarOpen((v) => !v)}
+            data-testid="app.sidebarToggle"
+            aria-label={t('app.layout.menuAria', 'Abrir o cerrar menú lateral')}
+            aria-expanded={isSidebarOpen}
+          >
+            <span className="app-layout-menu-icon" aria-hidden>☰</span>
+          </button>
           <h1 className="app-layout-title">{t('app.layout.title', 'Sistema de Registro de Tareas')}</h1>
           <button
             type="button"
@@ -75,9 +86,12 @@ export function AppLayout(): React.ReactElement {
           </button>
         </div>
       </header>
-      <main className="app-layout-main">
-        <Outlet />
-      </main>
+      <div className="app-layout-body">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <main className="app-layout-main">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

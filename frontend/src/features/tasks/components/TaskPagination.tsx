@@ -13,25 +13,27 @@ import './TaskList.css';
 export interface TaskPaginationProps {
   currentPage: number;
   lastPage: number;
-  total: number;
-  perPage: number;
+  total?: number;
+  perPage?: number;
   onPageChange: (page: number) => void;
   disabled?: boolean;
+  testIdPrefix?: string;
 }
 
 export function TaskPagination({
   currentPage,
   lastPage,
-  total,
-  perPage,
+  total = 0,
+  perPage = 15,
   onPageChange,
   disabled = false,
+  testIdPrefix = 'task.list',
 }: TaskPaginationProps): React.ReactElement {
   if (lastPage <= 1 && total <= perPage) {
     return (
       <nav
         className="task-list-pagination"
-        data-testid="task.list.pagination"
+        data-testid={`${testIdPrefix}.pagination`}
         aria-label={t('tasks.list.pagination.label', 'Paginación de tareas')}
       >
         <span className="task-list-pagination-info">
@@ -47,7 +49,7 @@ export function TaskPagination({
   return (
     <nav
       className="task-list-pagination"
-      data-testid="task.list.pagination"
+      data-testid={`${testIdPrefix}.pagination`}
       aria-label={t('tasks.list.pagination.label', 'Paginación de tareas')}
     >
       <span className="task-list-pagination-info">

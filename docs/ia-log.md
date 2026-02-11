@@ -1962,3 +1962,131 @@ Implementación TR-053(SH), TR-054(SH), TR-055(SH)
 - `docs/hu-tareas/TR-053(SH)-resumen-de-dedicación-por-empleado-en-dashboard-supervisor.md`
 - `docs/hu-tareas/TR-054(SH)-gráficos-y-visualizaciones-en-dashboard.md`
 - `docs/hu-tareas/TR-055(SH)-actualización-automática-del-dashboard.md`
+
+---
+
+## Entrada Migración SQL Server → MySQL
+
+### Fecha
+2026-02-11
+
+### Etapa del proyecto
+Infraestructura - Migración de Base de Datos
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA - Claude)
+
+### Prompt o instrucción utilizada
+```
+haz un plan y documentalo en docs/version-mysql.md, para transformar el proyecto para que trabaje sobre una base my sql. sería con la conectividad que figura en el mcp de MySql, recordando que hay que abrir el tunel ssh para poder conectarse.
+```
+
+### Resultado generado por IA
+
+**Plan completo de migración creado:**
+
+1. **Análisis del estado actual:**
+   - Identificación de configuración SQL Server actual (`sqlsrv`, host `PAQ-GAUSS\SQLEXPRESS_AXOFT,2544`)
+   - Revisión de migraciones específicas de SQL Server
+   - Identificación de seeders y tests usando `DB::raw('GETDATE()')`
+   - Análisis de configuración MCP MySQL existente
+
+2. **Documentación del plan:**
+   - Creación de `docs/version-mysql.md` con:
+     - Contexto y objetivos de migración
+     - Instrucciones detalladas para configuración del túnel SSH
+     - Lista completa de cambios requeridos
+     - Diferencias clave entre SQL Server y MySQL
+     - Proceso paso a paso de migración
+     - Checklist de verificación
+     - Troubleshooting
+
+3. **Implementación de cambios:**
+   - **Configuración:** Actualización de `backend/.env` (DB_CONNECTION=mysql, host, puerto, base de datos)
+   - **Migraciones adaptadas:**
+     - `personal_access_tokens`: Reemplazado SQL directo SQL Server por Schema Builder Laravel
+     - `fix_clientes_user_id_unique_sqlserver`: Documentado soporte MySQL (ya compatible)
+   - **Seeders actualizados:** 7 archivos - Reemplazado `DB::raw('GETDATE()')` por `now()`
+   - **Tests actualizados:** 14 archivos - Reemplazado `GETDATE()` por `now()`
+   - **Documentación actualizada:**
+     - `docs/deploy-ci-cd.md`: Requisitos y configuración MySQL
+     - `.cursor/rules/20-mysql-datetime-format.md`: Nueva regla específica para MySQL
+
+4. **Ejecución de migración:**
+   - Establecimiento de túnel SSH (usuario: forge, host: 18.218.140.170, clave SSH)
+   - Ejecución exitosa de `php artisan migrate:fresh` (11 migraciones)
+   - Ejecución exitosa de `php artisan db:seed` (5 seeders)
+   - Verificación de estructura: 11 tablas creadas, datos insertados correctamente
+
+### Ajustes humanos realizados
+
+- Proporcionados datos reales de conexión SSH (host, usuario, clave)
+- Establecimiento manual del túnel SSH antes de ejecutar migraciones
+- Verificación manual de funcionamiento del entorno de desarrollo
+
+### Archivos modificados
+
+**Configuración:**
+- `backend/.env` - Configuración MySQL
+- `mcp/mysql-toolbox/tools.yaml` - Base de datos actualizada
+
+**Migraciones:**
+- `backend/database/migrations/2019_12_14_000001_create_personal_access_tokens_table.php` - Adaptada a Schema Builder
+- `backend/database/migrations/2026_01_31_000001_fix_clientes_user_id_unique_sqlserver.php` - Documentación MySQL
+
+**Seeders (7 archivos):**
+- `backend/database/seeders/UserSeeder.php`
+- `backend/database/seeders/TipoClienteSeeder.php`
+- `backend/database/seeders/TipoTareaSeeder.php`
+- `backend/database/seeders/UsuarioSeeder.php`
+- `backend/database/seeders/ClienteSeeder.php`
+- `backend/database/seeders/TestUsersSeeder.php`
+- `backend/database/seeders/TestTasksSeeder.php`
+
+**Tests (14 archivos):**
+- `backend/tests/Feature/Api/V1/ReportControllerTest.php`
+- `backend/tests/Feature/Api/V1/TaskControllerTest.php`
+- `backend/tests/Unit/Services/PasswordResetServiceTest.php`
+- `backend/tests/Feature/Api/V1/Auth/PasswordResetTest.php`
+- `backend/tests/Feature/Api/V1/UserProfileTest.php`
+- `backend/tests/Unit/Services/UserProfileServiceTest.php`
+- `backend/tests/Feature/Api/V1/Auth/ChangePasswordTest.php`
+- `backend/tests/Unit/Services/AuthServiceTest.php`
+- `backend/tests/Feature/Api/V1/DashboardControllerTest.php`
+- `backend/tests/Unit/Services/TaskServiceTest.php`
+- `backend/tests/Feature/Api/V1/Auth/LogoutTest.php`
+- `backend/tests/Feature/Api/V1/Auth/LoginTest.php`
+- `backend/tests/Feature/Database/MigrationTest.php`
+
+**Documentación:**
+- `docs/deploy-ci-cd.md` - Actualizado para MySQL
+- `.cursor/rules/20-mysql-datetime-format.md` - Nueva regla creada
+- `docs/version-mysql.md` - Documentación completa de migración creada
+
+### Comandos ejecutados
+
+```bash
+# Migraciones
+php artisan migrate:fresh
+
+# Seeders
+php artisan db:seed
+
+# Verificación
+php artisan tinker --execute="DB::select('SHOW TABLES')"
+```
+
+### Resultado
+
+- Migración completa y exitosa de SQL Server a MySQL
+- Todas las tablas creadas correctamente (11 tablas)
+- Datos iniciales insertados (3 usuarios, 2 empleados, 2 clientes)
+- Configuración del túnel SSH documentada y funcionando
+- Código adaptado para compatibilidad con MySQL
+- Documentación completa disponible en `docs/version-mysql.md`
+
+### Referencias
+- `docs/version-mysql.md` - Documentación completa de la migración
+- `docs/deploy-ci-cd.md` - Configuración actualizada
+- `.cursor/rules/20-mysql-datetime-format.md` - Regla de formato de fechas MySQL
+- `mcp/mysql-toolbox/tools.yaml` - Configuración MCP MySQL

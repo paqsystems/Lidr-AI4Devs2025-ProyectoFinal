@@ -53,8 +53,8 @@ class TestTasksSeeder extends Seeder
                     'password_hash' => bcrypt('cliente002'),
                     'activo' => true,
                     'inhabilitado' => false,
-                    'created_at' => DB::raw('GETDATE()'),
-                    'updated_at' => DB::raw('GETDATE()'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
                 $cli002UserId = DB::table('USERS')->where('code', 'CLI002')->value('id');
             }
@@ -105,8 +105,8 @@ class TestTasksSeeder extends Seeder
                 DB::table('PQ_PARTES_CLIENTE_TIPO_TAREA')->insert([
                     'cliente_id' => $cli001Id,
                     'tipo_tarea_id' => $especialId,
-                    'created_at' => DB::raw('GETDATE()'),
-                    'updated_at' => DB::raw('GETDATE()'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
         }
@@ -119,7 +119,7 @@ class TestTasksSeeder extends Seeder
                 ->where('id', $desarrolloId)
                 ->update([
                     'is_generico' => true,
-                    'updated_at' => DB::raw('GETDATE()'),
+                    'updated_at' => now(),
                 ]);
         }
     }

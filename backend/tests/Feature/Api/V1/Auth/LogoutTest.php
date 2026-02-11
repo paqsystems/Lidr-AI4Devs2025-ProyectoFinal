@@ -29,7 +29,7 @@ class LogoutTest extends TestCase
 
     /**
      * Crear usuarios de prueba para los tests
-     * Usa DB::table con GETDATE() para compatibilidad con SQL Server
+     * Usa DB::table con now() para compatibilidad con MySQL y SQL Server
      * Primero elimina usuarios existentes para evitar conflictos de clave única
      */
     protected function seedTestUsers(): void
@@ -62,8 +62,8 @@ class LogoutTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $jperezId = DB::table('USERS')->where('code', 'JPEREZ')->value('id');
@@ -76,8 +76,8 @@ class LogoutTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

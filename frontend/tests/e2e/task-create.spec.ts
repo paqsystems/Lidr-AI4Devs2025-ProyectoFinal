@@ -91,7 +91,7 @@ test.describe('Carga de Tarea Diaria', () => {
     // Los errores pueden ser de validación HTML5 (burbujas del navegador) o JavaScript (.field-error)
     // Verificamos que el formulario no se envió, lo cual indica que la validación funcionó
     const formSubmitted = await page.evaluate(() => {
-      const form = document.querySelector('[data-testid="task.form.container"] form');
+      const form = document.querySelector('[data-testid="task.form.container"] form') as HTMLFormElement | null;
       return form ? form.checkValidity() : false;
     });
     expect(formSubmitted).toBe(false); // El formulario no es válido

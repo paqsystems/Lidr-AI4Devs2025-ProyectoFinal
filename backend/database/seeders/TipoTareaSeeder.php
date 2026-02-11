@@ -42,8 +42,8 @@ class TipoTareaSeeder extends Seeder
                     'is_default' => $tipo['is_default'],
                     'activo' => true,
                     'inhabilitado' => false,
-                    'created_at' => DB::raw('GETDATE()'),
-                    'updated_at' => DB::raw('GETDATE()'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
         }

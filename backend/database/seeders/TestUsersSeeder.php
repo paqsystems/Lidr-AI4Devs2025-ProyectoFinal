@@ -100,8 +100,8 @@ class TestUsersSeeder extends Seeder
                     'password_hash' => Hash::make($user['password']),
                     'activo' => $user['activo'],
                     'inhabilitado' => $user['inhabilitado'],
-                    'created_at' => DB::raw('GETDATE()'),
-                    'updated_at' => DB::raw('GETDATE()'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
         }

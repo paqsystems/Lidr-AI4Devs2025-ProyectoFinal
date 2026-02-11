@@ -47,8 +47,8 @@ class PasswordResetTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         $userId = DB::table('USERS')->where('code', 'JPEREZ')->value('id');
         DB::table('PQ_PARTES_USUARIOS')->insert([
@@ -59,8 +59,8 @@ class PasswordResetTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => DB::raw('GETDATE()'),
-            'updated_at' => DB::raw('GETDATE()'),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 
