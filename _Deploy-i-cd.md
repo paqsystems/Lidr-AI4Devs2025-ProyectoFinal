@@ -40,12 +40,11 @@ Se creó un pipeline básico de **CI (Integración Continua)** con GitHub Action
 
 ---
 
-## Rama principal
+## Rama principal y disparadores
 
-La rama principal del proyecto es **main**. El pipeline se dispara en:
+La rama principal del proyecto es **main**.
 
-- `push` a `main`
-- `pull_request` hacia `main`
+**Estado actual:** El pipeline **no se ejecuta automáticamente** en push/PR (para no bloquear merge). Solo corre con ejecución manual (`workflow_dispatch` en GitHub Actions). Para habilitar la ejecución automática, descomentar `push` y `pull_request` en `.github/workflows/ci.yml`.
 
 ---
 

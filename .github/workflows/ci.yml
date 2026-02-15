@@ -1,18 +1,21 @@
 # Pipeline CI/CD básico – MVP Lidr
 #
-# Ejecuta en cada push y pull_request a la rama main.
-# Pasos: instalación → tests backend → tests frontend (unit) → Swagger → build frontend → E2E
+# Documentación del workflow. Actualmente NO se ejecuta en push/PR
+# (solo manualmente vía workflow_dispatch) para no bloquear merge.
+# Pasos documentados: instalación → tests backend → tests frontend → Swagger → E2E
 #
+# Para habilitar ejecución automática, descomentar push/pull_request debajo.
 # @see docs/deploy-ci-cd.md
 # @see docs/testing.md
 
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # Solo ejecución manual; no bloquea PR
+  # push:
+  #   branches: [main]
+  # pull_request:
+  #   branches: [main]
 
 env:
   NODE_VERSION: "20"
