@@ -1,66 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Backend – Laravel + Sanctum
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Sistema de Partes de Atención
 
-## About Laravel
+Backend del **MVP de registro de tareas** para consultorías y empresas de servicios. Permite que empleados registren tareas diarias (fecha, cliente, tipo de tarea, duración) y se generen informes de dedicación.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack Tecnológico
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Framework:** Laravel (PHP)
+- **Autenticación:** Laravel Sanctum (Bearer Token)
+- **ORM:** Eloquent
+- **Base de Datos:** MySQL / SQL Server / PostgreSQL
+- **API:** REST, Base URL `/api/v1`
+- **Testing:** PHPUnit
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Estructura Principal
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```
+backend/
+├── app/
+│   ├── Models/           # Modelos Eloquent
+│   ├── Http/
+│   │   ├── Controllers/   # Controladores API
+│   │   ├── Requests/     # Form Requests (validación)
+│   │   └── Middleware/    # Middleware
+│   └── Services/          # Lógica de negocio (si aplica)
+├── database/
+│   ├── migrations/       # Migraciones de BD
+│   └── seeders/           # Seeders
+├── routes/
+│   └── api.php           # Rutas API
+└── tests/
+    ├── Unit/             # Tests unitarios
+    └── Feature/          # Tests de integración
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Modelos Implementados
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Modelo | Tabla | Descripción |
+|--------|-------|-------------|
+| **User** | `users` | Autenticación central (Laravel) |
+| **Usuario** | `PQ_PARTES_USUARIOS` | Empleados que cargan tareas |
+| **Cliente** | `PQ_PARTES_CLIENTES` | Clientes para quienes se registran tareas |
+| **TipoCliente** | `PQ_PARTES_TIPOS_CLIENTE` | Catálogo de tipos de cliente |
+| **TipoTarea** | `PQ_PARTES_TIPOS_TAREA` | Catálogo de tipos de tarea |
+| **RegistroTarea** | `PQ_PARTES_REGISTRO_TAREA` | Registros de tareas realizadas |
+| **ClienteTipoTarea** | `PQ_PARTES_CLIENTE_TIPO_TAREA` | Asociación Cliente–TipoTarea |
 
-### Premium Partners
+> **Nota:** La tabla `users` no usa prefijo. El login se valida contra `users` y luego se determina si es Cliente o Usuario interno.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+---
 
-## Contributing
+## Configuración Inicial
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+cd backend
+composer install
+cp .env.example .env
+# Configurar en .env: DB_CONNECTION, DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD
+php artisan key:generate
+php artisan migrate
+php artisan db:seed    # Opcional: datos iniciales
+php artisan serve
+```
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Ejecutar Tests
 
-## Security Vulnerabilities
+```bash
+cd backend
+php artisan test                    # Todos los tests
+php artisan test --filter Unit      # Solo unitarios
+php artisan test --filter Feature   # Solo integración
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Referencias Clave
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Documento | Propósito |
+|-----------|-----------|
+| **`docs/backend/PLAYBOOK_BACKEND_LARAVEL.md`** | Guía de desarrollo, convenciones, PHPDoc obligatorio |
+| **`docs/api/CONTRATO_BASE.md`** | Formato de respuestas API |
+| **`specs/contracts/response-envelope.md`** | Envelope estándar de respuestas |
+| **`specs/endpoints/`** | Especificaciones detalladas de cada endpoint |
+| **`specs/models/`** | Especificaciones de modelos y relaciones |
+| **`docs/modelo-datos.md`** | Modelo de datos completo |
+
+---
+
+## Convenciones
+
+- **Prefijo de tablas:** `PQ_PARTES_` (excepto `users`)
+- **Formato de respuesta:** Envelope estándar (`error`, `respuesta`, `resultado`)
+- **Validación:** Form Requests en todas las escrituras
+- **Documentación:** PHPDoc obligatorio en clases, métodos y propiedades (ver `specs/governance/code-documentation-rules.md`)

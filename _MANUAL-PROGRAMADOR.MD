@@ -1,7 +1,7 @@
 # Manual del Programador
 
-**Versión:** 1.2  
-**Última actualización:** 2025-01-20
+**Versión:** 1.4  
+**Última actualización:** 2025-02-15
 
 ---
 
@@ -36,10 +36,16 @@ El sistema permite:
 El flujo principal que debe funcionar completamente es:
 
 ```
-Login → Registro de tarea diaria → Visualización de tareas / resumen
+1. Autenticación de empleado
+2. Registro de una tarea diaria
+3. Visualización de tareas propias
+4. Consulta agrupada por cliente
+5. Visualización del dashboard principal
 ```
 
-**Todo el desarrollo debe soportar este flujo.**
+Equivalente simplificado: **Login → Registro de tarea → Visualización de tareas / resumen → Informes → Dashboard**
+
+**Todo el desarrollo debe soportar este flujo.** Ver `README.md` y `specs/flows/e2e-core-flow.md` para el detalle completo.
 
 ### Entidades Principales
 
@@ -100,9 +106,13 @@ Login → Registro de tarea diaria → Visualización de tareas / resumen
 
 ### Herramientas de Desarrollo
 
-- **IDE:** Cursor (con reglas específicas en `.cursor/`)
+- **IDE:** Cursor (con reglas específicas en `.cursor/rules/`)
 - **Control de Versiones:** Git
 - **Documentación:** Markdown
+
+### Convenciones de Código
+
+- **Nomenclatura:** camelCase para variables, propiedades, métodos y funciones
 
 ---
 
@@ -112,7 +122,7 @@ Login → Registro de tarea diaria → Visualización de tareas / resumen
 
 Lee estos archivos en orden para entender el proyecto:
 
-1. **`PROJECT_CONTEXT.md`** (raíz)
+1. **`_PROJECT_CONTEXT.md`** (raíz)
    - Contexto general del proyecto
    - Objetivos del MVP
    - Qué es y qué no es
@@ -122,136 +132,144 @@ Lee estos archivos en orden para entender el proyecto:
    - Información general del repositorio
    - Estructura básica
    - Checklist de validación del MVP
+   - Flujo E2E detallado (5 pasos)
+   - Documentación de API
 
-3. **`docs/README.md`** ⭐ **NUEVO**
+3. **`docs/README.md`**
    - Guía de navegación de la documentación
-   - Estructura de carpetas de documentación
-   - Referencias rápidas a documentos clave
+   - Índice de documentos por área (API, backend, frontend)
+   - Referencias rápidas
 
 ### Fase 2: Diseño Funcional (30 minutos)
 
-3. **`docs/producto.md`**
+4. **`docs/producto.md`**
    - Objetivo del producto
    - Usuarios y roles
    - Funcionalidades del MVP
    - Alcance y no-alcance
 
-4. **`docs/historias-y-tickets.md`**
+5. **`docs/historias-y-tickets.md`**
    - **IMPORTANTE:** Este es el documento central de funcionalidades
    - Historias de usuario (MUST-HAVE y SHOULD-HAVE)
    - Criterios de aceptación
    - Reglas de negocio
    - Tickets técnicos derivados
 
-5. **`specs/flows/e2e-core-flow.md`**
+6. **`specs/flows/e2e-core-flow.md`**
    - Flujo E2E detallado paso a paso
    - Casos de uso principales
 
 ### Fase 3: Diseño Técnico - Arquitectura (20 minutos)
 
-6. **`docs/arquitectura.md`**
+7. **`docs/arquitectura.md`**
    - Arquitectura general del sistema
    - Decisiones de diseño
    - Componentes principales
 
-7. **`docs/modelo-datos.md`**
+8. **`docs/modelo-datos.md`**
    - Modelo de datos completo
    - Entidades y relaciones
    - Restricciones y validaciones
 
-8. **`specs/rules/business-rules.md`**
+9. **`specs/rules/business-rules.md`**
    - Reglas de negocio específicas
    - Validaciones críticas
 
 ### Fase 4: Diseño Técnico - Backend (30 minutos)
 
-9. **`backend/README.md`** ⭐ **NUEVO**
-   - Estructura del backend
-   - Modelos implementados
-   - Convenciones y referencias
+10. **`backend/README.md`**
+   - Guía rápida del backend
+   - Estructura, modelos implementados
+   - Comandos de configuración y tests
 
-10. **`docs/backend/PLAYBOOK_BACKEND_LARAVEL.md`**
-    - Guía de desarrollo backend
-    - Convenciones Laravel
-    - Estructura de código
+11. **`docs/backend/PLAYBOOK_BACKEND_LARAVEL.md`**
+   - Guía de desarrollo backend
+   - Convenciones Laravel
+   - Estructura de código
 
-11. **`docs/api/CONTRATO_BASE.md`**
-    - Formato estándar de respuestas API
-    - Manejo de errores
-    - Convenciones de endpoints
+12. **`docs/api/CONTRATO_BASE.md`**
+   - Formato estándar de respuestas API
+   - Manejo de errores
+   - Convenciones de endpoints
 
-12. **`specs/contracts/response-envelope.md`**
+13. **`specs/contracts/response-envelope.md`**
     - Formato de respuesta estándar
     - Códigos de error
 
-13. **`specs/models/`** (todos los archivos)
+14. **`specs/models/`** (todos los archivos)
     - Especificaciones de modelos backend
     - Relaciones Eloquent
     - Validaciones
 
-14. **`specs/endpoints/README.md`** ⭐ **NUEVO**
+15. **`specs/endpoints/README.md`**
     - Guía de navegación de especificaciones de endpoints
     - Organización por funcionalidad
     - Formato de especificaciones
 
-15. **`specs/endpoints/`** (revisar según necesidad)
+16. **`specs/endpoints/`** (revisar según necesidad)
     - Especificaciones detalladas de cada endpoint
     - Request/Response
     - Validaciones
 
 ### Fase 5: Diseño Técnico - Frontend (30 minutos)
 
-14. **`docs/frontend/frontend-specifications.md`**
+17. **`docs/frontend/frontend-specifications.md`**
     - Especificaciones generales del frontend
     - Estructura de carpetas
     - Convenciones de código
 
-15. **`docs/frontend/ui-layer-wrappers.md`**
+18. **`docs/frontend/ui-layer-wrappers.md`**
     - **CRÍTICO:** Reglas de UI Layer
     - Componentes reutilizables
     - Separación de responsabilidades
 
-16. **`docs/frontend/i18n.md`**
+19. **`docs/frontend/i18n.md`**
     - Internacionalización obligatoria
     - Función `t()` con fallback
     - Convenciones de keys
 
-17. **`docs/frontend/features/features-structure.md`**
+20. **`docs/frontend/features/features-structure.md`**
     - Estructura de features
     - Organización de componentes
 
-18. **`specs/ui/screen-specifications.md`**
+21. **`specs/ui/screen-specifications.md`**
     - Especificaciones de pantallas
     - Componentes UI
 
 ### Fase 6: Testing y Calidad (20 minutos)
 
-19. **`docs/testing.md`**
-    - Estrategia de testing
-    - Tipos de tests (unit, integración, E2E)
-    - Cómo ejecutar tests
+22. **`docs/testing.md`**
+   - Estrategia de testing
+   - Tipos de tests (unit, integración, E2E)
+   - Cómo ejecutar tests
 
-20. **`specs/tests/`** (revisar según necesidad)
-    - Especificaciones de tests
-    - Casos de prueba documentados
+23. **`docs/frontend/testing.md`**
+   - Testing frontend con Vitest y Playwright
+   - Configuración y convenciones E2E
 
-### Fase 7.5: Navegación de Especificaciones (10 minutos) ⭐ **NUEVO**
+24. **`specs/tests/`** (revisar según necesidad)
+   - Especificaciones de tests
+   - Casos de prueba documentados
 
-21. **`specs/README.md`** ⭐ **NUEVO**
-    - Guía completa de especificaciones técnicas
-    - Organización por tipo de artefacto
-    - Referencias rápidas a todas las especificaciones
+### Fase 7: Navegación de Especificaciones (10 minutos)
+
+25. **`specs/README.md`**
+   - Guía completa de especificaciones técnicas
+   - Organización por tipo de artefacto (endpoints, models, rules, flows)
 
 ### Fase 8: Reglas y Convenciones (15 minutos)
 
-22. **`.cursor/consignas.md`**
-    - Reglas del proyecto
-    - Entregables obligatorios
-    - Principios de desarrollo
+26. **`.cursor/consignas.md`**
+   - Consignas del Master
+   - Entregables obligatorios
+   - Principios de desarrollo
 
-23. **`docs/reglas-negocio.md`**
-    - Reglas de negocio adicionales
-    - Validaciones
+27. **`.cursor/rules/`**
+   - Reglas numeradas para Cursor IDE (01-project-context.md, etc.)
+
+28. **`docs/reglas-negocio.md`**
+   - Reglas de negocio adicionales
+   - Validaciones
 
 ---
 
@@ -260,7 +278,7 @@ Lee estos archivos en orden para entender el proyecto:
 ```
 Lidr-AI4Devs2025-ProyectoFinal/
 ├── backend/                    # Backend Laravel
-│   ├── README.md              # ⭐ Guía del backend
+│   ├── README.md              # Guía del backend
 │   ├── app/
 │   │   ├── Models/            # Modelos Eloquent
 │   │   ├── Http/
@@ -285,7 +303,7 @@ Lidr-AI4Devs2025-ProyectoFinal/
 │   └── tests/                 # Tests frontend
 │
 ├── docs/                       # Documentación del proyecto
-│   ├── README.md              # ⭐ Guía de navegación de documentación
+│   ├── README.md              # Guía de navegación de documentación
 │   ├── producto.md            # Definición del producto
 │   ├── historias-y-tickets.md # Historias de usuario (CENTRAL)
 │   ├── arquitectura.md        # Arquitectura del sistema
@@ -308,11 +326,16 @@ Lidr-AI4Devs2025-ProyectoFinal/
 │   └── ...
 │
 ├── .cursor/                    # Reglas para Cursor IDE
-│   └── consignas.md           # Reglas del proyecto
+│   ├── consignas.md            # Consignas del Master (entregables)
+│   └── rules/                  # Reglas numeradas (01-, 02-, ... 22-)
+│       ├── 01-project-context.md
+│       ├── 10-i18n-and-testid.md   # i18n y Test IDs
+│       ├── 11-playwright-testing-rules.md
+│       └── ...
 │
-├── PROJECT_CONTEXT.md          # Contexto general (LEER PRIMERO)
+├── _PROJECT_CONTEXT.md         # Contexto general (LEER PRIMERO)
 ├── README.md                   # Información general del repo
-└── MANUAL-PROGRAMADOR.MD       # Este documento
+└── _MANUAL-PROGRAMADOR.MD      # Este documento
 ```
 
 ---
@@ -377,15 +400,17 @@ Lidr-AI4Devs2025-ProyectoFinal/
 
 1. **Clonar el repositorio**
    ```bash
-   git clone <url-del-repo>
+   git clone https://github.com/paqsystems/Lidr-AI4Devs2025-ProyectoFinal
    cd Lidr-AI4Devs2025-ProyectoFinal
    ```
+   > **Referencia:** URL pública de la aplicación: https://lidrproyectofinal.vercel.app/login
 
 2. **Backend (Laravel)**
    ```bash
    cd backend
    composer install
    cp .env.example .env
+   # Configurar en .env: DB_CONNECTION, DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD
    php artisan key:generate
    php artisan migrate
    php artisan serve
@@ -402,23 +427,20 @@ Lidr-AI4Devs2025-ProyectoFinal/
    ```bash
    # Tests del backend (desde backend/)
    cd backend
-   php artisan test              # Todos los tests
-   php artisan test --filter Unit    # Solo tests unitarios
-   php artisan test --filter Feature # Solo tests de integración
+   php artisan test                    # Todos los tests
+   php artisan test --filter Unit      # Solo tests unitarios
+   php artisan test --filter Feature   # Solo tests de integración
    
-   # Tests E2E del frontend (desde frontend/)
+   # Tests del frontend (desde frontend/)
    cd frontend
-   npm run test:e2e          # Todos los tests E2E
-   npm run test:e2e:ui      # Con UI interactiva
-   npm run test:e2e:headed # Ver navegador
-   ```
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
+   npm run test:all             # Recomendado: Vitest + Playwright E2E (al cerrar tarea)
+   npm run test:run             # Solo Vitest (unitarios)
+   npm run test:e2e              # Solo Playwright E2E
+   npm run test:e2e:ui           # E2E con UI interactiva
+   npm run test:e2e:headed       # E2E con navegador visible
    ```
 
-4. **Instalar Playwright (Tests E2E)**
+5. **Instalar Playwright (Tests E2E)**
    ```bash
    cd frontend
    npx playwright install        # Instalar navegadores
@@ -429,10 +451,10 @@ Lidr-AI4Devs2025-ProyectoFinal/
 
 Sigue la **Ruta de Lectura** descrita arriba. No saltes pasos.
 
-**💡 Tip:** Empieza leyendo los README.md de las carpetas principales para tener una visión general:
+**💡 Tip:** Empieza leyendo los README de las carpetas principales:
 - `docs/README.md` - Guía de navegación de documentación
-- `specs/README.md` - Guía de navegación de especificaciones
-- `backend/README.md` - Guía del backend
+- `specs/README.md` - Guía de especificaciones técnicas
+- `backend/README.md` - Guía del backend (estructura, modelos)
 
 ### 3. Entender el Flujo E2E
 
@@ -453,7 +475,7 @@ Lee y ejecuta el flujo E2E principal:
 - Identifica el ticket técnico correspondiente (TK-XXX)
 - **Para endpoints:** Revisa `specs/endpoints/README.md` primero, luego la especificación específica
 - **Para modelos:** Revisa `specs/models/` según corresponda
-- **Para backend:** Consulta `backend/README.md` para ver qué modelos están implementados
+- **Para backend:** Consulta `backend/README.md` (modelos implementados) y `docs/backend/PLAYBOOK_BACKEND_LARAVEL.md`
 
 ### 5. Desarrollo
 
@@ -483,7 +505,7 @@ Lee y ejecuta el flujo E2E principal:
 - [ ] Código sigue convenciones del proyecto
 - [ ] UI Layer wrappers usados correctamente (frontend)
 - [ ] i18n implementado (frontend)
-- [ ] Test IDs agregados (frontend) - Ver `.cursor/rules/03-i18n-and-testid.mdc`
+- [ ] Test IDs agregados (frontend) - Ver `.cursor/rules/10-i18n-and-testid.md`
 - [ ] Tests E2E escritos si es parte del flujo principal - Ver `.cursor/rules/11-playwright-testing-rules.md`
 - [ ] Formato de respuesta API correcto (backend)
 
@@ -495,16 +517,16 @@ Lee y ejecuta el flujo E2E principal:
 
 | Documento | Ubicación | Propósito |
 |-----------|-----------|-----------|
-| **📚 Guía de Documentación** | `docs/README.md` | ⭐ Navegación de toda la documentación |
-| **📚 Guía de Especificaciones** | `specs/README.md` | ⭐ Navegación de especificaciones técnicas |
-| **📚 Guía del Backend** | `backend/README.md` | ⭐ Estructura y convenciones del backend |
-| **📚 Guía de Endpoints** | `specs/endpoints/README.md` | ⭐ Navegación de especificaciones de API |
+| **📚 Guía de Documentación** | `docs/README.md` | Navegación de toda la documentación |
+| **📚 Guía de Especificaciones** | `specs/README.md` | Navegación de especificaciones técnicas |
+| **📚 Guía del Backend** | `backend/README.md` | Estructura, modelos, comandos |
+| **📚 Guía de Endpoints** | `specs/endpoints/README.md` | Especificaciones de API organizadas |
 | **Historias de Usuario** | `docs/historias-y-tickets.md` | Funcionalidades y tickets técnicos |
+| **Playbook Backend** | `docs/backend/PLAYBOOK_BACKEND_LARAVEL.md` | Convenciones de desarrollo Laravel |
 | **Flujo E2E** | `specs/flows/e2e-core-flow.md` | Flujo principal paso a paso |
 | **Modelo de Datos** | `docs/modelo-datos.md` | Entidades y relaciones |
 | **Arquitectura** | `docs/arquitectura.md` | Diseño del sistema |
 | **Contrato API** | `docs/api/CONTRATO_BASE.md` | Formato de respuestas |
-| **Playbook Backend** | `docs/backend/PLAYBOOK_BACKEND_LARAVEL.md` | Guía Laravel |
 | **UI Layer** | `docs/frontend/ui-layer-wrappers.md` | Reglas de componentes UI |
 | **i18n** | `docs/frontend/i18n.md` | Internacionalización |
 | **Testing** | `docs/testing.md` | Estrategia de tests |
@@ -528,6 +550,10 @@ Lee y ejecuta el flujo E2E principal:
 
 - **IA Log:** `docs/ia-log.md` - Registro de uso de IA
 - **Prompts:** `prompts.md` - Prompts clave utilizados
+
+### Proceso de Documentación
+
+- **Checklist:** `_CHECKLIST-DOCUMENTACION-DISEÑO.md` - Guía paso a paso del proceso de documentación y diseño (plantilla para proyectos nuevos)
 
 ---
 
@@ -581,8 +607,22 @@ Ver `docs/testing.md` para instrucciones detalladas. En general:
 
 Este documento se actualiza de forma específica cuando se indique. Las actualizaciones se registran en la sección de versión al inicio del documento.
 
-**Última actualización:** 2025-01-20  
-**Versión:** 1.2
+**Última actualización:** 2025-02-15  
+**Versión:** 1.4
+
+**Cambios en v1.4:**
+- Reconstruidos `docs/README.md` (guía de navegación de documentación) y `backend/README.md` (guía del backend)
+- Reincorporados ambos README en la Ruta de Lectura (Fase 1 y Fase 4)
+- Actualizados Tip, tabla de Referencias y estructura del proyecto
+
+**Cambios en v1.3:**
+- Corregidas referencias a archivos: `_PROJECT_CONTEXT.md`, eliminado `docs/README.md` (no existe)
+- Corregida referencia i18n/testid: `10-i18n-and-testid.md` (antes `03-i18n-and-testid.mdc`)
+- Añadido comando `npm run test:all` para cierre de tareas en frontend
+- Actualizada estructura del árbol: `_MANUAL-PROGRAMADOR.MD`, `.cursor/rules/`
+- Expandido flujo E2E para alinear con README
+- Actualizadas referencias: Playbook Backend, specs/endpoints/README.md
+- Añadida convención camelCase y configuración de variables de entorno
 
 **Cambios en v1.1:**
 - Agregadas instrucciones de instalación de Playwright

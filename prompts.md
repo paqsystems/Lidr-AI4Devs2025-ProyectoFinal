@@ -355,6 +355,35 @@ Cada especificación debe incluir:
 
 ---
 
+## Manual del Programador
+
+### Prompt 13: Revisión y Actualización del Manual del Programador
+
+**Prompt utilizado:**
+```
+podrías revisar si es necesario actualizar el archivo "manual-del-programador.md". Recuerda que su objetivo es que un nuevo programador con conocimientos de las herramientas que se utilizan pueda entender el objetivo funcional y estructura técnica del proyecto sin necesidad de explicación humana.
+```
+
+**Herramienta:** Cursor IDE
+
+**Resultado:**
+- Revisión completa del documento `_MANUAL-PROGRAMADOR.MD`
+- Corrección de referencias a archivos inexistentes o incorrectos (`_PROJECT_CONTEXT.md`, reglas i18n)
+- Actualización del flujo E2E para alinear con README (5 pasos)
+- Incorporación de `docs/README.md` y `backend/README.md` en la Ruta de Lectura
+- Añadido comando `npm run test:all` para cierre de tareas en frontend
+- Actualizada estructura del proyecto, tabla de referencias y convención camelCase
+- Reconstrucción de `docs/README.md` y `backend/README.md` (habían sido eliminados)
+- Versión actualizada a 1.4
+
+**Ajustes humanos:**
+- Validación de que el manual permita autonomía total a un programador nuevo
+- Verificación de que todas las referencias apunten a archivos existentes
+
+**Referencia:** `_MANUAL-PROGRAMADOR.MD` (v1.3, v1.4)
+
+---
+
 ## Notas sobre el Uso de IA
 
 ### Estrategia General
@@ -498,5 +527,5 @@ Este trabajo es exclusivamente de análisis y planificación.
 
 ---
 
-**Última actualización:** 2026-01-28
+**Última actualización:** 2025-02-15
 

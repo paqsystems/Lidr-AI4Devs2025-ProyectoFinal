@@ -1,6 +1,13 @@
 # Lidr-AI4Devs2025-ProyectoFinal
 Proyecto Final del Master de Lidr AI4Devs
 
+# links solicitados
+
+  repositorio del proyecto : https://github.com/paqsystems/Lidr-AI4Devs2025-ProyectoFinal
+   (contiene las tres ramas solicitadas)
+
+  url pública de la aplicación : https://lidrproyectofinal.vercel.app/login
+
 # Reglas para Cursor — BackEnd Laravel (Sanctum) — Sistema de Partes de Atención
 
 Este paquete contiene **solo reglas y especificaciones**. **NO** debe implementarse código todavía.
@@ -108,6 +115,8 @@ Las historias SHOULD-HAVE:
 - Quedan documentadas como roadmap futuro
 
 El MVP se considera funcionalmente completo cuando todas las historias MUST-HAVE están implementadas y validadas.
+
+Vale aclarar que igualmente se realizaron el 100% de las historias de usaurios, MUST-HAVE y SHOULD-HAVE
 
 ## Checklist de Validación del MVP
 
@@ -395,7 +404,10 @@ Los cambios están en la rama `feature-entrega2-PAQ`. PR hacia `main` con backen
 La operatoria básica fue : 
 - hice megaprompts en ChatGpt para que me fabrique prompts apropiados para cursor.
 - coloqué los requisitos del proyecto final en Cursor (.cursor/consignas.md)
-- Realice las solicitudes a Cursor de generación de archivos de contextos y especificaciones.
+- Realice las solicitudes a Cursor de generación de archivos de contextos y especificaciones:
+  a) Generar las historias de usuario.
+  b) Generar los planes de tarea a partir de cada historia de usuario, bajo las normativas especificadas en .cursor/rules/13-user-story-to-task-breakdown.md
+  c) Ejecutar las tareas planificadas, incluyendo los testings unitarios y e2e.
 - Revisé lo generado, e interactué con ChatGpt para entre ambos hacer las correcciones necesarias.
 - Solicite mejoras y correcciones a Cursor.
 - Hice una nueva revisión.
@@ -403,12 +415,16 @@ La operatoria básica fue :
 - le solicité completar la documentación faltante.
 - pedí revisar, explorar instrucciones duplicadas y ordenar toda la documentación.
 - realicé el primer PR
-- pedí generar un documento MANUAL-PROGRAMADOR.md para ver si un tercero puede seguir el proyecto sin explicación humana
+- pedí generar un documento MANUAL-PROGRAMADOR.md para ver si un tercero puede seguir el proyecto sin explicación humana.
+- Si en los testing manuales encontraba fallas, el proceso de corrección consistía : 
+  a) Revisar los E2E para entender porqué no había encontrado la falla, y que corrija el testing en consecuencia.
+  b) generar una HU aclarando la corrección a realizar
+  c) 
 
 ## Cómo me sentí con el proceso : 
 - me sentí muy cómodo.
 - como soy más analista de sistemas que programador, creo entender bien la diferencia de funciones entre la IA y yo, y poder hacer las ordenes, seguimientos y controles como si la IA fuese un programador humano.
-- Sólo siento que me sobrepasa la cantidad de información que genera. Debo contemplar reservar una importante suma de tiempo para poder controlar y revisar todo lo que genera.
+- Sólo siento que me sobrepasa la cantidad de información que genera. Debo contemplar reservar una importante suma de tiempo para poder controlar y revisar todo lo que genera, tanto código como documentación.
 - Por normativa propia y ampliado ahora por el punto anterior, procuro realizar pasos pequeños cada vez, para poder hacer un mejor seguimiento y evitar "alucinaciones" de la IA
 - en ningún momento generé código manualmente. Tampoco solicité cambios en el código desde el prompt, sino que siempre modifiqué especificaciones y le pedí que adecué el código a la misma.
 - en forma muy artesanal, en casos de ajustes, correcciones o modificaciones procuré usar el concepto de spec-kit : generar un documento con el mismo nombre del TR a modificar con el agregado "-update"; documenté ahí todos los pasos como una tarea nueva; al quedar debidamente probado, solicité integrar ese documento al original. Desgraciadamente omití conservar una copia como ejemplo.
