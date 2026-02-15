@@ -7,8 +7,8 @@ Pipeline CI/CD básico con GitHub Actions para el MVP Lidr. Ejecuta tests, gener
 `.github/workflows/ci.yml`
 
 ## Disparadores
-- **push** a la rama: `main`
-- **pull_request** hacia `main`
+- **Actual:** solo `workflow_dispatch` (ejecución manual). No corre en push/PR.
+- Para habilitar automático: descomentar `push` y `pull_request` en el archivo.
 
 ## Jobs
 

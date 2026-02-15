@@ -153,7 +153,8 @@ brew install php mysql
 Pipeline con **GitHub Actions** en `.github/workflows/ci.yml`.
 
 ### Disparadores
-- `push` y `pull_request` a la rama: `main`
+- Actualmente: solo **manual** (`workflow_dispatch`). No se ejecuta en push/PR para no bloquear merge.
+- Para habilitar automático: descomentar `push` y `pull_request` en `ci.yml`
 
 ### Jobs del pipeline
 
@@ -198,6 +199,10 @@ cd frontend && npm run test:all
 - Nunca versionar secretos reales
 
 ---
+
+## Frontend en Vercel
+- **vercel.json:** `frontend/vercel.json` con rewrites para SPA (todas las rutas → index.html)
+- Sin esto, URLs como `/login` devuelven 404 al abrirlas directamente
 
 ## Despliegue
 Opciones válidas:
