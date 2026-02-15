@@ -8,6 +8,18 @@ Proyecto Final del Master de Lidr AI4Devs
 
   url pública de la aplicación : https://lidrproyectofinal.vercel.app/login
 
+# Documentación Obligatoria
+
+  readme.md y prompts.md : generados durante todo el proyecto
+   
+  readme-proyectofinal.md y prompts-proyectofinal.md : el temario exigido en el repositorio "AI4Devs-finalproject"
+
+# Video Explicativo
+
+  ver el link "https://drive.google.com/file/d/1yk4lelbMe4zdb5x76DuK3kjwKk1GHl6T/view?usp=drive_link".
+  
+  Está compartido el acceso a jorge@lidr.co
+
 # Reglas para Cursor — BackEnd Laravel (Sanctum) — Sistema de Partes de Atención
 
 Este paquete contiene **solo reglas y especificaciones**. **NO** debe implementarse código todavía.
