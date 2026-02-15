@@ -121,8 +121,8 @@ class TaskControllerTest extends TestCase
                 'password_hash' => Hash::make('cliente123'),
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
             $cli001UserId = DB::table('USERS')->where('code', 'CLI001')->value('id');
             
@@ -134,8 +134,8 @@ class TaskControllerTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             DB::table('USERS')->insert([
@@ -143,8 +143,8 @@ class TaskControllerTest extends TestCase
                 'password_hash' => Hash::make('cliente002'),
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
             $cli002UserId = DB::table('USERS')->where('code', 'CLI002')->value('id');
             
@@ -156,8 +156,8 @@ class TaskControllerTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             DB::table('USERS')->insert([
@@ -165,8 +165,8 @@ class TaskControllerTest extends TestCase
                 'password_hash' => Hash::make('cliente456'),
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
             $cliInactivoUserId = DB::table('USERS')->where('code', 'CLIINACTIVO')->value('id');
             
@@ -178,8 +178,8 @@ class TaskControllerTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => false,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
@@ -193,8 +193,8 @@ class TaskControllerTest extends TestCase
                 'is_default' => false,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         } else {
             DB::table('PQ_PARTES_TIPOS_TAREA')
@@ -211,8 +211,8 @@ class TaskControllerTest extends TestCase
                 'is_default' => false,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => DB::raw('GETDATE()'),
-                'updated_at' => DB::raw('GETDATE()'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 

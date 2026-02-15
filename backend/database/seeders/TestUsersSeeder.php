@@ -183,8 +183,8 @@ class TestUsersSeeder extends Seeder
                         'supervisor' => $empleado['supervisor'],
                         'activo' => $empleado['activo'],
                         'inhabilitado' => $empleado['inhabilitado'],
-                        'created_at' => DB::raw('GETDATE()'),
-                        'updated_at' => DB::raw('GETDATE()'),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
                 }
             }
@@ -237,8 +237,8 @@ class TestUsersSeeder extends Seeder
                             'tipo_cliente_id' => $cliente['tipo_cliente_id'],
                             'activo' => $cliente['activo'],
                             'inhabilitado' => $cliente['inhabilitado'],
-                            'created_at' => DB::raw('GETDATE()'),
-                            'updated_at' => DB::raw('GETDATE()'),
+                            'created_at' => now(),
+                            'updated_at' => now(),
                         ]);
                     }
                 }
