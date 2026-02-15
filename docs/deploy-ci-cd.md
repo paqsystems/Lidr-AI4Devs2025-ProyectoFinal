@@ -149,12 +149,44 @@ brew install php mysql
 ---
 
 ## CI/CD (básico)
-Pipeline simple:
-1. Instalación de dependencias
-2. Ejecución de tests
-3. Generación de documentación Swagger/OpenAPI (`php artisan l5-swagger:generate`)
-4. Build de frontend
-5. Deploy automático
+
+Pipeline con **GitHub Actions** en `.github/workflows/ci.yml`.
+
+### Disparadores
+- `push` y `pull_request` a la rama: `main`
+
+### Jobs del pipeline
+
+| Job      | Descripción                                                  |
+|----------|---------------------------------------------------------------|
+| backend  | Tests Laravel (PHPUnit) con MySQL 8.0 como servicio            |
+| frontend | Tests unitarios (Vitest) + build (Vite)                       |
+| swagger  | Generación de documentación OpenAPI (`php artisan l5-swagger:generate`) |
+| e2e      | Tests E2E (Playwright, Chromium) con backend y frontend      |
+
+### Orden de ejecución
+1. **backend** y **frontend** en paralelo
+2. **swagger** tras backend
+3. **e2e** tras backend y frontend (inicia backend con `php artisan serve`, Playwright inicia el frontend)
+
+### Requisitos para CI
+- **PHP:** 8.2 (shivammathur/setup-php)
+- **Node.js:** 20
+- **MySQL:** 8.0 (servicio de contenedor)
+- **Composer** y **npm** con cache
+
+### Ejecución local del pipeline
+No es necesario instalar nada extra: GitHub Actions usa runners con PHP, Node, MySQL, etc. Solo asegúrate de que los tests pasen localmente:
+```bash
+# Backend
+cd backend && php artisan test
+
+# Frontend (unit + E2E)
+cd frontend && npm run test:all
+```
+
+### Deploy automático
+**No implementado.** El despliegue se realiza manualmente. Ver sección "Despliegue" más abajo para opciones de plataforma.
 
 ---
 

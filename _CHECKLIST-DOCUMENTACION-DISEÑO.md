@@ -1,5 +1,11 @@
 # Checklist: Proceso de Documentación y Diseño de Proyecto MVP
 
+**Objetivo:** Guía paso a paso para definir, documentar y diseñar un proyecto MVP. Un programador nuevo puede usar este checklist para verificar completitud del proceso de documentación o como plantilla para proyectos futuros.
+
+**Nota sobre nombres de archivo:** En este proyecto, algunos archivos en la raíz usan prefijo `_` (ej: `_PROJECT_CONTEXT.md`, `_MANUAL-PROGRAMADOR.MD`, `_CHECKLIST-DOCUMENTACION-DISEÑO.md`).
+
+---
+
 ## FASE 1: DEFINICIÓN Y CONTEXTO DEL PROYECTO
 
 ### 1.1 Definición del Proyecto
@@ -7,7 +13,7 @@
 - [ ] Identificar usuarios principales y roles
 - [ ] Establecer alcance del MVP (qué SÍ y qué NO incluir)
 - [ ] Documentar propósito principal y valor de negocio
-- [ ] Crear archivo `PROJECT_CONTEXT.md` o `docs/producto.md`
+- [ ] Crear archivo `_PROJECT_CONTEXT.md` o `docs/producto.md`
 
 ### 1.2 Stack Tecnológico
 - [ ] Definir framework backend (Laravel, Django, etc.)
@@ -226,7 +232,7 @@
 ## FASE 10: DOCUMENTACIÓN DE SOPORTE
 
 ### 10.1 Manual del Programador
-- [ ] Crear `MANUAL-PROGRAMADOR.MD` con:
+- [ ] Crear `_MANUAL-PROGRAMADOR.MD` con:
   - [ ] Objetivo del proyecto
   - [ ] Stack tecnológico
   - [ ] Ruta de lectura recomendada
@@ -370,8 +376,9 @@
 
 Este checklist está basado en el proceso seguido en este proyecto. Para más detalles, consultar:
 - `AGENTS.md` - Guía del proyecto para el Agente IA
-- `MANUAL-PROGRAMADOR.MD` - Manual de onboarding
-- `docs/consignas-mvp-cursor.md` - Consignas del MVP
+- `_MANUAL-PROGRAMADOR.MD` - Manual de onboarding del programador
+- `docs/consignas-mvp.md` - Consignas del MVP
+- `docs/consignas-mvp-cursor.md` - Consignas para Cursor
 - `docs/historias-y-tickets.md` - Historias y tickets del proyecto
 
 --------------------------------------------------------------------------------------
@@ -411,49 +418,62 @@ Este checklist está basado en el proceso seguido en este proyecto. Para más de
 
   ### Comandos de setup de servidores
 
-  Backend:
+  **Backend:**
+  ```bash
   cd backend
+  composer install
+  cp .env.example .env
+  php artisan key:generate
+  php artisan migrate
   php artisan serve
+  ```
 
-  FrontEnd:
+  **Frontend:**
+  ```bash
   cd frontend
+  npm install
   npm run dev
+  ```
 
   ### Comandos de test
   
-  Backend : 
+  **Backend:**
+  ```bash
   cd backend
-  php artisan test --filter=Logout
+  php artisan test                    # Todos los tests
+  php artisan test --filter=Logout     # Test específico
+  php artisan test --filter Unit      # Solo unitarios
+  php artisan test --filter Feature   # Solo integración
+  ```
 
-  FrontEnd : 
+  **Frontend (unitarios + E2E):**
+  ```bash
   cd frontend
-  npm run dev
+  npm run test:all             # Recomendado: Vitest + Playwright (al cerrar tarea)
+  npm run test:run             # Solo Vitest (unitarios)
+  npm run test:e2e             # Solo Playwright E2E
+  npm run test:e2e:ui          # E2E con UI interactiva
+  npm run test:e2e:headed      # E2E con navegador visible
+  ```
 
-  Test E2E:
-  cd frontend
-  npx playwright test auth-login.spec.ts
-
-  Playwright : comandos útiles
-  // Visualizar reporte
-  npx playwright show-report
-  //  Ejecutar tests con UI interactiva
-  npx playwright test --ui
-  // Ejecutar tests y mostrar reporte automáticamente
-  npx playwright test --reporter=html
-  //  Ver trace de un test fallido (si está configurado)
-  npx playwright show-trace path/to/trace.zip
-  //  Ejecutar un test específico
-  npx playwright test auth-login.spec.ts
-  //  Ejecutar en modo debug
-  npx playwright test --debug
+  **Playwright – comandos útiles:**
+  - `npx playwright show-report` – Visualizar reporte
+  - `npm run test:e2e:ui` o `npx playwright test --ui` – UI interactiva
+  - `npx playwright test --reporter=html` – Tests con reporte HTML
+  - `npx playwright show-trace path/to/trace.zip` – Ver trace de test fallido
+  - `npx playwright test auth-login.spec.ts` – Ejecutar test específico
+  - `npm run test:e2e:debug` o `npx playwright test --debug` – Modo debug
 
 ## Implementación
 
-- [ ] Readme.md y Manual-Programador.md
+- [ ] README.md y _MANUAL-PROGRAMADOR.MD
 - [ ] Manual del usuario
 - [ ] PR con Testing (Github Action o CodeRabbit)
 - [ ] Deploy
 - [ ] Seguimiento
 
+---
+
+**Última actualización:** 2025-02-15
 
 
