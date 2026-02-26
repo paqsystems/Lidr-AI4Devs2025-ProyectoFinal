@@ -49,8 +49,8 @@ class PasswordResetServiceTest extends TestCase
             'password_hash' => Hash::make('oldpass'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
         $userId = DB::table('USERS')->where('code', 'PWUSER')->value('id');
         DB::table('PQ_PARTES_USUARIOS')->insert([
@@ -61,8 +61,8 @@ class PasswordResetServiceTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
     }
 
@@ -138,7 +138,7 @@ class PasswordResetServiceTest extends TestCase
         $row = DB::table('password_reset_tokens')->where('email', 'pwuser@test.com')->first();
         DB::table('password_reset_tokens')
             ->where('email', 'pwuser@test.com')
-            ->update(['created_at' => now()->subMinutes(61)]);
+            ->update(['created_at' => DB::raw('DATEADD(MINUTE, -61, GETDATE())')]);
 
         $this->expectException(AuthException::class);
         $this->expectExceptionMessage('El enlace de recuperación ha expirado.');

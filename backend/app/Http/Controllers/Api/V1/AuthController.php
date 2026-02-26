@@ -82,6 +82,10 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
+        Log::info('AuthController login recibido', [
+            'usuario' => $request->input('usuario'),
+            'db_default' => config('database.default'),
+        ]);
         try {
             // Intentar login con credenciales validadas
             $result = $this->authService->login(

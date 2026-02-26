@@ -6,6 +6,14 @@
 npm install
 ```
 
+### Licencia DevExtreme
+
+Si ves el banner naranja de evaluación, configura tu licencia:
+
+1. Obtén tu clave en [DevExpress Download Manager](https://www.devexpress.com/ClientCenter/DownloadManager/)
+2. Copia `src/devextreme-license.example.ts` como `src/devextreme-license.ts`
+3. Reemplaza `DEVELOPER_LICENSE_KEY` por tu clave real
+
 ## Desarrollo
 
 ```bash

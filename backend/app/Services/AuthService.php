@@ -67,8 +67,15 @@ class AuthService
     public function login(string $usuario, string $password): array
     {
         // 1. Buscar usuario en USERS por code
+        \Illuminate\Support\Facades\Log::info('AuthService login', [
+            'usuario' => $usuario,
+            'db_connection' => config('database.default'),
+        ]);
         $user = User::where('code', $usuario)->first();
-        
+        \Illuminate\Support\Facades\Log::info('AuthService user lookup', [
+            'found' => (bool)$user,
+            'hash_check' => $user ? \Illuminate\Support\Facades\Hash::check($password, $user->password_hash) : null,
+        ]);
         if (!$user) {
             // Usuario no encontrado - retornar error genérico por seguridad
             throw new AuthException(

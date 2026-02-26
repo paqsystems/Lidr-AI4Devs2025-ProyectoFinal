@@ -1,8 +1,14 @@
 /**
  * TiposClienteEditarPage – Formulario de edición de tipo de cliente. TR-016(MH).
+ * Usa TextBox, CheckBox y Button de DevExtreme.
+ *
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import TextBox from 'devextreme-react/text-box';
+import CheckBox from 'devextreme-react/check-box';
+import Button from 'devextreme-react/button';
 import { getTipoCliente, updateTipoCliente } from '../services/tipoCliente.service';
 import './TiposClientePage.css';
 
@@ -69,7 +75,7 @@ export function TiposClienteEditarPage(): React.ReactElement {
     return (
       <div className="tipos-cliente-page">
         <p className="tipos-cliente-page-error">{error}</p>
-        <button type="button" className="tipos-cliente-btn-cancel" onClick={() => navigate('/tipos-cliente')}>Volver</button>
+        <Button text="Volver" type="normal" onClick={() => navigate('/tipos-cliente')} />
       </div>
     );
   }
@@ -83,39 +89,28 @@ export function TiposClienteEditarPage(): React.ReactElement {
         {error && <div className="tipos-cliente-page-error" role="alert">{error}</div>}
         <div className="tipos-cliente-form-group">
           <label className="tipos-cliente-form-label">Código</label>
-          <input type="text" value={code} readOnly disabled className="readonly" data-testid="tipoClienteEditar.code" />
+          <TextBox value={code} readOnly disabled elementAttr={{ 'data-testid': 'tipoClienteEditar.code' }} />
         </div>
         <div className="tipos-cliente-form-group">
           <label htmlFor="descripcion" className="tipos-cliente-form-label">Descripción</label>
-          <input
-            id="descripcion"
-            type="text"
+          <TextBox
             value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
+            onValueChanged={(e) => setDescripcion(e.value ?? '')}
             disabled={saving}
-            className={fieldErrors.descripcion ? 'input-error' : ''}
-            data-testid="tipoClienteEditar.descripcion"
             maxLength={255}
+            elementAttr={{ 'data-testid': 'tipoClienteEditar.descripcion' }}
           />
           {fieldErrors.descripcion && <span className="field-error">{fieldErrors.descripcion}</span>}
         </div>
         <div className="tipos-cliente-form-group checkbox">
-          <label>
-            <input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} disabled={saving} />
-            Activo
-          </label>
+          <CheckBox text="Activo" value={activo} onValueChanged={(e) => setActivo(e.value ?? true)} disabled={saving} />
         </div>
         <div className="tipos-cliente-form-group checkbox">
-          <label>
-            <input type="checkbox" checked={inhabilitado} onChange={(e) => setInhabilitado(e.target.checked)} disabled={saving} />
-            Inhabilitado
-          </label>
+          <CheckBox text="Inhabilitado" value={inhabilitado} onValueChanged={(e) => setInhabilitado(e.value ?? false)} disabled={saving} />
         </div>
         <div className="tipos-cliente-form-actions">
-          <button type="button" className="tipos-cliente-btn-cancel" onClick={() => navigate('/tipos-cliente')}>Cancelar</button>
-          <button type="submit" disabled={saving} data-testid="tipoClienteEditar.submit" className="tipos-cliente-btn-submit">
-            {saving ? 'Guardando...' : 'Guardar'}
-          </button>
+          <Button text="Cancelar" type="normal" onClick={() => navigate('/tipos-cliente')} elementAttr={{ 'data-testid': 'tipoClienteEditar.cancel' }} />
+          <Button text={saving ? 'Guardando...' : 'Guardar'} type="default" useSubmitBehavior={true} disabled={saving} elementAttr={{ 'data-testid': 'tipoClienteEditar.submit' }} />
         </div>
       </form>
     </div>

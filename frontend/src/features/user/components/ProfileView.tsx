@@ -10,6 +10,8 @@
 
 import React, { useEffect, useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import TextBox from 'devextreme-react/text-box';
+import Button from 'devextreme-react/button';
 import { getProfile, changePassword, updateProfile, UserProfile } from '../services/user.service';
 import './ProfileView.css';
 
@@ -265,14 +267,12 @@ export function ProfileView(): React.ReactElement {
     <div className="profile-container" data-testid="user.profile.container">
       <header className="profile-header">
         <h1>Mi Perfil</h1>
-        <button
+        <Button
+          text="← Volver"
+          type="normal"
           onClick={handleBack}
-          className="profile-back-button"
-          data-testid="user.profile.backButton"
-          aria-label="Volver al dashboard"
-        >
-          ← Volver
-        </button>
+          elementAttr={{ 'data-testid': 'user.profile.backButton', 'aria-label': 'Volver al dashboard' }}
+        />
       </header>
 
       <main className="profile-main">
@@ -318,24 +318,18 @@ export function ProfileView(): React.ReactElement {
         </dl>
 
         <section className="profile-actions">
-          <button
-            type="button"
+          <Button
+            text="Editar perfil"
+            type="normal"
             onClick={handleEditProfileClick}
-            className="profile-edit-button"
-            data-testid="user.profile.editLink"
-            aria-label="Editar perfil"
-          >
-            Editar perfil
-          </button>
-          <button
-            type="button"
+            elementAttr={{ 'data-testid': 'user.profile.editLink', 'aria-label': 'Editar perfil' }}
+          />
+          <Button
+            text="Cambiar contraseña"
+            type="normal"
             onClick={handleChangePasswordClick}
-            className="profile-change-password-button"
-            data-testid="profile.changePasswordLink"
-            aria-label="Cambiar contraseña"
-          >
-            Cambiar contraseña
-          </button>
+            elementAttr={{ 'data-testid': 'profile.changePasswordLink', 'aria-label': 'Cambiar contraseña' }}
+          />
         </section>
 
         {showEditForm && (
@@ -355,29 +349,12 @@ export function ProfileView(): React.ReactElement {
               <div className="profile-form-row">
                 <label className="profile-form-label">
                   Código de usuario (no modificable)
-                  <input
-                    type="text"
-                    value={profile.user_code}
-                    readOnly
-                    className="profile-form-input profile-form-input-readonly"
-                    data-testid="user.profile.editCode"
-                    aria-readonly="true"
-                  />
+                  <TextBox value={profile.user_code} readOnly elementAttr={{ 'data-testid': 'user.profile.editCode' }} />
                 </label>
               </div>
               <label className="profile-form-label">
                 Nombre
-                <input
-                  type="text"
-                  value={editNombre}
-                  onChange={(e) => setEditNombre(e.target.value)}
-                  className="profile-form-input"
-                  data-testid="user.profile.editNombre"
-                  autoComplete="name"
-                  required
-                  aria-invalid={!!editFieldErrors.nombre}
-                  aria-describedby={editFieldErrors.nombre ? 'profile-edit-nombre-error' : undefined}
-                />
+                <TextBox value={editNombre} onValueChanged={(e) => setEditNombre(e.value ?? '')} elementAttr={{ 'data-testid': 'user.profile.editNombre' }} />
                 {editFieldErrors.nombre && (
                   <span id="profile-edit-nombre-error" className="profile-form-error" role="alert">
                     {editFieldErrors.nombre}
@@ -386,16 +363,7 @@ export function ProfileView(): React.ReactElement {
               </label>
               <label className="profile-form-label">
                 Email
-                <input
-                  type="email"
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  className="profile-form-input"
-                  data-testid="user.profile.editEmail"
-                  autoComplete="email"
-                  aria-invalid={!!editFieldErrors.email}
-                  aria-describedby={editFieldErrors.email ? 'profile-edit-email-error' : undefined}
-                />
+                <TextBox value={editEmail} onValueChanged={(e) => setEditEmail(e.value ?? '')} mode="email" elementAttr={{ 'data-testid': 'user.profile.editEmail' }} />
                 {editFieldErrors.email && (
                   <span id="profile-edit-email-error" className="profile-form-error" role="alert">
                     {editFieldErrors.email}
@@ -403,24 +371,8 @@ export function ProfileView(): React.ReactElement {
                 )}
               </label>
               <div className="profile-edit-buttons">
-                <button
-                  type="button"
-                  onClick={handleEditProfileCancel}
-                  className="profile-form-button profile-form-button-secondary"
-                  disabled={editLoading}
-                  data-testid="user.profile.editCancel"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="profile-form-button profile-form-button-primary"
-                  disabled={editLoading}
-                  data-testid="user.profile.editSubmit"
-                  aria-busy={editLoading}
-                >
-                  {editLoading ? 'Guardando...' : 'Guardar'}
-                </button>
+                <Button text="Cancelar" type="normal" onClick={handleEditProfileCancel} disabled={editLoading} elementAttr={{ 'data-testid': 'user.profile.editCancel' }} />
+                <Button text={editLoading ? 'Guardando...' : 'Guardar'} type="default" useSubmitBehavior disabled={editLoading} elementAttr={{ 'data-testid': 'user.profile.editSubmit' }} />
               </div>
             </form>
           </section>
@@ -442,16 +394,7 @@ export function ProfileView(): React.ReactElement {
             <form onSubmit={handleChangePasswordSubmit} className="profile-change-password-form" noValidate>
               <label className="profile-form-label">
                 Contraseña actual
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="profile-form-input"
-                  data-testid="profile.currentPassword"
-                  autoComplete="current-password"
-                  aria-invalid={!!fieldErrors.current_password}
-                  aria-describedby={fieldErrors.current_password ? 'profile-current-password-error' : undefined}
-                />
+                <TextBox value={currentPassword} onValueChanged={(e) => setCurrentPassword(e.value ?? '')} mode="password" elementAttr={{ 'data-testid': 'profile.currentPassword' }} />
                 {fieldErrors.current_password && (
                   <span id="profile-current-password-error" className="profile-form-error" role="alert">
                     {fieldErrors.current_password}
@@ -460,17 +403,7 @@ export function ProfileView(): React.ReactElement {
               </label>
               <label className="profile-form-label">
                 Nueva contraseña
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="profile-form-input"
-                  data-testid="profile.newPassword"
-                  autoComplete="new-password"
-                  minLength={MIN_PASSWORD_LENGTH}
-                  aria-invalid={!!fieldErrors.password}
-                  aria-describedby={fieldErrors.password ? 'profile-password-error' : undefined}
-                />
+                <TextBox value={newPassword} onValueChanged={(e) => setNewPassword(e.value ?? '')} mode="password" elementAttr={{ 'data-testid': 'profile.newPassword' }} />
                 {fieldErrors.password && (
                   <span id="profile-password-error" className="profile-form-error" role="alert">
                     {fieldErrors.password}
@@ -479,17 +412,7 @@ export function ProfileView(): React.ReactElement {
               </label>
               <label className="profile-form-label">
                 Confirmar nueva contraseña
-                <input
-                  type="password"
-                  value={newPasswordConfirm}
-                  onChange={(e) => setNewPasswordConfirm(e.target.value)}
-                  className="profile-form-input"
-                  data-testid="profile.newPasswordConfirm"
-                  autoComplete="new-password"
-                  minLength={MIN_PASSWORD_LENGTH}
-                  aria-invalid={!!fieldErrors.password_confirmation}
-                  aria-describedby={fieldErrors.password_confirmation ? 'profile-password-confirm-error' : undefined}
-                />
+                <TextBox value={newPasswordConfirm} onValueChanged={(e) => setNewPasswordConfirm(e.value ?? '')} mode="password" elementAttr={{ 'data-testid': 'profile.newPasswordConfirm' }} />
                 {fieldErrors.password_confirmation && (
                   <span id="profile-password-confirm-error" className="profile-form-error" role="alert">
                     {fieldErrors.password_confirmation}
@@ -497,24 +420,8 @@ export function ProfileView(): React.ReactElement {
                 )}
               </label>
               <div className="profile-change-password-buttons">
-                <button
-                  type="button"
-                  onClick={handleChangePasswordCancel}
-                  className="profile-form-button profile-form-button-secondary"
-                  disabled={changePasswordLoading}
-                  data-testid="profile.changePasswordCancel"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="profile-form-button profile-form-button-primary"
-                  disabled={changePasswordLoading}
-                  data-testid="profile.changePasswordSubmit"
-                  aria-busy={changePasswordLoading}
-                >
-                  {changePasswordLoading ? 'Guardando...' : 'Guardar'}
-                </button>
+                <Button text="Cancelar" type="normal" onClick={handleChangePasswordCancel} disabled={changePasswordLoading} elementAttr={{ 'data-testid': 'profile.changePasswordCancel' }} />
+                <Button text={changePasswordLoading ? 'Guardando...' : 'Guardar'} type="default" useSubmitBehavior disabled={changePasswordLoading} elementAttr={{ 'data-testid': 'profile.changePasswordSubmit' }} />
               </div>
             </form>
           </section>

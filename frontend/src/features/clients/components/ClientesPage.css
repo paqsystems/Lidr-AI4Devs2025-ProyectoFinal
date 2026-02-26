@@ -84,6 +84,12 @@
   background-color: #b91c1c;
 }
 
+.clientes-actions-cell {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
 .clientes-page-filters {
   background: white;
   padding: 1rem;

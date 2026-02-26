@@ -30,6 +30,20 @@ use App\Http\Controllers\Api\V1\TipoTareaController;
 */
 Route::prefix('v1')->group(function () {
     
+    // DEBUG: ver qué conexión usa el backend (eliminar después)
+    Route::get('/debug-db-config', function () {
+        $conn = config('database.default');
+        $host = config("database.connections.{$conn}.host");
+        $database = config("database.connections.{$conn}.database");
+        $driver = config("database.connections.{$conn}.driver");
+        return response()->json([
+            'db_connection' => $conn,
+            'db_driver' => $driver,
+            'db_host' => $host,
+            'db_database' => $database,
+        ]);
+    });
+
     // Rutas públicas de autenticación
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login'])

@@ -2,12 +2,16 @@
  * Component: ConsultaDetalladaPage
  *
  * Pantalla de consulta detallada de tareas (TR-044).
- * Tabla con filtros por período; filtro por cliente para empleado y supervisor;
- * filtro por empleado solo para supervisor. Sin acciones editar/eliminar;
- * total de horas y paginación.
+ * Usa DataGrid, DateBox, SelectBox y Button de DevExtreme.
+ *
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import DataGrid, { Column, Sorting } from 'devextreme-react/data-grid';
+import DateBox from 'devextreme-react/date-box';
+import SelectBox from 'devextreme-react/select-box';
+import Button from 'devextreme-react/button';
 import { getUserData } from '../../../shared/utils/tokenStorage';
 import {
   getDetailReport,
@@ -126,12 +130,6 @@ export function ConsultaDetalladaPage(): React.ReactElement {
     setPage(newPage);
   };
 
-  const handleSort = (column: string) => {
-    const orden = appliedFilters.ordenarPor === column && appliedFilters.orden === 'desc' ? 'asc' : 'desc';
-    setAppliedFilters({ ...appliedFilters, ordenarPor: column, orden });
-    setPage(1);
-  };
-
   const hasData = data.length > 0;
   const handleExportExcel = () => {
     const filename = buildExportFileName(appliedFilters.fechaDesde, appliedFilters.fechaHasta);
@@ -150,22 +148,34 @@ export function ConsultaDetalladaPage(): React.ReactElement {
         <div className="consulta-detallada-filters-row">
           <label className="consulta-detallada-label">
             {t('tasks.list.filters.fechaDesde', 'Fecha desde')}
-            <input
+            <DateBox
               type="date"
-              value={filters.fechaDesde}
-              onChange={(e) => setFilters({ ...filters, fechaDesde: e.target.value })}
+              value={filters.fechaDesde ? new Date(filters.fechaDesde + 'T12:00:00') : null}
+              onValueChanged={(e) => {
+                const d = e.value ?? null;
+                setFilters({
+                  ...filters,
+                  fechaDesde: d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '',
+                });
+              }}
               disabled={loading}
-              aria-label={t('tasks.list.filters.fechaDesde', 'Fecha desde')}
+              elementAttr={{ 'aria-label': t('tasks.list.filters.fechaDesde', 'Fecha desde') }}
             />
           </label>
           <label className="consulta-detallada-label">
             {t('tasks.list.filters.fechaHasta', 'Fecha hasta')}
-            <input
+            <DateBox
               type="date"
-              value={filters.fechaHasta}
-              onChange={(e) => setFilters({ ...filters, fechaHasta: e.target.value })}
+              value={filters.fechaHasta ? new Date(filters.fechaHasta + 'T12:00:00') : null}
+              onValueChanged={(e) => {
+                const d = e.value ?? null;
+                setFilters({
+                  ...filters,
+                  fechaHasta: d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '',
+                });
+              }}
               disabled={loading}
-              aria-label={t('tasks.list.filters.fechaHasta', 'Fecha hasta')}
+              elementAttr={{ 'aria-label': t('tasks.list.filters.fechaHasta', 'Fecha hasta') }}
             />
           </label>
           {!isCliente && (
@@ -173,24 +183,18 @@ export function ConsultaDetalladaPage(): React.ReactElement {
               <span className="consulta-detallada-label-text">
                 {t('tasks.list.filters.cliente', 'Cliente')}
               </span>
-              <select
-                value={filters.clienteId ?? ''}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    clienteId: e.target.value === '' ? null : Number(e.target.value),
-                  })
-                }
+              <SelectBox
+                dataSource={[{ id: -1, nombre: t('tasks.list.filters.todos', 'Todos') }, ...clients]}
+                value={filters.clienteId ?? -1}
+                onValueChanged={(e) => {
+                  const v = e.value ?? -1;
+                  setFilters({ ...filters, clienteId: v === -1 ? null : (v as number) });
+                }}
+                displayExpr="nombre"
+                valueExpr="id"
                 disabled={loading}
-                aria-label={t('tasks.list.filters.cliente', 'Cliente')}
-              >
-                <option value="">{t('tasks.list.filters.todos', 'Todos')}</option>
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </select>
+                elementAttr={{ 'aria-label': t('tasks.list.filters.cliente', 'Cliente') }}
+              />
             </div>
           )}
           {isSupervisor && (
@@ -198,35 +202,68 @@ export function ConsultaDetalladaPage(): React.ReactElement {
               <span className="consulta-detallada-label-text">
                 {t('tasks.list.filters.empleado', 'Empleado')}
               </span>
-              <select
-                value={filters.usuarioId ?? ''}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    usuarioId: e.target.value === '' ? null : Number(e.target.value),
-                  })
-                }
+              <SelectBox
+                dataSource={[{ id: -1, nombre: t('tasks.list.filters.todos', 'Todos') }, ...employees]}
+                value={filters.usuarioId ?? -1}
+                onValueChanged={(e) => {
+                  const v = e.value ?? -1;
+                  setFilters({ ...filters, usuarioId: v === -1 ? null : (v as number) });
+                }}
+                displayExpr="nombre"
+                valueExpr="id"
                 disabled={loading}
-                aria-label={t('tasks.list.filters.empleado', 'Empleado')}
-              >
-                <option value="">{t('tasks.list.filters.todos', 'Todos')}</option>
-                {employees.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.nombre}
-                  </option>
-                ))}
-              </select>
+                elementAttr={{ 'aria-label': t('tasks.list.filters.empleado', 'Empleado') }}
+              />
             </div>
           )}
-          <button
-            type="button"
+          <div className="consulta-detallada-label">
+            <span className="consulta-detallada-label-text">{t('report.detail.sortBy', 'Ordenar por')}</span>
+            <SelectBox
+              dataSource={[
+                ...(isSupervisor && !isCliente ? [{ value: 'empleado', text: t('tasks.list.col.empleado', 'Empleado') }] : []),
+                { value: 'cliente', text: t('tasks.list.col.cliente', 'Cliente') },
+                { value: 'fecha', text: t('tasks.list.col.fecha', 'Fecha') },
+                { value: 'tipo_tarea', text: t('tasks.list.col.tipoTarea', 'Tipo tarea') },
+                { value: 'horas', text: t('report.detail.col.horas', 'Horas') },
+              ]}
+              value={appliedFilters.ordenarPor}
+              onValueChanged={(e) => {
+                const v = e.value ?? 'fecha';
+                setAppliedFilters({ ...appliedFilters, ordenarPor: v });
+                setPage(1);
+              }}
+              displayExpr="text"
+              valueExpr="value"
+              disabled={loading}
+              elementAttr={{ 'aria-label': t('report.detail.sortBy', 'Ordenar por') }}
+            />
+          </div>
+          <div className="consulta-detallada-label">
+            <span className="consulta-detallada-label-text">{t('report.detail.sortOrder', 'Orden')}</span>
+            <SelectBox
+              dataSource={[
+                { value: 'desc', text: t('report.detail.desc', 'Descendente') },
+                { value: 'asc', text: t('report.detail.asc', 'Ascendente') },
+              ]}
+              value={appliedFilters.orden}
+              onValueChanged={(e) => {
+                const v = (e.value ?? 'desc') as 'asc' | 'desc';
+                setAppliedFilters({ ...appliedFilters, orden: v });
+                setPage(1);
+              }}
+              displayExpr="text"
+              valueExpr="value"
+              disabled={loading}
+              elementAttr={{ 'aria-label': t('report.detail.sortOrder', 'Orden') }}
+            />
+          </div>
+          <Button
+            text={t('report.detail.applyFilters', 'Aplicar Filtros')}
+            type="default"
             onClick={handleApplyFilters}
             disabled={loading}
-            className="consulta-detallada-btn-apply"
-            data-testid="report.detail.applyFilters"
-          >
-            {t('report.detail.applyFilters', 'Aplicar Filtros')}
-          </button>
+            elementAttr={{ 'data-testid': 'report.detail.applyFilters' }}
+          />
         </div>
       </div>
 
@@ -253,16 +290,13 @@ export function ConsultaDetalladaPage(): React.ReactElement {
                   {t('report.export.noData', 'No hay datos para exportar')}
                 </span>
               )}
-              <button
-                type="button"
+              <Button
+                text={t('report.export.button', 'Exportar a Excel')}
+                type="default"
                 onClick={handleExportExcel}
                 disabled={!hasData || loading}
-                className="consulta-detallada-btn-export"
-                data-testid="exportarExcel.boton"
-                aria-label={t('report.export.aria', 'Exportar a Excel')}
-              >
-                {t('report.export.button', 'Exportar a Excel')}
-              </button>
+                elementAttr={{ 'data-testid': 'exportarExcel.boton', 'aria-label': t('report.export.aria', 'Exportar a Excel') }}
+              />
             </div>
           </div>
 
@@ -280,85 +314,53 @@ export function ConsultaDetalladaPage(): React.ReactElement {
             </div>
           ) : (
             <div className="consulta-detallada-table-wrapper">
-              <table
-                className="consulta-detallada-table"
-                data-testid="report.detail.table"
-                role="table"
+              <DataGrid
+                dataSource={data}
+                keyExpr="id"
+                showBorders={true}
+                rowAlternationEnabled={true}
+                elementAttr={{ 'data-testid': 'report.detail.table', 'aria-label': 'Consulta detallada' }}
+                noDataText=""
               >
-                <thead>
-                  <tr>
-                    {isSupervisor && !isCliente && (
-                      <th scope="col">
-                        <button
-                          type="button"
-                          className="consulta-detallada-th-sort"
-                          onClick={() => handleSort('empleado')}
-                        >
-                          {t('tasks.list.col.empleado', 'Empleado')}
-                        </button>
-                      </th>
-                    )}
-                    <th scope="col">
-                      <button
-                        type="button"
-                        className="consulta-detallada-th-sort"
-                        onClick={() => handleSort('cliente')}
-                      >
-                        {t('tasks.list.col.cliente', 'Cliente')}
-                      </button>
-                    </th>
-                    <th scope="col">
-                      <button
-                        type="button"
-                        className="consulta-detallada-th-sort"
-                        onClick={() => handleSort('fecha')}
-                      >
-                        {t('tasks.list.col.fecha', 'Fecha')}
-                      </button>
-                    </th>
-                    <th scope="col">
-                      <button
-                        type="button"
-                        className="consulta-detallada-th-sort"
-                        onClick={() => handleSort('tipo_tarea')}
-                      >
-                        {t('tasks.list.col.tipoTarea', 'Tipo tarea')}
-                      </button>
-                    </th>
-                    <th scope="col">
-                      <button
-                        type="button"
-                        className="consulta-detallada-th-sort"
-                        onClick={() => handleSort('horas')}
-                      >
-                        {t('report.detail.col.horas', 'Horas')}
-                      </button>
-                    </th>
-                    <th scope="col">{t('tasks.list.col.sinCargo', 'Sin cargo')}</th>
-                    <th scope="col">{t('tasks.list.col.presencial', 'Presencial')}</th>
-                    <th scope="col">{t('report.detail.col.descripcion', 'Descripción')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((row) => (
-                    <tr key={row.id} data-testid={`report.detail.row.${row.id}`}>
-                      {isSupervisor && !isCliente && (
-                        <td>{row.empleado ? row.empleado.nombre : '—'}</td>
-                      )}
-                      <td>
-                        {row.cliente.nombre}
-                        {row.cliente.tipo_cliente ? ` (${row.cliente.tipo_cliente})` : ''}
-                      </td>
-                      <td>{row.fecha}</td>
-                      <td>{row.tipo_tarea.descripcion}</td>
-                      <td>{row.horas.toFixed(2)}</td>
-                      <td>{row.sin_cargo ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No')}</td>
-                      <td>{row.presencial ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No')}</td>
-                      <td>{row.descripcion}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                <Sorting mode="none" />
+                {isSupervisor && !isCliente && (
+                  <Column
+                    dataField="empleado.nombre"
+                    caption={t('tasks.list.col.empleado', 'Empleado')}
+                    width={150}
+                    customizeText={({ value }) => value ?? '—'}
+                  />
+                )}
+                <Column
+                  dataField="cliente"
+                  caption={t('tasks.list.col.cliente', 'Cliente')}
+                  width={180}
+                  calculateCellValue={(rowData) =>
+                    `${rowData.cliente.nombre}${rowData.cliente.tipo_cliente ? ` (${rowData.cliente.tipo_cliente})` : ''}`
+                  }
+                />
+                <Column dataField="fecha" caption={t('tasks.list.col.fecha', 'Fecha')} width={100} />
+                <Column dataField="tipo_tarea.descripcion" caption={t('tasks.list.col.tipoTarea', 'Tipo tarea')} width={140} />
+                <Column
+                  dataField="horas"
+                  caption={t('report.detail.col.horas', 'Horas')}
+                  width={80}
+                  customizeText={({ value }) => (value != null ? Number(value).toFixed(2) : '')}
+                />
+                <Column
+                  dataField="sin_cargo"
+                  caption={t('tasks.list.col.sinCargo', 'Sin cargo')}
+                  width={90}
+                  customizeText={({ value }) => (value ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No'))}
+                />
+                <Column
+                  dataField="presencial"
+                  caption={t('tasks.list.col.presencial', 'Presencial')}
+                  width={90}
+                  customizeText={({ value }) => (value ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No'))}
+                />
+                <Column dataField="descripcion" caption={t('report.detail.col.descripcion', 'Descripción')} minWidth={150} />
+              </DataGrid>
             </div>
           )}
 

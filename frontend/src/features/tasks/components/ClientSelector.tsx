@@ -1,12 +1,15 @@
 /**
  * Component: ClientSelector
- * 
+ *
  * Selector de clientes con carga dinámica desde el API.
- * 
+ * Usa SelectBox de DevExtreme.
+ *
  * @see TR-028(MH)-carga-de-tarea-diaria.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import SelectBox from 'devextreme-react/select-box';
 import { getClients, Client } from '../services/task.service';
 import { t } from '../../../shared/i18n';
 import './TaskForm.css';
@@ -16,9 +19,7 @@ export interface ClientSelectorProps {
   onChange: (clientId: number | null) => void;
   error?: string;
   disabled?: boolean;
-  /** Si true, no muestra el label (para usar dentro de filtros con label externo). */
   showLabel?: boolean;
-  /** Si true, añade opción "Todos" como primera opción. */
   allowAll?: boolean;
 }
 
@@ -34,43 +35,48 @@ export function ClientSelector({ value, onChange, error, disabled, showLabel = t
   const loadClients = async () => {
     setLoading(true);
     setErrorMessage('');
-    
     const result = await getClients();
-    
     if (result.success && result.data) {
       setClients(result.data);
     } else {
       setErrorMessage(result.errorMessage || t('tasks.form.selectors.clients.error', 'Error al cargar clientes'));
     }
-    
     setLoading(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const clientId = e.target.value ? parseInt(e.target.value, 10) : null;
-    onChange(clientId);
+  const ALL_ID = -1;
+  const items = useMemo(() => {
+    const list = clients.map((c) => ({ id: c.id, text: `${c.nombre} (${c.code})` }));
+    if (allowAll) {
+      return [{ id: ALL_ID, text: t('tasks.list.filters.todos', 'Todos') }, ...list];
+    }
+    return list;
+  }, [clients, allowAll]);
+
+  const placeholder = allowAll ? t('tasks.list.filters.todos', 'Todos') : t('tasks.form.selectors.clients.placeholder', '-- Seleccione un cliente --');
+  const effectiveValue = allowAll && value === null ? ALL_ID : value;
+
+  const handleValueChanged = (e: { value?: number | null }) => {
+    const v = e.value ?? null;
+    onChange(allowAll && v === ALL_ID ? null : v);
   };
 
   const selectEl = (
-    <select
-      id="cliente-select"
-      data-testid="task.form.clientSelect"
-      value={value ?? ''}
-      onChange={handleChange}
+    <SelectBox
+      dataSource={items}
+      value={effectiveValue ?? null}
+      placeholder={placeholder}
+      onValueChanged={handleValueChanged}
+      displayExpr="text"
+      valueExpr="id"
       disabled={disabled || loading}
-      className={`form-input form-select ${error ? 'input-error' : ''}`}
-      aria-label={t('tasks.form.fields.cliente.ariaLabel', 'Seleccionar cliente')}
-      aria-invalid={!!error}
-      aria-describedby={error ? 'cliente-error' : undefined}
-      aria-required={!allowAll}
-    >
-      <option value="">{allowAll ? t('tasks.list.filters.todos', 'Todos') : t('tasks.form.selectors.clients.placeholder', '-- Seleccione un cliente --')}</option>
-      {clients.map((client) => (
-          <option key={client.id} value={client.id}>
-            {client.nombre} ({client.code})
-          </option>
-        ))}
-    </select>
+      elementAttr={{ 'data-testid': 'task.form.clientSelect' }}
+      inputAttr={{
+        'aria-label': t('tasks.form.fields.cliente.ariaLabel', 'Seleccionar cliente'),
+        'aria-invalid': !!error,
+        'aria-required': !allowAll,
+      }}
+    />
   );
 
   if (!showLabel) {

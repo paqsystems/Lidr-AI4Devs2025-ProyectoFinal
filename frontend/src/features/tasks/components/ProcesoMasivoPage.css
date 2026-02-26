@@ -171,41 +171,45 @@
   cursor: not-allowed;
 }
 
-.proceso-masivo-table-wrapper {
-  overflow-x: auto;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+/* Contenedor del DataGrid DevExtreme - estilos para resaltar el componente */
+.proceso-masivo-grid-wrapper {
   margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e7ff;
+  background: white;
 }
 
-.proceso-masivo-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
+/* Resaltar encabezados del DataGrid DevExtreme */
+.proceso-masivo-grid-wrapper .dx-datagrid-headers {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
-.proceso-masivo-table th,
-.proceso-masivo-table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.proceso-masivo-table th {
-  background: #f9fafb;
+.proceso-masivo-grid-wrapper .dx-datagrid-headers .dx-header-row td {
+  color: white;
   font-weight: 600;
-  color: #374151;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.proceso-masivo-th-checkbox,
-.proceso-masivo-td-checkbox {
-  width: 3rem;
-  text-align: center;
+/* Filas alternadas más visibles */
+.proceso-masivo-grid-wrapper .dx-datagrid-rowsview .dx-row-alt {
+  background-color: #f8fafc;
 }
 
-.proceso-masivo-row-closed {
-  background: #f9fafb;
+/* Hover en filas */
+.proceso-masivo-grid-wrapper .dx-datagrid-rowsview .dx-row:hover {
+  background-color: #eef2ff;
+}
+
+/* Bordes y espaciado del grid */
+.proceso-masivo-grid-wrapper .dx-datagrid {
+  border: none;
+}
+
+.proceso-masivo-grid-wrapper .dx-datagrid-rowsview .dx-row > td {
+  padding: 0.75rem 1rem;
 }
 
 .proceso-masivo-empty {

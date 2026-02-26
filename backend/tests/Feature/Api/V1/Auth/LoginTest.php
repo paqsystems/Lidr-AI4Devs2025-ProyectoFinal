@@ -62,8 +62,8 @@ class LoginTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         $jperezId = DB::table('USERS')->where('code', 'JPEREZ')->value('id');
@@ -76,8 +76,8 @@ class LoginTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         // Usuario activo supervisor
@@ -86,8 +86,8 @@ class LoginTest extends TestCase
             'password_hash' => Hash::make('password456'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         $mgarciaId = DB::table('USERS')->where('code', 'MGARCIA')->value('id');
@@ -100,8 +100,8 @@ class LoginTest extends TestCase
             'supervisor' => true,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         // Usuario inactivo en USERS
@@ -110,8 +110,8 @@ class LoginTest extends TestCase
             'password_hash' => Hash::make('password789'),
             'activo' => false,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         $inactivoId = DB::table('USERS')->where('code', 'INACTIVO')->value('id');
@@ -124,8 +124,8 @@ class LoginTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         // ========================================
@@ -138,8 +138,8 @@ class LoginTest extends TestCase
             'password_hash' => Hash::make('cliente123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         $cli001Id = DB::table('USERS')->where('code', 'CLI001')->value('id');
@@ -150,8 +150,8 @@ class LoginTest extends TestCase
             'password_hash' => Hash::make('cliente456'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         $cliInactivoId = DB::table('USERS')->where('code', 'CLIINACTIVO')->value('id');
@@ -172,8 +172,8 @@ class LoginTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
         }
 
@@ -186,8 +186,8 @@ class LoginTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => false,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
         }
     }

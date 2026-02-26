@@ -1,12 +1,14 @@
 /**
  * Component: TaskPagination
  *
- * Paginación para la lista de tareas (anterior / siguiente y página actual).
+ * Paginación para la lista de tareas. Usa Button de DevExtreme.
  *
  * @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React from 'react';
+import Button from 'devextreme-react/button';
 import { t } from '../../../shared/i18n';
 import './TaskList.css';
 
@@ -56,29 +58,23 @@ export function TaskPagination({
         {t('tasks.list.pagination.showing', 'Mostrando')} {from}-{to} {t('tasks.list.pagination.of', 'de')} {total}
       </span>
       <div className="task-list-pagination-buttons">
-        <button
-          type="button"
-          className="task-list-pagination-btn"
+        <Button
+          text={t('tasks.list.pagination.prev', 'Anterior')}
+          type="normal"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={disabled || currentPage <= 1}
-          data-testid="task.list.pagination.prev"
-          aria-label={t('tasks.list.pagination.prev', 'Página anterior')}
-        >
-          {t('tasks.list.pagination.prev', 'Anterior')}
-        </button>
+          elementAttr={{ 'data-testid': 'task.list.pagination.prev', 'aria-label': t('tasks.list.pagination.prev', 'Página anterior') }}
+        />
         <span className="task-list-pagination-current" data-testid="task.list.pagination.current">
           {t('tasks.list.pagination.page', 'Página')} {currentPage} / {lastPage}
         </span>
-        <button
-          type="button"
-          className="task-list-pagination-btn"
+        <Button
+          text={t('tasks.list.pagination.next', 'Siguiente')}
+          type="normal"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={disabled || currentPage >= lastPage}
-          data-testid="task.list.pagination.next"
-          aria-label={t('tasks.list.pagination.next', 'Página siguiente')}
-        >
-          {t('tasks.list.pagination.next', 'Siguiente')}
-        </button>
+          elementAttr={{ 'data-testid': 'task.list.pagination.next', 'aria-label': t('tasks.list.pagination.next', 'Página siguiente') }}
+        />
       </div>
     </nav>
   );

@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import 'devextreme/dist/css/dx.light.css';
 import { LoginForm, ForgotPasswordPage, ResetPasswordPage } from '../features/auth';
 import { ProfileView } from '../features/user';
 import { TaskForm, TaskList, TaskListAll, TaskEditPage, ProcesoMasivoPage, ConsultaDetalladaPage, TareasPorClientePage, TareasPorEmpleadoPage, TareasPorTipoPage, TareasPorFechaPage } from '../features/tasks';

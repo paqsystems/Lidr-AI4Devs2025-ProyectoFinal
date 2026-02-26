@@ -12,6 +12,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DateBox from 'devextreme-react/date-box';
+import Button from 'devextreme-react/button';
 import { getUserData } from '../shared/utils/tokenStorage';
 import {
   getDashboard,
@@ -154,6 +156,7 @@ export function Dashboard(): React.ReactElement {
   const isSupervisor = user.esSupervisor === true;
 
   return (
+    <div data-testid="app.dashboard">
     <div className="dashboard-container" data-testid="dashboard.container">
       <div className="dashboard-main">
         <div className="welcome-card">
@@ -171,43 +174,41 @@ export function Dashboard(): React.ReactElement {
           <div className="dashboard-period-controls">
             <label>
               <span>Desde</span>
-              <input
+              <DateBox
                 type="date"
-                value={period.fechaDesde}
-                onChange={(e) => handlePeriodChange(e.target.value, period.fechaHasta)}
-                data-testid="dashboard.periodDesde"
-                aria-label="Fecha desde"
+                value={period.fechaDesde ? new Date(period.fechaDesde + 'T12:00:00') : null}
+                onValueChanged={(e) => {
+                  const d = e.value ?? null;
+                  handlePeriodChange(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '', period.fechaHasta);
+                }}
+                elementAttr={{ 'data-testid': 'dashboard.periodDesde', 'aria-label': 'Fecha desde' }}
               />
             </label>
             <label>
               <span>Hasta</span>
-              <input
+              <DateBox
                 type="date"
-                value={period.fechaHasta}
-                onChange={(e) => handlePeriodChange(period.fechaDesde, e.target.value)}
-                data-testid="dashboard.periodHasta"
-                aria-label="Fecha hasta"
+                value={period.fechaHasta ? new Date(period.fechaHasta + 'T12:00:00') : null}
+                onValueChanged={(e) => {
+                  const d = e.value ?? null;
+                  handlePeriodChange(period.fechaDesde, d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '');
+                }}
+                elementAttr={{ 'data-testid': 'dashboard.periodHasta', 'aria-label': 'Fecha hasta' }}
               />
             </label>
-            <button
-              type="button"
+            <Button
+              text="Mes actual"
+              type="normal"
               onClick={applyCurrentMonth}
-              className="dashboard-btn-secondary"
-              data-testid="dashboard.periodCurrentMonth"
-              aria-label="Usar mes actual"
-            >
-              Mes actual
-            </button>
-            <button
-              type="button"
+              elementAttr={{ 'data-testid': 'dashboard.periodCurrentMonth', 'aria-label': 'Usar mes actual' }}
+            />
+            <Button
+              text="Actualizar"
+              type="normal"
               onClick={() => loadDashboard({ fecha_desde: period.fechaDesde, fecha_hasta: period.fechaHasta })}
-              className="dashboard-btn-secondary"
-              data-testid="dashboard.botonActualizar"
-              aria-label="Actualizar datos del dashboard"
               disabled={loading}
-            >
-              Actualizar
-            </button>
+              elementAttr={{ 'data-testid': 'dashboard.botonActualizar', 'aria-label': 'Actualizar datos del dashboard' }}
+            />
           </div>
           {lastUpdatedAt != null && (
             <p className="dashboard-ultima-actualizacion" data-testid="dashboard.ultimaActualizacion" role="status">
@@ -410,6 +411,7 @@ export function Dashboard(): React.ReactElement {
           </>
         )}
       </div>
+    </div>
     </div>
   );
 }

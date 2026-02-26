@@ -1,12 +1,15 @@
 /**
  * Página: Solicitar recuperación de contraseña (forgot).
- * Formulario con código o email; mensaje genérico de éxito.
+ * Usa controles DevExtreme (TextBox, Button).
  *
  * @see TR-004(SH)-recuperación-de-contraseña.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import TextBox from 'devextreme-react/text-box';
+import Button from 'devextreme-react/button';
 import { forgotPassword } from '../services/auth.service';
 import './ForgotPasswordPage.css';
 
@@ -61,17 +64,16 @@ export function ForgotPasswordPage(): React.ReactElement {
               <label htmlFor="codeOrEmail" className="form-label">
                 Código de usuario o email
               </label>
-              <input
-                type="text"
-                id="codeOrEmail"
+              <TextBox
                 value={codeOrEmail}
-                onChange={(e) => setCodeOrEmail(e.target.value)}
+                onValueChanged={(e) => setCodeOrEmail(e.value ?? '')}
                 disabled={loading}
-                data-testid="forgotPassword.codeOrEmail"
-                className={`form-input ${fieldError ? 'input-error' : ''}`}
-                aria-invalid={!!fieldError}
-                autoComplete="username"
-                autoFocus
+                inputAttr={{
+                  'data-testid': 'forgotPassword.codeOrEmail',
+                  id: 'codeOrEmail',
+                  'aria-invalid': !!fieldError,
+                  autoComplete: 'username',
+                }}
               />
               {fieldError && (
                 <span className="field-error" role="alert">
@@ -79,15 +81,13 @@ export function ForgotPasswordPage(): React.ReactElement {
                 </span>
               )}
             </div>
-            <button
-              type="submit"
+            <Button
+              text={loading ? 'Enviando...' : 'Enviar'}
+              type="default"
+              useSubmitBehavior
               disabled={loading}
-              data-testid="forgotPassword.submit"
-              className="forgot-password-submit"
-              aria-busy={loading}
-            >
-              {loading ? 'Enviando...' : 'Enviar'}
-            </button>
+              elementAttr={{ 'data-testid': 'forgotPassword.submit', 'aria-busy': loading }}
+            />
             <Link to="/login" className="forgot-password-cancel" data-testid="forgotPassword.cancel">
               Volver al inicio de sesión
             </Link>

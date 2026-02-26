@@ -18,6 +18,8 @@
     "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
+    "devextreme": "25.2.4",
+    "devextreme-react": "25.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",

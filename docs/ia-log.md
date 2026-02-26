@@ -2114,3 +2114,34 @@ Refuerzo de documentación de reglas para que sean ineludibles en futuras progra
 ### Referencias
 - `lidr - frontend.txt` - Listado exacto de errores en deploy
 - `.cursor/rules/22-frontend-build-typescript.md` - Regla ampliada con tabla de errores
+
+---
+
+## Entrada TR-057(SH) – Migración de controles a DevExpress (parcial)
+
+### Fecha
+2026-02-22
+
+### Etapa del proyecto
+Frontend – Migración de UI a DevExtreme
+
+### Herramientas de IA utilizadas
+- Cursor (agente IA)
+
+### Prompt o instrucción utilizada
+```
+Ejecutá la TR TR-057(SH)-migración-de-controles-a-devextreme.md
+```
+
+### Resultado generado por IA
+- **T2 completado:** LoginForm, ForgotPasswordPage, ResetPasswordPage migrados a TextBox y Button de DevExtreme. data-testid preservados.
+- **T3 completado:** TaskForm migrado a DateBox, TextBox, TextArea, CheckBox, Button. ClientSelector, TaskTypeSelector, EmployeeSelector migrados a SelectBox.
+- Build frontend OK.
+- Tests E2E auth: algunos pasan (formulario visible, validaciones); otros requieren backend en ejecución (login exitoso, forgot-password).
+
+### Ajustes humanos realizados
+- Ninguno hasta el momento.
+
+### Referencias
+- `docs/hu-tareas/TR-057(SH)-migración-de-controles-a-devextreme.md`
+- `docs/hu-historias/HU-057(SH)-migración-de-controles-a-devextreme.md`

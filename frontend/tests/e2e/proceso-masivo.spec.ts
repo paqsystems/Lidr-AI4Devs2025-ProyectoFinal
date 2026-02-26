@@ -165,12 +165,15 @@ test.describe('Proceso Masivo de Tareas — TR-039 a TR-043', () => {
       test.skip();
       return;
     }
-    const firstCheckbox = page.locator('[data-testid^="procesoMasivo.checkboxTarea."]').first();
+    /* DataGrid DevExtreme: checkboxes de selección en la columna de comandos */
+    const firstCheckbox = page
+      .locator('[data-testid="procesoMasivo.dataGrid"] .dx-command-select .dx-checkbox, [data-testid="procesoMasivo.dataGrid"] .dx-select-checkbox')
+      .first();
     if (!(await firstCheckbox.isVisible())) {
       test.skip();
       return;
     }
-    await firstCheckbox.check();
+    await firstCheckbox.click();
     await expect(page.locator('[data-testid="procesoMasivo.procesar"]')).toBeEnabled();
     await page.click('[data-testid="procesoMasivo.procesar"]');
     await expect(page.locator('[data-testid="procesoMasivo.confirmModal-overlay"]')).toBeVisible({ timeout: 5000 });

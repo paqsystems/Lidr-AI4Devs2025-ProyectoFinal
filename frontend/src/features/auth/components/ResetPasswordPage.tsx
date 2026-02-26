@@ -1,12 +1,15 @@
 /**
  * Página: Restablecer contraseña con token (reset).
- * Token por query; formulario con nueva contraseña y confirmación.
+ * Usa controles DevExtreme (TextBox, Button).
  *
  * @see TR-004(SH)-recuperación-de-contraseña.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useState, FormEvent, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import TextBox from 'devextreme-react/text-box';
+import Button from 'devextreme-react/button';
 import { resetPassword } from '../services/auth.service';
 import './ResetPasswordPage.css';
 
@@ -98,16 +101,17 @@ export function ResetPasswordPage(): React.ReactElement {
           )}
           <div className="form-group">
             <label htmlFor="password" className="form-label">Nueva contraseña</label>
-            <input
-              type="password"
-              id="password"
+            <TextBox
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onValueChanged={(e) => setPassword(e.value ?? '')}
+              mode="password"
               disabled={loading}
-              data-testid="resetPassword.password"
-              className={`form-input ${fieldErrors.password ? 'input-error' : ''}`}
-              autoComplete="new-password"
-              minLength={MIN_PASSWORD_LENGTH}
+              inputAttr={{
+                'data-testid': 'resetPassword.password',
+                id: 'password',
+                autoComplete: 'new-password',
+                minLength: String(MIN_PASSWORD_LENGTH),
+              }}
             />
             {fieldErrors.password && (
               <span className="field-error" role="alert">{fieldErrors.password}</span>
@@ -115,30 +119,29 @@ export function ResetPasswordPage(): React.ReactElement {
           </div>
           <div className="form-group">
             <label htmlFor="passwordConfirm" className="form-label">Confirmar contraseña</label>
-            <input
-              type="password"
-              id="passwordConfirm"
+            <TextBox
               value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
+              onValueChanged={(e) => setPasswordConfirm(e.value ?? '')}
+              mode="password"
               disabled={loading}
-              data-testid="resetPassword.passwordConfirm"
-              className={`form-input ${fieldErrors.passwordConfirm ? 'input-error' : ''}`}
-              autoComplete="new-password"
-              minLength={MIN_PASSWORD_LENGTH}
+              inputAttr={{
+                'data-testid': 'resetPassword.passwordConfirm',
+                id: 'passwordConfirm',
+                autoComplete: 'new-password',
+                minLength: String(MIN_PASSWORD_LENGTH),
+              }}
             />
             {fieldErrors.passwordConfirm && (
               <span className="field-error" role="alert">{fieldErrors.passwordConfirm}</span>
             )}
           </div>
-          <button
-            type="submit"
+          <Button
+            text={loading ? 'Guardando...' : 'Guardar'}
+            type="default"
+            useSubmitBehavior
             disabled={loading}
-            data-testid="resetPassword.submit"
-            className="reset-password-submit"
-            aria-busy={loading}
-          >
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+            elementAttr={{ 'data-testid': 'resetPassword.submit', 'aria-busy': loading }}
+          />
           <Link to="/login" className="reset-password-cancel">Cancelar</Link>
         </form>
       </div>

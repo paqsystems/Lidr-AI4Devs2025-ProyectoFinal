@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import Button from 'devextreme-react/button';
 import { getUserData } from '../shared/utils/tokenStorage';
 import { logout } from '../features/auth/services/auth.service';
 import { t } from '../shared/i18n';
@@ -46,26 +47,21 @@ export function AppLayout(): React.ReactElement {
     <div className="app-layout" data-testid="app.layout">
       <header className="app-layout-header" role="banner">
         <div className="app-layout-header-left">
-          <button
-            type="button"
+          <Button
+            icon="menu"
+            type="normal"
             className="app-layout-menu-toggle"
             onClick={() => setIsSidebarOpen((v) => !v)}
-            data-testid="app.sidebarToggle"
-            aria-label={t('app.layout.menuAria', 'Abrir o cerrar menú lateral')}
-            aria-expanded={isSidebarOpen}
-          >
-            <span className="app-layout-menu-icon" aria-hidden>☰</span>
-          </button>
+            elementAttr={{ 'data-testid': 'app.sidebarToggle', 'aria-label': t('app.layout.menuAria', 'Abrir o cerrar menú lateral'), 'aria-expanded': String(isSidebarOpen) }}
+          />
           <h1 className="app-layout-title">{t('app.layout.title', 'Sistema de Registro de Tareas')}</h1>
-          <button
-            type="button"
-            onClick={handleVolver}
+          <Button
+            text={isPanel ? t('app.layout.panel', 'Panel') : t('app.layout.volver', 'Volver')}
+            type="normal"
             className="app-layout-volver"
-            data-testid="app.volverButton"
-            aria-label={t('app.layout.volverAria', 'Volver al panel del usuario')}
-          >
-            {isPanel ? t('app.layout.panel', 'Panel') : t('app.layout.volver', 'Volver')}
-          </button>
+            onClick={handleVolver}
+            elementAttr={{ 'data-testid': 'app.volverButton', 'aria-label': t('app.layout.volverAria', 'Volver al panel del usuario') }}
+          />
         </div>
         <div className="app-layout-user-info">
           <span className="app-layout-user-name">{user.nombre}</span>
@@ -74,16 +70,14 @@ export function AppLayout(): React.ReactElement {
               {t('app.layout.supervisor', 'Supervisor')}
             </span>
           )}
-          <button
-            type="button"
-            onClick={handleLogout}
+          <Button
+            text={isLoggingOut ? t('app.layout.loggingOut', 'Cerrando...') : t('app.layout.logout', 'Cerrar Sesión')}
+            type="normal"
             className="app-layout-logout"
-            data-testid="app.logoutButton"
+            onClick={handleLogout}
             disabled={isLoggingOut}
-            aria-label={t('app.layout.logoutAria', 'Cerrar sesión')}
-          >
-            {isLoggingOut ? t('app.layout.loggingOut', 'Cerrando...') : t('app.layout.logout', 'Cerrar Sesión')}
-          </button>
+            elementAttr={{ 'data-testid': 'app.logoutButton', 'aria-label': t('app.layout.logoutAria', 'Cerrar sesión') }}
+          />
         </div>
       </header>
       <div className="app-layout-body">

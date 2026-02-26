@@ -79,8 +79,8 @@ class TaskServiceTest extends TestCase
             'password_hash' => Hash::make('password123'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
         $jperezUserId = DB::table('USERS')->where('code', 'JPEREZ')->value('id');
         
@@ -92,8 +92,8 @@ class TaskServiceTest extends TestCase
             'supervisor' => false,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         DB::table('USERS')->insert([
@@ -101,8 +101,8 @@ class TaskServiceTest extends TestCase
             'password_hash' => Hash::make('password456'),
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
         $mgarciaUserId = DB::table('USERS')->where('code', 'MGARCIA')->value('id');
         
@@ -114,8 +114,8 @@ class TaskServiceTest extends TestCase
             'supervisor' => true,
             'activo' => true,
             'inhabilitado' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => DB::raw('GETDATE()'),
+            'updated_at' => DB::raw('GETDATE()'),
         ]);
 
         // Crear clientes
@@ -125,8 +125,8 @@ class TaskServiceTest extends TestCase
                 'password_hash' => Hash::make('cliente123'),
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
             $cli001UserId = DB::table('USERS')->where('code', 'CLI001')->value('id');
             
@@ -138,8 +138,8 @@ class TaskServiceTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
 
             DB::table('USERS')->insert([
@@ -147,8 +147,8 @@ class TaskServiceTest extends TestCase
                 'password_hash' => Hash::make('cliente002'),
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
             $cli002UserId = DB::table('USERS')->where('code', 'CLI002')->value('id');
             
@@ -160,8 +160,8 @@ class TaskServiceTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
 
             DB::table('USERS')->insert([
@@ -169,8 +169,8 @@ class TaskServiceTest extends TestCase
                 'password_hash' => Hash::make('cliente456'),
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
             $cliInactivoUserId = DB::table('USERS')->where('code', 'CLIINACTIVO')->value('id');
             
@@ -182,8 +182,8 @@ class TaskServiceTest extends TestCase
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => false,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
         }
 
@@ -197,8 +197,8 @@ class TaskServiceTest extends TestCase
                 'is_default' => false,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
         } else {
             // Asegurar que sea genérico
@@ -216,8 +216,8 @@ class TaskServiceTest extends TestCase
                 'is_default' => false,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
         }
 
@@ -235,8 +235,8 @@ class TaskServiceTest extends TestCase
                 DB::table('PQ_PARTES_CLIENTE_TIPO_TAREA')->insert([
                     'cliente_id' => $cli001Id,
                     'tipo_tarea_id' => $especialId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'created_at' => DB::raw('GETDATE()'),
+                    'updated_at' => DB::raw('GETDATE()'),
                 ]);
             }
         }

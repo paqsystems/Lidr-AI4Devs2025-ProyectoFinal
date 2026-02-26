@@ -15,24 +15,24 @@
 
 import { test, expect } from '@playwright/test';
 
-// Datos de prueba (deben coincidir con el seeder TestUsersSeeder)
+// Datos de prueba (ADMIN y CLI001 según seed actual)
 const TEST_USER = {
-  code: 'JPEREZ',
-  password: 'password123',
-  name: 'Juan Pérez',
+  code: 'ADMIN',
+  password: 'admin123',
+  name: 'Administrador del Sistema',
 };
 
 const SUPERVISOR_USER = {
-  code: 'MGARCIA',
-  password: 'password456',
-  name: 'María García',
+  code: 'ADMIN',
+  password: 'admin123',
+  name: 'Administrador del Sistema',
 };
 
 // Datos de prueba para cliente (TR-002)
 const CLIENT_USER = {
   code: 'CLI001',
   password: 'cliente123',
-  name: 'Empresa ABC S.A.',
+  name: 'Cliente Demo S.A.',
 };
 
 test.describe('Login de Empleado', () => {

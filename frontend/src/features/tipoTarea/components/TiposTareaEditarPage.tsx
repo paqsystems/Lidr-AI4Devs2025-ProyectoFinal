@@ -1,9 +1,14 @@
 /**
  * TiposTareaEditarPage – Formulario de edición de tipo de tarea. TR-025(MH).
- * Código solo lectura. Si "por defecto" se marca, "genérico" se fuerza y se deshabilita.
+ * Usa TextBox, CheckBox y Button de DevExtreme.
+ *
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import TextBox from 'devextreme-react/text-box';
+import CheckBox from 'devextreme-react/check-box';
+import Button from 'devextreme-react/button';
 import { getTipoTarea, updateTipoTarea, ERROR_YA_HAY_POR_DEFECTO } from '../services/tipoTarea.service';
 import './TiposTareaPage.css';
 
@@ -89,7 +94,7 @@ export function TiposTareaEditarPage(): React.ReactElement {
     return (
       <div className="tipos-tarea-page">
         <p className="tipos-tarea-page-error">{error}</p>
-        <button type="button" className="tipos-tarea-btn-cancel" onClick={() => navigate('/tipos-tarea')}>Volver</button>
+        <Button text="Volver" type="normal" onClick={() => navigate('/tipos-tarea')} />
       </div>
     );
   }
@@ -103,61 +108,28 @@ export function TiposTareaEditarPage(): React.ReactElement {
         {error && <div className="tipos-tarea-page-error" role="alert">{error}</div>}
         <div className="tipos-tarea-form-group">
           <label className="tipos-tarea-form-label">Código</label>
-          <input type="text" value={code} readOnly disabled className="readonly" data-testid="tipoTareaEditar.code" />
+          <TextBox value={code} readOnly disabled elementAttr={{ 'data-testid': 'tipoTareaEditar.code' }} />
         </div>
         <div className="tipos-tarea-form-group">
           <label htmlFor="descripcion" className="tipos-tarea-form-label">Descripción</label>
-          <input
-            id="descripcion"
-            type="text"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            disabled={saving}
-            className={fieldErrors.descripcion ? 'input-error' : ''}
-            data-testid="tipoTareaEditar.descripcion"
-            maxLength={255}
-          />
+          <TextBox value={descripcion} onValueChanged={(e) => setDescripcion(e.value ?? '')} disabled={saving} maxLength={255} elementAttr={{ 'data-testid': 'tipoTareaEditar.descripcion' }} />
           {fieldErrors.descripcion && <span className="field-error">{fieldErrors.descripcion}</span>}
         </div>
         <div className="tipos-tarea-form-group checkbox">
-          <label>
-            <input
-              type="checkbox"
-              checked={isGenerico}
-              onChange={(e) => setIsGenerico(e.target.checked)}
-              disabled={saving || isDefault}
-            />
-            Genérico
-          </label>
+          <CheckBox text="Genérico" value={isGenerico} onValueChanged={(e) => setIsGenerico(e.value ?? false)} disabled={saving || isDefault} />
         </div>
         <div className="tipos-tarea-form-group checkbox">
-          <label>
-            <input
-              type="checkbox"
-              checked={isDefault}
-              onChange={(e) => handlePorDefectoChange(e.target.checked)}
-              disabled={saving}
-            />
-            Por defecto
-          </label>
+          <CheckBox text="Por defecto" value={isDefault} onValueChanged={(e) => handlePorDefectoChange(e.value ?? false)} disabled={saving} />
         </div>
         <div className="tipos-tarea-form-group checkbox">
-          <label>
-            <input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} disabled={saving} />
-            Activo
-          </label>
+          <CheckBox text="Activo" value={activo} onValueChanged={(e) => setActivo(e.value ?? true)} disabled={saving} />
         </div>
         <div className="tipos-tarea-form-group checkbox">
-          <label>
-            <input type="checkbox" checked={inhabilitado} onChange={(e) => setInhabilitado(e.target.checked)} disabled={saving} />
-            Inhabilitado
-          </label>
+          <CheckBox text="Inhabilitado" value={inhabilitado} onValueChanged={(e) => setInhabilitado(e.value ?? false)} disabled={saving} />
         </div>
         <div className="tipos-tarea-form-actions">
-          <button type="button" className="tipos-tarea-btn-cancel" onClick={() => navigate('/tipos-tarea')}>Cancelar</button>
-          <button type="submit" disabled={saving} data-testid="tipoTareaEditar.submit" className="tipos-tarea-btn-submit">
-            {saving ? 'Guardando...' : 'Guardar'}
-          </button>
+          <Button text="Cancelar" type="normal" onClick={() => navigate('/tipos-tarea')} />
+          <Button text={saving ? 'Guardando...' : 'Guardar'} type="default" useSubmitBehavior={true} disabled={saving} elementAttr={{ 'data-testid': 'tipoTareaEditar.submit' }} />
         </div>
       </form>
     </div>

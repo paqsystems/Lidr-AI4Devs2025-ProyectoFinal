@@ -2,11 +2,17 @@
  * Component: ProcesoMasivoPage
  *
  * Página de proceso masivo de tareas (TR-039 a TR-043). Solo supervisores.
- * Filtros (fecha, cliente, empleado, estado), tabla con checkboxes,
+ * Filtros (fecha, cliente, empleado, estado), DataGrid DevExtreme con selección múltiple,
  * Seleccionar/Deseleccionar todos, contador, botón Procesar con confirmación.
+ *
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import DataGrid, { Column } from 'devextreme-react/data-grid';
+import DateBox from 'devextreme-react/date-box';
+import SelectBox from 'devextreme-react/select-box';
+import Button from 'devextreme-react/button';
 import {
   getAllTasks,
   bulkToggleClose,
@@ -110,15 +116,6 @@ export function ProcesoMasivoPage(): React.ReactElement {
     setPage(newPage);
   };
 
-  const toggleSelect = (id: number) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   const selectAll = () => {
     setSelectedIds(new Set(data.map((r) => r.id)));
   };
@@ -173,24 +170,28 @@ export function ProcesoMasivoPage(): React.ReactElement {
         <div className="proceso-masivo-filtros-row">
           <label className="proceso-masivo-label">
             {t('tasks.list.filters.fechaDesde', 'Fecha desde')}
-            <input
+            <DateBox
               type="date"
-              value={filters.fechaDesde}
-              onChange={(e) => setFilters((f) => ({ ...f, fechaDesde: e.target.value }))}
+              value={filters.fechaDesde ? new Date(filters.fechaDesde + 'T12:00:00') : null}
+              onValueChanged={(e) => {
+                const d = e.value ?? null;
+                setFilters((f) => ({ ...f, fechaDesde: d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '' }));
+              }}
               disabled={loading}
-              data-testid="procesoMasivo.filtroFechaDesde"
-              aria-label="Fecha desde"
+              elementAttr={{ 'data-testid': 'procesoMasivo.filtroFechaDesde', 'aria-label': 'Fecha desde' }}
             />
           </label>
           <label className="proceso-masivo-label">
             {t('tasks.list.filters.fechaHasta', 'Fecha hasta')}
-            <input
+            <DateBox
               type="date"
-              value={filters.fechaHasta}
-              onChange={(e) => setFilters((f) => ({ ...f, fechaHasta: e.target.value }))}
+              value={filters.fechaHasta ? new Date(filters.fechaHasta + 'T12:00:00') : null}
+              onValueChanged={(e) => {
+                const d = e.value ?? null;
+                setFilters((f) => ({ ...f, fechaHasta: d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '' }));
+              }}
               disabled={loading}
-              data-testid="procesoMasivo.filtroFechaHasta"
-              aria-label="Fecha hasta"
+              elementAttr={{ 'data-testid': 'procesoMasivo.filtroFechaHasta', 'aria-label': 'Fecha hasta' }}
             />
           </label>
           <div className="proceso-masivo-label proceso-masivo-cliente">
@@ -215,29 +216,27 @@ export function ProcesoMasivoPage(): React.ReactElement {
           </div>
           <label className="proceso-masivo-label">
             {t('procesoMasivo.filtroEstado', 'Estado')}
-            <select
+            <SelectBox
+              dataSource={[
+                { value: 'all', text: t('procesoMasivo.estadoTodos', 'Todos') },
+                { value: 'open', text: t('procesoMasivo.estadoAbiertos', 'Abiertos') },
+                { value: 'closed', text: t('procesoMasivo.estadoCerrados', 'Cerrados') },
+              ]}
               value={filters.estadoCerrado}
-              onChange={(e) =>
-                setFilters((f) => ({ ...f, estadoCerrado: e.target.value as EstadoCerrado }))
-              }
+              onValueChanged={(e) => setFilters((f) => ({ ...f, estadoCerrado: (e.value ?? 'all') as EstadoCerrado }))}
+              displayExpr="text"
+              valueExpr="value"
               disabled={loading}
-              data-testid="procesoMasivo.filtroEstado"
-              aria-label="Estado cerrado/abierto"
-            >
-              <option value="all">{t('procesoMasivo.estadoTodos', 'Todos')}</option>
-              <option value="open">{t('procesoMasivo.estadoAbiertos', 'Abiertos')}</option>
-              <option value="closed">{t('procesoMasivo.estadoCerrados', 'Cerrados')}</option>
-            </select>
+              elementAttr={{ 'data-testid': 'procesoMasivo.filtroEstado', 'aria-label': 'Estado cerrado/abierto' }}
+            />
           </label>
-          <button
-            type="button"
-            className="proceso-masivo-btn-apply"
+          <Button
+            text={t('procesoMasivo.aplicarFiltros', 'Aplicar Filtros')}
+            type="default"
             onClick={handleApplyFilters}
             disabled={loading}
-            data-testid="procesoMasivo.aplicarFiltros"
-          >
-            {t('procesoMasivo.aplicarFiltros', 'Aplicar Filtros')}
-          </button>
+            elementAttr={{ 'data-testid': 'procesoMasivo.aplicarFiltros' }}
+          />
         </div>
       </div>
 
@@ -276,36 +275,32 @@ export function ProcesoMasivoPage(): React.ReactElement {
           </div>
 
           <div className="proceso-masivo-actions">
-            <button
-              type="button"
-              className="proceso-masivo-btn-link"
+            <Button
+              text={t('procesoMasivo.seleccionarTodos', 'Seleccionar todos')}
+              type="normal"
+              stylingMode="text"
               onClick={selectAll}
               disabled={loading || data.length === 0}
-              data-testid="procesoMasivo.seleccionarTodos"
-            >
-              {t('procesoMasivo.seleccionarTodos', 'Seleccionar todos')}
-            </button>
-            <button
-              type="button"
-              className="proceso-masivo-btn-link"
+              elementAttr={{ 'data-testid': 'procesoMasivo.seleccionarTodos' }}
+            />
+            <Button
+              text={t('procesoMasivo.deseleccionarTodos', 'Deseleccionar todos')}
+              type="normal"
+              stylingMode="text"
               onClick={deselectAll}
               disabled={loading || selectedIds.size === 0}
-              data-testid="procesoMasivo.deseleccionarTodos"
-            >
-              {t('procesoMasivo.deseleccionarTodos', 'Deseleccionar todos')}
-            </button>
+              elementAttr={{ 'data-testid': 'procesoMasivo.deseleccionarTodos' }}
+            />
             <span className="proceso-masivo-contador" data-testid="procesoMasivo.contadorSeleccionadas">
               {selectedIds.size} {t('procesoMasivo.tareasSeleccionadas', 'tareas seleccionadas')}
             </span>
-            <button
-              type="button"
-              className="proceso-masivo-btn-procesar"
+            <Button
+              text={t('procesoMasivo.procesar', 'Procesar')}
+              type="default"
               onClick={handleProcesarClick}
               disabled={selectedIds.size === 0 || processing}
-              data-testid="procesoMasivo.procesar"
-            >
-              {t('procesoMasivo.procesar', 'Procesar')}
-            </button>
+              elementAttr={{ 'data-testid': 'procesoMasivo.procesar' }}
+            />
           </div>
 
           {loading ? (
@@ -317,52 +312,42 @@ export function ProcesoMasivoPage(): React.ReactElement {
               {t('tasks.list.empty', 'No hay tareas que mostrar.')}
             </div>
           ) : (
-            <div className="proceso-masivo-table-wrapper">
-              <table className="proceso-masivo-table" data-testid="procesoMasivo.tabla" role="table">
-                <thead>
-                  <tr>
-                    <th scope="col" className="proceso-masivo-th-checkbox">
-                      {t('procesoMasivo.colSeleccion', 'Sel.')}
-                    </th>
-                    <th scope="col">{t('tasks.list.col.fecha', 'Fecha')}</th>
-                    <th scope="col">{t('tasks.form.fields.empleado.label', 'Empleado')}</th>
-                    <th scope="col">{t('tasks.list.col.cliente', 'Cliente')}</th>
-                    <th scope="col">{t('tasks.list.col.tipoTarea', 'Tipo tarea')}</th>
-                    <th scope="col">{t('tasks.list.col.duracion', 'Duración')}</th>
-                    <th scope="col">{t('tasks.list.col.cerrado', 'Cerrado')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((row) => (
-                    <tr
-                      key={row.id}
-                      data-testid={`procesoMasivo.row.${row.id}`}
-                      className={row.cerrado ? 'proceso-masivo-row-closed' : ''}
-                    >
-                      <td className="proceso-masivo-td-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(row.id)}
-                          onChange={() => toggleSelect(row.id)}
-                          disabled={processing}
-                          data-testid={`procesoMasivo.checkboxTarea.${row.id}`}
-                          aria-label={t('procesoMasivo.seleccionarTarea', 'Seleccionar tarea')}
-                        />
-                      </td>
-                      <td>{row.fecha}</td>
-                      <td>
-                        {row.empleado
-                          ? `${row.empleado.nombre} (${row.empleado.code})`
-                          : '—'}
-                      </td>
-                      <td>{row.cliente.nombre}</td>
-                      <td>{row.tipo_tarea.nombre}</td>
-                      <td>{row.duracion_horas}</td>
-                      <td>{row.cerrado ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="proceso-masivo-grid-wrapper" data-testid="procesoMasivo.tabla">
+              <DataGrid
+                dataSource={data}
+                keyExpr="id"
+                showBorders={true}
+                rowAlternationEnabled={true}
+                selection={{
+                  mode: 'multiple',
+                  showCheckBoxesMode: 'always',
+                }}
+                selectedRowKeys={Array.from(selectedIds)}
+                onSelectionChanged={(e) => {
+                  const keys = e.selectedRowKeys as number[];
+                  setSelectedIds(new Set(keys));
+                }}
+                noDataText=""
+                elementAttr={{ 'data-testid': 'procesoMasivo.dataGrid' }}
+              >
+                <Column dataField="fecha" caption={t('tasks.list.col.fecha', 'Fecha')} width={100} />
+                <Column
+                  caption={t('tasks.form.fields.empleado.label', 'Empleado')}
+                  width={180}
+                  calculateCellValue={(rowData) =>
+                    rowData.empleado ? `${rowData.empleado.nombre} (${rowData.empleado.code})` : '—'
+                  }
+                />
+                <Column dataField="cliente.nombre" caption={t('tasks.list.col.cliente', 'Cliente')} width={150} />
+                <Column dataField="tipo_tarea.nombre" caption={t('tasks.list.col.tipoTarea', 'Tipo tarea')} width={120} />
+                <Column dataField="duracion_horas" caption={t('tasks.list.col.duracion', 'Duración')} width={90} />
+                <Column
+                  dataField="cerrado"
+                  caption={t('tasks.list.col.cerrado', 'Cerrado')}
+                  width={90}
+                  customizeText={(cellInfo) => (cellInfo.value ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No'))}
+                />
+              </DataGrid>
             </div>
           )}
 
@@ -393,17 +378,13 @@ export function ProcesoMasivoPage(): React.ReactElement {
             )}
           </p>
           <div className="proceso-masivo-modal-actions">
-            <button
-              type="button"
-              className="proceso-masivo-btn-procesar"
+            <Button
+              text={t('procesoMasivo.confirmar', 'Confirmar')}
+              type="default"
               onClick={handleConfirmProcesar}
-              data-testid="procesoMasivo.confirmarProcesar"
-            >
-              {t('procesoMasivo.confirmar', 'Confirmar')}
-            </button>
-            <button type="button" className="proceso-masivo-btn-cancel" onClick={handleCancelConfirm}>
-              {t('procesoMasivo.cancelar', 'Cancelar')}
-            </button>
+              elementAttr={{ 'data-testid': 'procesoMasivo.confirmarProcesar' }}
+            />
+            <Button text={t('procesoMasivo.cancelar', 'Cancelar')} type="normal" onClick={handleCancelConfirm} />
           </div>
         </Modal>
       )}

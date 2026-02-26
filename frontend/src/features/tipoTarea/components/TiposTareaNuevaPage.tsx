@@ -1,9 +1,14 @@
 /**
  * TiposTareaNuevaPage – Formulario de creación de tipo de tarea. TR-024(MH).
- * Si "por defecto" se marca, "genérico" se fuerza a true y se deshabilita.
+ * Usa TextBox, CheckBox y Button de DevExtreme.
+ *
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import TextBox from 'devextreme-react/text-box';
+import CheckBox from 'devextreme-react/check-box';
+import Button from 'devextreme-react/button';
 import { createTipoTarea, ERROR_YA_HAY_POR_DEFECTO } from '../services/tipoTarea.service';
 import './TiposTareaPage.css';
 
@@ -65,74 +70,30 @@ export function TiposTareaNuevaPage(): React.ReactElement {
         {error && <div className="tipos-tarea-page-error" role="alert">{error}</div>}
         <div className="tipos-tarea-form-group">
           <label htmlFor="code" className="tipos-tarea-form-label">Código</label>
-          <input
-            id="code"
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            disabled={loading}
-            className={fieldErrors.code ? 'input-error' : ''}
-            data-testid="tipoTareaCrear.code"
-            maxLength={50}
-          />
+          <TextBox value={code} onValueChanged={(e) => setCode(e.value ?? '')} disabled={loading} maxLength={50} elementAttr={{ 'data-testid': 'tipoTareaCrear.code' }} />
           {fieldErrors.code && <span className="field-error">{fieldErrors.code}</span>}
         </div>
         <div className="tipos-tarea-form-group">
           <label htmlFor="descripcion" className="tipos-tarea-form-label">Descripción</label>
-          <input
-            id="descripcion"
-            type="text"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            disabled={loading}
-            className={fieldErrors.descripcion ? 'input-error' : ''}
-            data-testid="tipoTareaCrear.descripcion"
-            maxLength={255}
-          />
+          <TextBox value={descripcion} onValueChanged={(e) => setDescripcion(e.value ?? '')} disabled={loading} maxLength={255} elementAttr={{ 'data-testid': 'tipoTareaCrear.descripcion' }} />
           {fieldErrors.descripcion && <span className="field-error">{fieldErrors.descripcion}</span>}
         </div>
         <div className="tipos-tarea-form-group checkbox">
-          <label>
-            <input
-              type="checkbox"
-              checked={isGenerico}
-              onChange={(e) => setIsGenerico(e.target.checked)}
-              disabled={loading || isDefault}
-              data-testid="tipoTareaCrear.generico"
-            />
-            Genérico
-          </label>
+          <CheckBox text="Genérico" value={isGenerico} onValueChanged={(e) => setIsGenerico(e.value ?? false)} disabled={loading || isDefault} elementAttr={{ 'data-testid': 'tipoTareaCrear.generico' }} />
           {isDefault && <span className="tipos-tarea-form-label" style={{ marginLeft: '0.5rem', color: '#6b7280' }}>(obligatorio si es por defecto)</span>}
         </div>
         <div className="tipos-tarea-form-group checkbox">
-          <label>
-            <input
-              type="checkbox"
-              checked={isDefault}
-              onChange={(e) => handlePorDefectoChange(e.target.checked)}
-              disabled={loading}
-              data-testid="tipoTareaCrear.porDefecto"
-            />
-            Por defecto
-          </label>
+          <CheckBox text="Por defecto" value={isDefault} onValueChanged={(e) => handlePorDefectoChange(e.value ?? false)} disabled={loading} elementAttr={{ 'data-testid': 'tipoTareaCrear.porDefecto' }} />
         </div>
         <div className="tipos-tarea-form-group checkbox">
-          <label>
-            <input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} disabled={loading} />
-            Activo
-          </label>
+          <CheckBox text="Activo" value={activo} onValueChanged={(e) => setActivo(e.value ?? true)} disabled={loading} />
         </div>
         <div className="tipos-tarea-form-group checkbox">
-          <label>
-            <input type="checkbox" checked={inhabilitado} onChange={(e) => setInhabilitado(e.target.checked)} disabled={loading} />
-            Inhabilitado
-          </label>
+          <CheckBox text="Inhabilitado" value={inhabilitado} onValueChanged={(e) => setInhabilitado(e.value ?? false)} disabled={loading} />
         </div>
         <div className="tipos-tarea-form-actions">
-          <button type="button" className="tipos-tarea-btn-cancel" onClick={() => navigate('/tipos-tarea')}>Cancelar</button>
-          <button type="submit" disabled={loading} data-testid="tipoTareaCrear.submit" className="tipos-tarea-btn-submit">
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+          <Button text="Cancelar" type="normal" onClick={() => navigate('/tipos-tarea')} />
+          <Button text={loading ? 'Guardando...' : 'Guardar'} type="default" useSubmitBehavior={true} disabled={loading} elementAttr={{ 'data-testid': 'tipoTareaCrear.submit' }} />
         </div>
       </form>
     </div>

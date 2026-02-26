@@ -2,14 +2,17 @@
  * Component: TiposTareaPage
  *
  * Listado paginado de tipos de tarea (solo supervisores). TR-023(MH).
- * Tabla con búsqueda, filtros (genérico, por defecto, activo, inhabilitado), paginación, total.
- * Acciones: Crear, Editar, Eliminar, Ver (TR-024, TR-025, TR-026, TR-027).
+ * Usa DataGrid, TextBox, SelectBox y Button de DevExtreme.
  *
- * @see TR-023(MH)-listado-de-tipos-de-tarea.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DataGrid, { Column } from 'devextreme-react/data-grid';
+import TextBox from 'devextreme-react/text-box';
+import SelectBox from 'devextreme-react/select-box';
+import Button from 'devextreme-react/button';
 import {
   getTiposTareaList,
   deleteTipoTarea,
@@ -59,6 +62,24 @@ function buildParams(
   if (filters.inhabilitado === 'false') params.inhabilitado = false;
   return params;
 }
+
+const SI_NO_OPTIONS = [
+  { value: '', text: 'Todos' },
+  { value: 'true', text: 'Sí' },
+  { value: 'false', text: 'No' },
+];
+
+const ESTADO_OPTIONS = [
+  { value: '', text: 'Todos' },
+  { value: 'true', text: 'Activo' },
+  { value: 'false', text: 'Inactivo' },
+];
+
+const INHABILITADO_OPTIONS = [
+  { value: '', text: 'Todos' },
+  { value: 'false', text: 'No' },
+  { value: 'true', text: 'Sí' },
+];
 
 export function TiposTareaPage(): React.ReactElement {
   const navigate = useNavigate();
@@ -148,96 +169,75 @@ export function TiposTareaPage(): React.ReactElement {
     <div className="tipos-tarea-page" data-testid="tiposTarea.list">
       <header className="tipos-tarea-page-header">
         <h1 className="tipos-tarea-page-title">Tipos de Tarea</h1>
-        <button
-          type="button"
-          className="tipos-tarea-page-btn-create"
+        <Button
+          text="Crear tipo de tarea"
+          type="default"
           onClick={() => navigate('/tipos-tarea/nuevo')}
-          data-testid="tiposTarea.crear"
-          aria-label="Crear tipo de tarea"
-        >
-          Crear tipo de tarea
-        </button>
+          elementAttr={{ 'data-testid': 'tiposTarea.crear', 'aria-label': 'Crear tipo de tarea' }}
+        />
       </header>
 
       <section className="tipos-tarea-page-filters" data-testid="tiposTarea.filters">
         <div className="tipos-tarea-filters-row">
           <label className="tipos-tarea-filter-label">
             <span className="tipos-tarea-filter-label-text">Búsqueda (código o descripción)</span>
-            <input
-              type="text"
+            <TextBox
               value={filters.search}
-              onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+              onValueChanged={(e) => setFilters((f) => ({ ...f, search: e.value ?? '' }))}
               placeholder="Buscar..."
-              className="tipos-tarea-filter-input"
-              data-testid="tiposTarea.busqueda"
-              aria-label="Búsqueda"
+              elementAttr={{ 'data-testid': 'tiposTarea.busqueda', 'aria-label': 'Búsqueda' }}
             />
           </label>
           <label className="tipos-tarea-filter-label">
             <span className="tipos-tarea-filter-label-text">Genérico</span>
-            <select
+            <SelectBox
+              dataSource={SI_NO_OPTIONS}
               value={filters.is_generico}
-              onChange={(e) => setFilters((f) => ({ ...f, is_generico: e.target.value as '' | 'true' | 'false' }))}
-              className="tipos-tarea-filter-select"
-              data-testid="tiposTarea.filtroGenerico"
-              aria-label="Filtrar por genérico"
-            >
-              <option value="">Todos</option>
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, is_generico: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'tiposTarea.filtroGenerico', 'aria-label': 'Filtrar por genérico' }}
+            />
           </label>
           <label className="tipos-tarea-filter-label">
             <span className="tipos-tarea-filter-label-text">Por defecto</span>
-            <select
+            <SelectBox
+              dataSource={SI_NO_OPTIONS}
               value={filters.is_default}
-              onChange={(e) => setFilters((f) => ({ ...f, is_default: e.target.value as '' | 'true' | 'false' }))}
-              className="tipos-tarea-filter-select"
-              data-testid="tiposTarea.filtroPorDefecto"
-              aria-label="Filtrar por defecto"
-            >
-              <option value="">Todos</option>
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, is_default: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'tiposTarea.filtroPorDefecto', 'aria-label': 'Filtrar por defecto' }}
+            />
           </label>
           <label className="tipos-tarea-filter-label">
             <span className="tipos-tarea-filter-label-text">Estado</span>
-            <select
+            <SelectBox
+              dataSource={ESTADO_OPTIONS}
               value={filters.activo}
-              onChange={(e) => setFilters((f) => ({ ...f, activo: e.target.value as '' | 'true' | 'false' }))}
-              className="tipos-tarea-filter-select"
-              data-testid="tiposTarea.filtroActivo"
-              aria-label="Filtrar por activo"
-            >
-              <option value="">Todos</option>
-              <option value="true">Activo</option>
-              <option value="false">Inactivo</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, activo: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'tiposTarea.filtroActivo', 'aria-label': 'Filtrar por activo' }}
+            />
           </label>
           <label className="tipos-tarea-filter-label">
             <span className="tipos-tarea-filter-label-text">Inhabilitado</span>
-            <select
+            <SelectBox
+              dataSource={INHABILITADO_OPTIONS}
               value={filters.inhabilitado}
-              onChange={(e) => setFilters((f) => ({ ...f, inhabilitado: e.target.value as '' | 'true' | 'false' }))}
-              className="tipos-tarea-filter-select"
-              data-testid="tiposTarea.filtroInhabilitado"
-              aria-label="Filtrar por inhabilitado"
-            >
-              <option value="">Todos</option>
-              <option value="false">No</option>
-              <option value="true">Sí</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, inhabilitado: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'tiposTarea.filtroInhabilitado', 'aria-label': 'Filtrar por inhabilitado' }}
+            />
           </label>
-          <button
-            type="button"
-            className="tipos-tarea-filter-btn-apply"
+          <Button
+            text="Aplicar"
+            type="default"
             onClick={handleApplyFilters}
-            data-testid="tiposTarea.filters.apply"
-            aria-label="Aplicar filtros"
-          >
-            Aplicar
-          </button>
+            elementAttr={{ 'data-testid': 'tiposTarea.filters.apply', 'aria-label': 'Aplicar filtros' }}
+          />
         </div>
       </section>
 
@@ -271,70 +271,77 @@ export function TiposTareaPage(): React.ReactElement {
             </p>
           ) : (
             <div className="tipos-tarea-table-wrapper">
-              <table className="tipos-tarea-table" data-testid="tiposTarea.tabla" aria-label="Listado de tipos de tarea">
-                <thead>
-                  <tr>
-                    <th scope="col">Código</th>
-                    <th scope="col">Descripción</th>
-                    <th scope="col">Genérico</th>
-                    <th scope="col">Por defecto</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Inhabilitado</th>
-                    <th scope="col">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((t) => (
-                    <tr
-                      key={t.id}
-                      className={
-                        t.inhabilitado
-                          ? 'tipos-tarea-table-row-inhabilitado'
-                          : t.is_default
-                            ? 'tipos-tarea-table-row-por-defecto'
-                            : ''
-                      }
-                      data-testid={`tiposTarea.row.${t.id}`}
-                    >
-                      <td>{t.code}</td>
-                      <td>{t.descripcion}</td>
-                      <td>{t.is_generico ? 'Sí' : 'No'}</td>
-                      <td>{t.is_default ? 'Sí' : 'No'}</td>
-                      <td>{t.activo ? 'Activo' : 'Inactivo'}</td>
-                      <td>{t.inhabilitado ? 'Sí' : 'No'}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className="tipos-tarea-page-btn-ver"
-                          onClick={() => navigate(`/tipos-tarea/${t.id}`)}
-                          data-testid={`tiposTarea.ver.${t.id}`}
-                          aria-label={`Ver detalle de ${t.code}`}
-                        >
-                          Ver
-                        </button>
-                        <button
-                          type="button"
-                          className="tipos-tarea-page-btn-edit"
-                          onClick={() => navigate(`/tipos-tarea/${t.id}/editar`)}
-                          data-testid={`tiposTarea.editar.${t.id}`}
-                          aria-label={`Editar tipo ${t.code}`}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          className="tipos-tarea-page-btn-delete"
-                          onClick={() => handleDeleteClick(t)}
-                          data-testid={`tiposTarea.eliminar.${t.id}`}
-                          aria-label={`Eliminar tipo ${t.code}`}
-                        >
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataGrid
+                dataSource={data}
+                keyExpr="id"
+                showBorders={true}
+                rowAlternationEnabled={true}
+                onRowPrepared={(e) => {
+                  if (e.rowType === 'data' && e.data) {
+                    if (e.data.inhabilitado) e.rowElement?.classList.add('tipos-tarea-table-row-inhabilitado');
+                    else if (e.data.is_default) e.rowElement?.classList.add('tipos-tarea-table-row-por-defecto');
+                  }
+                }}
+                elementAttr={{ 'data-testid': 'tiposTarea.tabla', 'aria-label': 'Listado de tipos de tarea' }}
+                noDataText=""
+              >
+                <Column dataField="code" caption="Código" width={100} />
+                <Column dataField="descripcion" caption="Descripción" width={200} />
+                <Column
+                  dataField="is_generico"
+                  caption="Genérico"
+                  width={90}
+                  customizeText={({ value }) => (value ? 'Sí' : 'No')}
+                />
+                <Column
+                  dataField="is_default"
+                  caption="Por defecto"
+                  width={100}
+                  customizeText={({ value }) => (value ? 'Sí' : 'No')}
+                />
+                <Column
+                  dataField="activo"
+                  caption="Estado"
+                  width={90}
+                  customizeText={({ value }) => (value ? 'Activo' : 'Inactivo')}
+                />
+                <Column
+                  dataField="inhabilitado"
+                  caption="Inhabilitado"
+                  width={90}
+                  customizeText={({ value }) => (value ? 'Sí' : 'No')}
+                />
+                <Column
+                  caption="Acciones"
+                  width={220}
+                  allowSorting={false}
+                  cellRender={({ data }: { data: TipoTareaListItem }) => (
+                    <div className="tipos-tarea-actions-cell">
+                      <Button
+                        text="Ver"
+                        type="normal"
+                        stylingMode="text"
+                        onClick={() => navigate(`/tipos-tarea/${data.id}`)}
+                        elementAttr={{ 'data-testid': `tiposTarea.ver.${data.id}`, 'aria-label': `Ver detalle de ${data.code}` }}
+                      />
+                      <Button
+                        text="Editar"
+                        type="normal"
+                        stylingMode="text"
+                        onClick={() => navigate(`/tipos-tarea/${data.id}/editar`)}
+                        elementAttr={{ 'data-testid': `tiposTarea.editar.${data.id}`, 'aria-label': `Editar tipo ${data.code}` }}
+                      />
+                      <Button
+                        text="Eliminar"
+                        type="normal"
+                        stylingMode="text"
+                        onClick={() => handleDeleteClick(data)}
+                        elementAttr={{ 'data-testid': `tiposTarea.eliminar.${data.id}`, 'aria-label': `Eliminar tipo ${data.code}` }}
+                      />
+                    </div>
+                  )}
+                />
+              </DataGrid>
             </div>
           )}
 
@@ -360,18 +367,20 @@ export function TiposTareaPage(): React.ReactElement {
             </p>
             {deleteError && <p className="tipos-tarea-modal-error" role="alert">{deleteError}</p>}
             <div className="tipos-tarea-modal-actions">
-              <button type="button" className="tipos-tarea-btn-cancel" onClick={handleDeleteCancel} disabled={deleteLoading}>
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="tipos-tarea-btn-confirm-delete"
+              <Button
+                text="Cancelar"
+                type="normal"
+                onClick={handleDeleteCancel}
+                disabled={deleteLoading}
+                elementAttr={{ 'data-testid': 'tiposTarea.deleteCancel' }}
+              />
+              <Button
+                text={deleteLoading ? 'Eliminando...' : 'Eliminar'}
+                type="danger"
                 onClick={handleDeleteConfirm}
                 disabled={deleteLoading}
-                data-testid="tiposTarea.deleteConfirm"
-              >
-                {deleteLoading ? 'Eliminando...' : 'Eliminar'}
-              </button>
+                elementAttr={{ 'data-testid': 'tiposTarea.deleteConfirm' }}
+              />
             </div>
           </div>
         </div>

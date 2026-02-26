@@ -53,8 +53,8 @@ class TestTasksSeeder extends Seeder
                     'password_hash' => bcrypt('cliente002'),
                     'activo' => true,
                     'inhabilitado' => false,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'created_at' => DB::raw('GETDATE()'),
+                    'updated_at' => DB::raw('GETDATE()'),
                 ]);
                 $cli002UserId = DB::table('USERS')->where('code', 'CLI002')->value('id');
             }
@@ -68,8 +68,8 @@ class TestTasksSeeder extends Seeder
                 'tipo_cliente_id' => $tipoClienteId,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
         }
 
@@ -86,8 +86,8 @@ class TestTasksSeeder extends Seeder
                 'is_default' => false,
                 'activo' => true,
                 'inhabilitado' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => DB::raw('GETDATE()'),
+                'updated_at' => DB::raw('GETDATE()'),
             ]);
         }
 
@@ -105,8 +105,8 @@ class TestTasksSeeder extends Seeder
                 DB::table('PQ_PARTES_CLIENTE_TIPO_TAREA')->insert([
                     'cliente_id' => $cli001Id,
                     'tipo_tarea_id' => $especialId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'created_at' => DB::raw('GETDATE()'),
+                    'updated_at' => DB::raw('GETDATE()'),
                 ]);
             }
         }
@@ -119,7 +119,7 @@ class TestTasksSeeder extends Seeder
                 ->where('id', $desarrolloId)
                 ->update([
                     'is_generico' => true,
-                    'updated_at' => now(),
+                    'updated_at' => DB::raw('GETDATE()'),
                 ]);
         }
     }

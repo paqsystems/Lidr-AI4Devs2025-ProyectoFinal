@@ -1,25 +1,23 @@
 /**
  * Component: DeleteTaskModal
  *
- * Modal de confirmación para eliminar una tarea (TR-030, TR-032).
- * Muestra información de la tarea (fecha, cliente, tipo, duración) y, si existe, empleado propietario (supervisor).
+ * Modal de confirmación para eliminar una tarea. Usa Button de DevExtreme.
+ *
+ * @see TR-030, TR-032
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React from 'react';
+import Button from 'devextreme-react/button';
 import { TaskListItem } from '../services/task.service';
 import { t } from '../../../shared/i18n';
 import './DeleteTaskModal.css';
 
 export interface DeleteTaskModalProps {
-  /** Tarea a eliminar (null = modal cerrado) */
   task: TaskListItem | null;
-  /** Si está en curso la petición de eliminación */
   loading?: boolean;
-  /** Mensaje de error a mostrar (2111, 4030, 4040) */
   errorMessage?: string;
-  /** Callback al confirmar eliminación */
   onConfirm: () => void;
-  /** Callback al cancelar */
   onCancel: () => void;
 }
 
@@ -78,26 +76,20 @@ export function DeleteTaskModal({
           </div>
         )}
         <div className="delete-task-modal-actions">
-          <button
-            type="button"
-            className="delete-task-modal-btn delete-task-modal-btn-cancel"
+          <Button
+            text={t('tasks.delete.cancel', 'Cancelar')}
+            type="normal"
             onClick={onCancel}
             disabled={loading}
-            data-testid="task.delete.cancel"
-            aria-label={t('tasks.delete.cancelLabel', 'Cancelar eliminación')}
-          >
-            {t('tasks.delete.cancel', 'Cancelar')}
-          </button>
-          <button
-            type="button"
-            className="delete-task-modal-btn delete-task-modal-btn-confirm"
+            elementAttr={{ 'data-testid': 'task.delete.cancel', 'aria-label': t('tasks.delete.cancelLabel', 'Cancelar eliminación') }}
+          />
+          <Button
+            text={loading ? t('tasks.delete.deleting', 'Eliminando...') : t('tasks.delete.confirm', 'Eliminar')}
+            type="danger"
             onClick={onConfirm}
             disabled={loading}
-            data-testid="task.delete.confirm"
-            aria-label={t('tasks.delete.confirmLabel', 'Confirmar eliminación')}
-          >
-            {loading ? t('tasks.delete.deleting', 'Eliminando...') : t('tasks.delete.confirm', 'Eliminar')}
-          </button>
+            elementAttr={{ 'data-testid': 'task.delete.confirm', 'aria-label': t('tasks.delete.confirmLabel', 'Confirmar eliminación') }}
+          />
         </div>
       </div>
     </div>

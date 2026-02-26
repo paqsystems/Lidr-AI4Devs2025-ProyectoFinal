@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import Button from 'devextreme-react/button';
 import { t } from '../../i18n';
 import styles from './Modal.module.css';
 
@@ -120,15 +121,14 @@ export const Modal: React.FC<ModalProps> = ({
             <h2 id={`${testId}-title`} className={styles.title}>
               {titleText}
             </h2>
-            <button
-              data-testid={`${testId}-close-button`}
+            <Button
+              icon="close"
+              type="normal"
+              stylingMode="text"
               className={styles.closeButton}
               onClick={onClose}
-              aria-label={t('common.close', 'Cerrar')}
-              type="button"
-            >
-              ×
-            </button>
+              elementAttr={{ 'data-testid': `${testId}-close-button`, 'aria-label': t('common.close', 'Cerrar') }}
+            />
           </div>
         )}
         <div className={styles.content} data-testid={`${testId}-content`}>

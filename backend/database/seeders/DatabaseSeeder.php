@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             UsuarioSeeder::class,
             ClienteSeeder::class,
+            TestUsersSeeder::class, // JPEREZ, MGARCIA, etc. para E2E y tests
         ]);
     }
 }

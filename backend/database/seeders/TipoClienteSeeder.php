@@ -35,8 +35,8 @@ class TipoClienteSeeder extends Seeder
                     'descripcion' => $tipo['descripcion'],
                     'activo' => true,
                     'inhabilitado' => false,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'created_at' => DB::raw('GETDATE()'),
+                    'updated_at' => DB::raw('GETDATE()'),
                 ]);
             }
         }

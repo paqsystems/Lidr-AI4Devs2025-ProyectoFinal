@@ -7,24 +7,25 @@ Disponer de una URL pública accesible para evaluación del MVP.
 
 ## Base de Datos y Migraciones
 
-### Requisitos
-- **Motor:** MySQL 5.7+ o MariaDB 10.3+ (recomendado MySQL 8.0+)
-- **Base de datos:** Configurada según entorno (ej: `_datosempresa`)
-- **Driver Laravel:** `mysql` (extensión PHP PDO MySQL)
-- **Túnel SSH:** Requerido para conexión remota (ver `docs/version-mysql.md`)
+### Requisitos (SQL Server / MSSQL)
+- **Motor:** SQL Server 2019+ (recomendado)
+- **Base de datos:** Configurada según entorno (ej: `Lidr`)
+- **Driver Laravel:** `sqlsrv` (extensión PHP pdo_sqlsrv)
+- **Conexión directa:** No se requiere túnel SSH (a diferencia de MySQL remoto)
 
 ### Configuración de Conexión (.env)
 
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=_datosempresa
-DB_USERNAME=forge
+DB_CONNECTION=sqlsrv
+DB_HOST=PAQ-GAUSS\SQLEXPRESS_AXOFT,2544
+DB_PORT=
+DB_DATABASE=Lidr
+DB_USERNAME=tu_usuario
 DB_PASSWORD=tu_password
+DB_TRUST_SERVER_CERTIFICATE=true
 ```
 
-**Nota:** El `DB_HOST=127.0.0.1` indica que se usa un túnel SSH local. El túnel debe estar activo antes de ejecutar migraciones o acceder a la base de datos. Ver instrucciones en `docs/version-mysql.md`.
+**Nota:** Para instancia nombrada con puerto explícito use el formato `SERVIDOR\INSTANCIA,puerto`. La variable `DB_TRUST_SERVER_CERTIFICATE=true` es requerida en muchos entornos SQL Server. Ver `docs/migracion-mysql-a-mssql.md` para más detalles.
 
 ### Estructura de Tablas
 
@@ -107,38 +108,24 @@ Los seeders crean los siguientes datos mínimos para testing:
 
 ### Troubleshooting
 
-**Error: Driver MySQL no encontrado**
-```bash
-# Linux (Ubuntu/Debian)
-sudo apt-get install php-mysql
-
-# Linux (CentOS/RHEL)
-sudo yum install php-mysql
-
-# Mac (Homebrew)
-brew install php mysql
-
-# Windows
-# Habilitar extensión en php.ini:
-# extension=pdo_mysql
-# extension=mysqli
-```
+**Error: Could not find driver (pdo_sqlsrv)**
+- Instalar Microsoft ODBC Driver for SQL Server
+- Instalar extensión PHP `pdo_sqlsrv` (compatible con la versión de PHP)
+- Reiniciar servidor web o PHP-FPM
 
 **Error: Conexión rechazada**
-- Verificar que el túnel SSH está activo y configurado correctamente
-- Verificar que MySQL permite conexiones remotas (si aplica)
-- Verificar firewall (puerto 3306)
+- Verificar que SQL Server está en ejecución
+- Verificar formato de host: `SERVIDOR\INSTANCIA,puerto` para instancia nombrada
+- Verificar firewall (puerto 1433 por defecto, o el configurado)
 - Verificar credenciales en `.env`
-- Verificar que la base de datos existe en el servidor MySQL
+- Verificar que la base de datos existe en el servidor SQL Server
 
-**Error: Túnel SSH no disponible**
-- Establecer túnel SSH antes de ejecutar migraciones
-- Ver instrucciones detalladas en `docs/version-mysql.md`
+**Error: Trust Server Certificate**
+- Agregar `DB_TRUST_SERVER_CERTIFICATE=true` en `.env`
 
 **Error: Timeout en migraciones**
 - Verificar conexión de red
 - Aumentar timeout en `config/database.php` si es necesario
-- Verificar que el túnel SSH sigue activo
 
 ---
 

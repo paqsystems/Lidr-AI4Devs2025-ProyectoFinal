@@ -47,8 +47,8 @@ class UsuarioSeeder extends Seeder
                         'supervisor' => $usuario['supervisor'],
                         'activo' => true,
                         'inhabilitado' => false,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at' => DB::raw('GETDATE()'),
+                        'updated_at' => DB::raw('GETDATE()'),
                     ]);
                 }
             }

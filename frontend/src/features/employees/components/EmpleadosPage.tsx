@@ -2,15 +2,17 @@
  * Component: EmpleadosPage
  *
  * Listado paginado de empleados (solo supervisores). TR-018(MH), TR-021(MH).
- * Tabla con búsqueda, filtros (supervisor, estado, inhabilitado), paginación y total.
- * Modal de confirmación para eliminar empleados.
+ * Usa DataGrid, TextBox, SelectBox y Button de DevExtreme.
  *
- * @see TR-018(MH)-listado-de-empleados.md
- * @see TR-021(MH)-eliminación-de-empleado.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DataGrid, { Column } from 'devextreme-react/data-grid';
+import TextBox from 'devextreme-react/text-box';
+import SelectBox from 'devextreme-react/select-box';
+import Button from 'devextreme-react/button';
 import { getEmpleados, deleteEmpleado, EmpleadoListItem } from '../services/empleado.service';
 import { TaskPagination } from '../../tasks/components/TaskPagination';
 import './EmpleadosPage.css';
@@ -51,6 +53,24 @@ function buildParams(
   if (filters.inhabilitado === 'false') params.inhabilitado = false;
   return params;
 }
+
+const SUPERVISOR_OPTIONS = [
+  { value: '', text: 'Todos' },
+  { value: 'true', text: 'Sí' },
+  { value: 'false', text: 'No' },
+];
+
+const ESTADO_OPTIONS = [
+  { value: '', text: 'Todos' },
+  { value: 'true', text: 'Activo' },
+  { value: 'false', text: 'Inactivo' },
+];
+
+const INHABILITADO_OPTIONS = [
+  { value: '', text: 'Todos' },
+  { value: 'false', text: 'No' },
+  { value: 'true', text: 'Sí' },
+];
 
 export function EmpleadosPage(): React.ReactElement {
   const navigate = useNavigate();
@@ -139,97 +159,64 @@ export function EmpleadosPage(): React.ReactElement {
     <div className="empleados-page" data-testid="empleados.list">
       <header className="empleados-page-header">
         <h1 className="empleados-page-title">Empleados</h1>
-        <button
-          type="button"
-          className="empleados-page-btn-create"
+        <Button
+          text="Crear empleado"
+          type="default"
           onClick={() => navigate('/empleados/nuevo')}
-          data-testid="empleados.create"
-          aria-label="Crear empleado"
-        >
-          Crear empleado
-        </button>
+          elementAttr={{ 'data-testid': 'empleados.create', 'aria-label': 'Crear empleado' }}
+        />
       </header>
 
       <section className="empleados-page-filters" data-testid="empleados.filters">
         <div className="empleados-filters-row">
           <label className="empleados-filter-label">
             <span className="empleados-filter-label-text">Búsqueda (código, nombre o email)</span>
-            <input
-              type="text"
+            <TextBox
               value={filters.search}
-              onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+              onValueChanged={(e) => setFilters((f) => ({ ...f, search: e.value ?? '' }))}
               placeholder="Buscar..."
-              className="empleados-filter-input"
-              data-testid="empleados.search"
-              aria-label="Búsqueda por código, nombre o email"
+              elementAttr={{ 'data-testid': 'empleados.search', 'aria-label': 'Búsqueda por código, nombre o email' }}
             />
           </label>
           <label className="empleados-filter-label">
             <span className="empleados-filter-label-text">Supervisor</span>
-            <select
+            <SelectBox
+              dataSource={SUPERVISOR_OPTIONS}
               value={filters.supervisor}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  supervisor: e.target.value as '' | 'true' | 'false',
-                }))
-              }
-              className="empleados-filter-select"
-              data-testid="empleados.filter.supervisor"
-              aria-label="Filtrar por rol supervisor"
-            >
-              <option value="">Todos</option>
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, supervisor: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'empleados.filter.supervisor', 'aria-label': 'Filtrar por rol supervisor' }}
+            />
           </label>
           <label className="empleados-filter-label">
             <span className="empleados-filter-label-text">Estado</span>
-            <select
+            <SelectBox
+              dataSource={ESTADO_OPTIONS}
               value={filters.activo}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  activo: e.target.value as '' | 'true' | 'false',
-                }))
-              }
-              className="empleados-filter-select"
-              data-testid="empleados.filter.activo"
-              aria-label="Filtrar por estado activo"
-            >
-              <option value="">Todos</option>
-              <option value="true">Activo</option>
-              <option value="false">Inactivo</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, activo: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'empleados.filter.activo', 'aria-label': 'Filtrar por estado activo' }}
+            />
           </label>
           <label className="empleados-filter-label">
             <span className="empleados-filter-label-text">Inhabilitado</span>
-            <select
+            <SelectBox
+              dataSource={INHABILITADO_OPTIONS}
               value={filters.inhabilitado}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  inhabilitado: e.target.value as '' | 'true' | 'false',
-                }))
-              }
-              className="empleados-filter-select"
-              data-testid="empleados.filter.inhabilitado"
-              aria-label="Filtrar por inhabilitado"
-            >
-              <option value="">Todos</option>
-              <option value="false">No</option>
-              <option value="true">Sí</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, inhabilitado: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'empleados.filter.inhabilitado', 'aria-label': 'Filtrar por inhabilitado' }}
+            />
           </label>
-          <button
-            type="button"
-            className="empleados-filter-btn-apply"
+          <Button
+            text="Aplicar"
+            type="default"
             onClick={handleApplyFilters}
-            data-testid="empleados.filters.apply"
-            aria-label="Aplicar filtros"
-          >
-            Aplicar
-          </button>
+            elementAttr={{ 'data-testid': 'empleados.filters.apply', 'aria-label': 'Aplicar filtros' }}
+          />
         </div>
       </section>
 
@@ -263,64 +250,71 @@ export function EmpleadosPage(): React.ReactElement {
             </p>
           ) : (
             <div className="empleados-table-wrapper">
-              <table className="empleados-table" data-testid="empleados.table" aria-label="Listado de empleados">
-                <thead>
-                  <tr>
-                    <th scope="col">Código</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Supervisor</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Inhabilitado</th>
-                    <th scope="col">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((e) => (
-                    <tr
-                      key={e.id}
-                      className={e.inhabilitado ? 'empleados-table-row-inhabilitado' : ''}
-                      data-testid={`empleados.row.${e.id}`}
-                    >
-                      <td>{e.code}</td>
-                      <td>{e.nombre}</td>
-                      <td>{e.email ?? '—'}</td>
-                      <td>{e.supervisor ? 'Sí' : 'No'}</td>
-                      <td>{e.activo ? 'Activo' : 'Inactivo'}</td>
-                      <td>{e.inhabilitado ? 'Sí' : 'No'}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className="empleados-page-btn-detail"
-                          onClick={() => navigate(`/empleados/${e.id}`)}
-                          data-testid={`empleados.detail.${e.id}`}
-                          aria-label={`Ver detalle de ${e.nombre}`}
-                        >
-                          Ver detalle
-                        </button>
-                        <button
-                          type="button"
-                          className="empleados-page-btn-edit"
-                          onClick={() => navigate(`/empleados/${e.id}/editar`)}
-                          data-testid={`empleados.edit.${e.id}`}
-                          aria-label={`Editar empleado ${e.nombre}`}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          className="empleados-page-btn-delete"
-                          onClick={() => handleDeleteClick(e)}
-                          data-testid={`empleados.row.${e.id}.delete`}
-                          aria-label={`Eliminar empleado ${e.nombre}`}
-                        >
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataGrid
+                dataSource={data}
+                keyExpr="id"
+                showBorders={true}
+                rowAlternationEnabled={true}
+                onRowPrepared={(e) => {
+                  if (e.rowType === 'data' && e.data?.inhabilitado) {
+                    e.rowElement?.classList.add('empleados-table-row-inhabilitado');
+                  }
+                }}
+                elementAttr={{ 'data-testid': 'empleados.table', 'aria-label': 'Listado de empleados' }}
+                noDataText=""
+              >
+                <Column dataField="code" caption="Código" width={100} />
+                <Column dataField="nombre" caption="Nombre" width={180} />
+                <Column dataField="email" caption="Email" width={180} customizeText={({ value }) => value ?? '—'} />
+                <Column
+                  dataField="supervisor"
+                  caption="Supervisor"
+                  width={90}
+                  customizeText={({ value }) => (value ? 'Sí' : 'No')}
+                />
+                <Column
+                  dataField="activo"
+                  caption="Estado"
+                  width={90}
+                  customizeText={({ value }) => (value ? 'Activo' : 'Inactivo')}
+                />
+                <Column
+                  dataField="inhabilitado"
+                  caption="Inhabilitado"
+                  width={90}
+                  customizeText={({ value }) => (value ? 'Sí' : 'No')}
+                />
+                <Column
+                  caption="Acciones"
+                  width={260}
+                  allowSorting={false}
+                  cellRender={({ data }: { data: EmpleadoListItem }) => (
+                    <div className="empleados-actions-cell">
+                      <Button
+                        text="Ver detalle"
+                        type="normal"
+                        stylingMode="text"
+                        onClick={() => navigate(`/empleados/${data.id}`)}
+                        elementAttr={{ 'data-testid': `empleados.detail.${data.id}`, 'aria-label': `Ver detalle de ${data.nombre}` }}
+                      />
+                      <Button
+                        text="Editar"
+                        type="normal"
+                        stylingMode="text"
+                        onClick={() => navigate(`/empleados/${data.id}/editar`)}
+                        elementAttr={{ 'data-testid': `empleados.edit.${data.id}`, 'aria-label': `Editar empleado ${data.nombre}` }}
+                      />
+                      <Button
+                        text="Eliminar"
+                        type="normal"
+                        stylingMode="text"
+                        onClick={() => handleDeleteClick(data)}
+                        elementAttr={{ 'data-testid': `empleados.row.${data.id}.delete`, 'aria-label': `Eliminar empleado ${data.nombre}` }}
+                      />
+                    </div>
+                  )}
+                />
+              </DataGrid>
             </div>
           )}
 
@@ -356,25 +350,20 @@ export function EmpleadosPage(): React.ReactElement {
               </div>
             )}
             <div className="empleados-delete-modal-actions">
-              <button
-                type="button"
-                className="empleados-delete-modal-btn-cancel"
+              <Button
+                text="Cancelar"
+                type="normal"
                 onClick={handleDeleteCancel}
                 disabled={deleteLoading}
-                data-testid="empleados.delete.cancel"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="empleados-page-btn-delete"
+                elementAttr={{ 'data-testid': 'empleados.delete.cancel' }}
+              />
+              <Button
+                text={deleteLoading ? 'Eliminando...' : 'Confirmar'}
+                type="danger"
                 onClick={handleDeleteConfirm}
                 disabled={deleteLoading}
-                data-testid="empleados.delete.confirm"
-                aria-busy={deleteLoading}
-              >
-                {deleteLoading ? 'Eliminando...' : 'Confirmar'}
-              </button>
+                elementAttr={{ 'data-testid': 'empleados.delete.confirm', 'aria-busy': deleteLoading ? 'true' : 'false' }}
+              />
             </div>
           </div>
         </div>

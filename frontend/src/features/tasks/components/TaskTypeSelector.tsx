@@ -1,12 +1,15 @@
 /**
  * Component: TaskTypeSelector
- * 
+ *
  * Selector de tipos de tarea con carga dinámica según cliente seleccionado.
- * 
+ * Usa SelectBox de DevExtreme.
+ *
  * @see TR-028(MH)-carga-de-tarea-diaria.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import SelectBox from 'devextreme-react/select-box';
 import { getTaskTypes, TaskType } from '../services/task.service';
 import { t } from '../../../shared/i18n';
 import './TaskForm.css';
@@ -17,17 +20,15 @@ export interface TaskTypeSelectorProps {
   onChange: (tipoTareaId: number | null) => void;
   error?: string;
   disabled?: boolean;
-  /** Si true, no muestra el label (para usar dentro de filtros con label externo). */
   showLabel?: boolean;
-  /** Si true, añade opción "Todos" y cuando cliente es "Todos" carga todos los tipos (genéricos + no genéricos). */
   allowAll?: boolean;
 }
 
-export function TaskTypeSelector({ 
-  clienteId, 
-  value, 
-  onChange, 
-  error, 
+export function TaskTypeSelector({
+  clienteId,
+  value,
+  onChange,
+  error,
   disabled,
   showLabel = true,
   allowAll = false,
@@ -50,51 +51,62 @@ export function TaskTypeSelector({
   const loadTaskTypes = async (clienteIdValue: number | undefined) => {
     setLoading(true);
     setErrorMessage('');
-    
     const result = await getTaskTypes(clienteIdValue);
-    
     if (result.success && result.data) {
       setTaskTypes(result.data);
     } else {
       setErrorMessage(result.errorMessage || t('tasks.form.selectors.taskTypes.error', 'Error al cargar tipos de tarea'));
       setTaskTypes([]);
     }
-    
     setLoading(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const tipoTareaId = e.target.value ? parseInt(e.target.value, 10) : null;
-    onChange(tipoTareaId);
-  };
+  const items = useMemo(() => {
+    return taskTypes.map((tipo) => ({
+      id: tipo.id,
+      text: `${tipo.descripcion}${tipo.is_generico ? ` ${t('tasks.form.selectors.taskTypes.generic', '(Genérico)')}` : ''}`,
+    }));
+  }, [taskTypes]);
 
-  const isDisabled = disabled || loading || (!allowAll && !clienteId);
+  const ALL_TIPO_ID = -1;
+  const itemsWithAll = useMemo(() => {
+    if (allowAll) {
+      return [{ id: ALL_TIPO_ID, text: t('tasks.list.filters.todos', 'Todos') }, ...items];
+    }
+    return items;
+  }, [items, allowAll]);
+
   const placeholder = allowAll
     ? t('tasks.list.filters.todos', 'Todos')
     : !clienteId
       ? t('tasks.form.selectors.taskTypes.placeholder.noClient', '-- Seleccione un cliente primero --')
       : t('tasks.form.selectors.taskTypes.placeholder.select', '-- Seleccione un tipo de tarea --');
 
+  const effectiveValue = allowAll && value === null ? ALL_TIPO_ID : value;
+
+  const handleValueChanged = (e: { value?: number | null }) => {
+    const v = e.value ?? null;
+    onChange(allowAll && v === ALL_TIPO_ID ? null : v);
+  };
+
+  const isDisabled = disabled || loading || (!allowAll && !clienteId);
+
   const selectEl = (
-    <select
-      id="tipo-tarea-select"
-      data-testid="task.form.taskTypeSelect"
-      value={value ?? ''}
-      onChange={handleChange}
+    <SelectBox
+      dataSource={allowAll ? itemsWithAll : items}
+      value={effectiveValue ?? null}
+      placeholder={placeholder}
+      onValueChanged={handleValueChanged}
+      displayExpr="text"
+      valueExpr="id"
       disabled={isDisabled}
-      className={`form-input form-select ${error ? 'input-error' : ''}`}
-      aria-label={t('tasks.form.fields.tipoTarea.ariaLabel', 'Seleccionar tipo de tarea')}
-      aria-invalid={!!error}
-      aria-describedby={error ? 'tipo-tarea-error' : undefined}
-      aria-required={!allowAll}
-    >
-      <option value="">{placeholder}</option>
-      {taskTypes.map((tipo) => (
-        <option key={tipo.id} value={tipo.id}>
-          {tipo.descripcion} {tipo.is_generico ? t('tasks.form.selectors.taskTypes.generic', '(Genérico)') : ''}
-        </option>
-      ))}
-    </select>
+      elementAttr={{ 'data-testid': 'task.form.taskTypeSelect' }}
+      inputAttr={{
+        'aria-label': t('tasks.form.fields.tipoTarea.ariaLabel', 'Seleccionar tipo de tarea'),
+        'aria-invalid': !!error,
+        'aria-required': !allowAll,
+      }}
+    />
   );
 
   if (!showLabel) {

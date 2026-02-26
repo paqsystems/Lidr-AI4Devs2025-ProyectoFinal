@@ -12,6 +12,10 @@
 
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import TextBox from 'devextreme-react/text-box';
+import SelectBox from 'devextreme-react/select-box';
+import CheckBox from 'devextreme-react/check-box';
+import Button from 'devextreme-react/button';
 import {
   getCliente,
   updateCliente,
@@ -179,8 +183,7 @@ export function ClientesEditarPage(): React.ReactElement {
     setTiposTareaError('');
   };
 
-  const handleGuardarTiposTarea = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleGuardarTiposTarea = async () => {
     if (Number.isNaN(clienteId) || clienteId <= 0) return;
     setTiposTareaError('');
     setTiposTareaSuccess('');
@@ -214,9 +217,7 @@ export function ClientesEditarPage(): React.ReactElement {
         <div className="clientes-nueva-form-error" role="alert">
           {errorMessage}
         </div>
-        <button type="button" className="clientes-nueva-btn-cancel" onClick={handleCancel}>
-          Volver al listado
-        </button>
+        <Button text="Volver al listado" type="normal" onClick={handleCancel} />
       </div>
     );
   }
@@ -245,99 +246,42 @@ export function ClientesEditarPage(): React.ReactElement {
       >
         <div className="clientes-nueva-field">
           <label className="clientes-nueva-label">Código</label>
-          <input
-            type="text"
-            value={cliente.code}
-            readOnly
-            disabled
-            className="clientes-nueva-input"
-            data-testid="clientes.edit.code"
-            aria-readonly="true"
-          />
+          <TextBox value={cliente.code} readOnly disabled elementAttr={{ 'data-testid': 'clientes.edit.code' }} />
         </div>
 
         <div className="clientes-nueva-field">
-          <label htmlFor="clientes-edit-nombre" className="clientes-nueva-label">
-            Nombre <span className="clientes-nueva-required">*</span>
-          </label>
-          <input
-            id="clientes-edit-nombre"
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-            maxLength={255}
-            className="clientes-nueva-input"
-            data-testid="clientes.edit.nombre"
-            aria-required="true"
-            aria-invalid={!!fieldErrors.nombre}
-          />
-          {fieldErrors.nombre && (
-            <span className="clientes-nueva-error" role="alert">
-              {fieldErrors.nombre}
-            </span>
-          )}
+          <label className="clientes-nueva-label">Nombre <span className="clientes-nueva-required">*</span></label>
+          <TextBox value={nombre} onValueChanged={(e) => setNombre(e.value ?? '')} maxLength={255} elementAttr={{ 'data-testid': 'clientes.edit.nombre' }} />
+          {fieldErrors.nombre && <span className="clientes-nueva-error" role="alert">{fieldErrors.nombre}</span>}
         </div>
 
         <div className="clientes-nueva-field">
-          <label htmlFor="clientes-edit-tipoCliente" className="clientes-nueva-label">
-            Tipo de cliente <span className="clientes-nueva-required">*</span>
-          </label>
-          <select
-            id="clientes-edit-tipoCliente"
-            value={tipoClienteId ?? ''}
-            onChange={(e) => setTipoClienteId(e.target.value === '' ? null : Number(e.target.value))}
-            required
-            className="clientes-nueva-select"
-            data-testid="clientes.edit.tipoCliente"
-            aria-required="true"
-            aria-invalid={!!fieldErrors.tipo_cliente_id}
-          >
-            <option value="">Seleccione...</option>
-            {tiposCliente.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.descripcion}
-              </option>
-            ))}
-          </select>
-          {fieldErrors.tipo_cliente_id && (
-            <span className="clientes-nueva-error" role="alert">
-              {fieldErrors.tipo_cliente_id}
-            </span>
-          )}
+          <label className="clientes-nueva-label">Tipo de cliente <span className="clientes-nueva-required">*</span></label>
+          <SelectBox
+            dataSource={tiposCliente}
+            value={tipoClienteId}
+            onValueChanged={(e) => setTipoClienteId(e.value ?? null)}
+            displayExpr="descripcion"
+            valueExpr="id"
+            placeholder="Seleccione..."
+            elementAttr={{ 'data-testid': 'clientes.edit.tipoCliente' }}
+          />
+          {fieldErrors.tipo_cliente_id && <span className="clientes-nueva-error" role="alert">{fieldErrors.tipo_cliente_id}</span>}
         </div>
 
         <div className="clientes-nueva-field">
-          <label htmlFor="clientes-edit-email" className="clientes-nueva-label">
-            Email
-          </label>
-          <input
-            id="clientes-edit-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="clientes-nueva-input"
-            data-testid="clientes.edit.email"
-            aria-invalid={!!fieldErrors.email}
-          />
-          {fieldErrors.email && (
-            <span className="clientes-nueva-error" role="alert">
-              {fieldErrors.email}
-            </span>
-          )}
+          <label className="clientes-nueva-label">Email</label>
+          <TextBox value={email} onValueChanged={(e) => setEmail(e.value ?? '')} mode="email" elementAttr={{ 'data-testid': 'clientes.edit.email' }} />
+          {fieldErrors.email && <span className="clientes-nueva-error" role="alert">{fieldErrors.email}</span>}
         </div>
 
         <div className="clientes-nueva-field clientes-nueva-checkbox-row">
-          <label className="clientes-nueva-label-inline">
-            <input
-              type="checkbox"
-              checked={habilitarAcceso}
-              onChange={(e) => setHabilitarAcceso(e.target.checked)}
-              className="clientes-nueva-checkbox"
-              data-testid="clientes.edit.habilitarAcceso"
-            />
-            <span>Habilitar acceso al sistema</span>
-          </label>
+          <CheckBox
+            text="Habilitar acceso al sistema"
+            value={habilitarAcceso}
+            onValueChanged={(e) => setHabilitarAcceso(e.value ?? false)}
+            elementAttr={{ 'data-testid': 'clientes.edit.habilitarAcceso' }}
+          />
           <span className="clientes-nueva-hint">
             {cliente.tiene_acceso
               ? 'Desmarque para desvincular el usuario del cliente.'
@@ -347,53 +291,25 @@ export function ClientesEditarPage(): React.ReactElement {
 
         {(habilitarAcceso || cliente.tiene_acceso) && (
           <div className="clientes-nueva-field">
-            <label htmlFor="clientes-edit-password" className="clientes-nueva-label">
-              Cambiar contraseña
-            </label>
-            <input
-              id="clientes-edit-password"
-              type="password"
+            <label className="clientes-nueva-label">Cambiar contraseña</label>
+            <TextBox
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={8}
+              onValueChanged={(e) => setPassword(e.value ?? '')}
+              mode="password"
               placeholder={cliente.tiene_acceso ? 'Dejar en blanco para no cambiar' : 'Obligatoria al habilitar acceso'}
-              className="clientes-nueva-input"
-              data-testid="clientes.edit.password"
-              aria-invalid={!!fieldErrors.password}
+              elementAttr={{ 'data-testid': 'clientes.edit.password' }}
             />
-            {fieldErrors.password && (
-              <span className="clientes-nueva-error" role="alert">
-                {fieldErrors.password}
-              </span>
-            )}
+            {fieldErrors.password && <span className="clientes-nueva-error" role="alert">{fieldErrors.password}</span>}
             <span className="clientes-nueva-hint">Mínimo 8 caracteres.</span>
           </div>
         )}
 
         <div className="clientes-nueva-field clientes-nueva-checkbox-row">
-          <label className="clientes-nueva-label-inline">
-            <input
-              type="checkbox"
-              checked={activo}
-              onChange={(e) => setActivo(e.target.checked)}
-              className="clientes-nueva-checkbox"
-              data-testid="clientes.edit.activo"
-            />
-            <span>Activo</span>
-          </label>
+          <CheckBox text="Activo" value={activo} onValueChanged={(e) => setActivo(e.value ?? false)} elementAttr={{ 'data-testid': 'clientes.edit.activo' }} />
         </div>
 
         <div className="clientes-nueva-field clientes-nueva-checkbox-row">
-          <label className="clientes-nueva-label-inline">
-            <input
-              type="checkbox"
-              checked={inhabilitado}
-              onChange={(e) => setInhabilitado(e.target.checked)}
-              className="clientes-nueva-checkbox"
-              data-testid="clientes.edit.inhabilitado"
-            />
-            <span>Inhabilitado</span>
-          </label>
+          <CheckBox text="Inhabilitado" value={inhabilitado} onValueChanged={(e) => setInhabilitado(e.value ?? false)} elementAttr={{ 'data-testid': 'clientes.edit.inhabilitado' }} />
         </div>
 
         {/* TR-012: Sección Tipos de tarea (asignar tipos no genéricos) */}
@@ -414,26 +330,15 @@ export function ClientesEditarPage(): React.ReactElement {
             </p>
           ) : (
             <>
-              <ul
-                className="clientes-task-types-list"
-                data-testid="clientes.taskTypes.list"
-                role="list"
-              >
+              <ul className="clientes-task-types-list" data-testid="clientes.taskTypes.list" role="list">
                 {tiposTareaDisponibles.map((tipo) => (
                   <li key={tipo.id} className="clientes-nueva-checkbox-row">
-                    <label className="clientes-nueva-label-inline">
-                      <input
-                        type="checkbox"
-                        checked={tiposTareaSeleccionados.has(tipo.id)}
-                        onChange={(e) => handleTiposTareaChange(tipo.id, e.target.checked)}
-                        className="clientes-nueva-checkbox"
-                        data-testid={`clientes.taskTypes.check.${tipo.id}`}
-                        aria-label={`Asignar tipo ${tipo.descripcion} (${tipo.code})`}
-                      />
-                      <span>
-                        {tipo.descripcion} <small>({tipo.code})</small>
-                      </span>
-                    </label>
+                    <CheckBox
+                      text={`${tipo.descripcion} (${tipo.code})`}
+                      value={tiposTareaSeleccionados.has(tipo.id)}
+                      onValueChanged={(e) => handleTiposTareaChange(tipo.id, e.value ?? false)}
+                      elementAttr={{ 'data-testid': `clientes.taskTypes.check.${tipo.id}` }}
+                    />
                   </li>
                 ))}
               </ul>
@@ -441,16 +346,16 @@ export function ClientesEditarPage(): React.ReactElement {
                 <p className="clientes-nueva-hint">No hay tipos de tarea no genéricos disponibles.</p>
               )}
               <div className="clientes-nueva-actions" style={{ marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  className="clientes-nueva-btn-submit"
+                <Button
+                  text={tiposTareaSaving ? 'Guardando tipos...' : 'Guardar tipos de tarea'}
+                  type="default"
                   disabled={tiposTareaSaving}
-                  onClick={handleGuardarTiposTarea}
-                  data-testid="clientes.taskTypes.save"
-                  aria-busy={tiposTareaSaving}
-                >
-                  {tiposTareaSaving ? 'Guardando tipos...' : 'Guardar tipos de tarea'}
-                </button>
+                  onClick={(e) => {
+                    (e.event as Event)?.preventDefault?.();
+                    handleGuardarTiposTarea();
+                  }}
+                  elementAttr={{ 'data-testid': 'clientes.taskTypes.save' }}
+                />
               </div>
               {tiposTareaError && (
                 <div className="clientes-nueva-form-error" data-testid="clientes.taskTypes.error" role="alert">
@@ -479,24 +384,8 @@ export function ClientesEditarPage(): React.ReactElement {
         )}
 
         <div className="clientes-nueva-actions">
-          <button
-            type="submit"
-            className="clientes-nueva-btn-submit"
-            disabled={isSaving}
-            data-testid="clientes.edit.submit"
-            aria-busy={isSaving}
-          >
-            {isSaving ? 'Guardando...' : 'Guardar'}
-          </button>
-          <button
-            type="button"
-            className="clientes-nueva-btn-cancel"
-            onClick={handleCancel}
-            disabled={isSaving}
-            data-testid="clientes.edit.cancel"
-          >
-            Cancelar
-          </button>
+          <Button text={isSaving ? 'Guardando...' : 'Guardar'} type="default" useSubmitBehavior disabled={isSaving} elementAttr={{ 'data-testid': 'clientes.edit.submit' }} />
+          <Button text="Cancelar" type="normal" onClick={handleCancel} disabled={isSaving} elementAttr={{ 'data-testid': 'clientes.edit.cancel' }} />
         </div>
       </form>
     </div>

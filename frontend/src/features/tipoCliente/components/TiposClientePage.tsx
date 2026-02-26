@@ -2,14 +2,17 @@
  * Component: TiposClientePage
  *
  * Listado paginado de tipos de cliente (solo supervisores). TR-014(MH).
- * Tabla con búsqueda, filtros (activo, inhabilitado), paginación, total.
- * Acciones: Crear, Editar, Eliminar (TR-015, TR-016, TR-017).
+ * Usa DataGrid, TextBox, SelectBox y Button de DevExtreme.
  *
- * @see TR-014(MH)-listado-de-tipos-de-cliente.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DataGrid, { Column } from 'devextreme-react/data-grid';
+import TextBox from 'devextreme-react/text-box';
+import SelectBox from 'devextreme-react/select-box';
+import Button from 'devextreme-react/button';
 import {
   getTiposClienteList,
   deleteTipoCliente,
@@ -51,6 +54,18 @@ function buildParams(
   if (filters.inhabilitado === 'false') params.inhabilitado = false;
   return params;
 }
+
+const ESTADO_OPTIONS = [
+  { value: '', text: 'Todos' },
+  { value: 'true', text: 'Activo' },
+  { value: 'false', text: 'Inactivo' },
+];
+
+const INHABILITADO_OPTIONS = [
+  { value: '', text: 'Todos' },
+  { value: 'false', text: 'No' },
+  { value: 'true', text: 'Sí' },
+];
 
 export function TiposClientePage(): React.ReactElement {
   const navigate = useNavigate();
@@ -140,68 +155,53 @@ export function TiposClientePage(): React.ReactElement {
     <div className="tipos-cliente-page" data-testid="tiposCliente.list">
       <header className="tipos-cliente-page-header">
         <h1 className="tipos-cliente-page-title">Tipos de Cliente</h1>
-        <button
-          type="button"
-          className="tipos-cliente-page-btn-create"
+        <Button
+          text="Crear tipo de cliente"
+          type="default"
           onClick={() => navigate('/tipos-cliente/nuevo')}
-          data-testid="tiposCliente.crear"
-          aria-label="Crear tipo de cliente"
-        >
-          Crear tipo de cliente
-        </button>
+          elementAttr={{ 'data-testid': 'tiposCliente.crear', 'aria-label': 'Crear tipo de cliente' }}
+        />
       </header>
 
       <section className="tipos-cliente-page-filters" data-testid="tiposCliente.filters">
         <div className="tipos-cliente-filters-row">
           <label className="tipos-cliente-filter-label">
             <span className="tipos-cliente-filter-label-text">Búsqueda (código o descripción)</span>
-            <input
-              type="text"
+            <TextBox
               value={filters.search}
-              onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+              onValueChanged={(e) => setFilters((f) => ({ ...f, search: e.value ?? '' }))}
               placeholder="Buscar..."
-              className="tipos-cliente-filter-input"
-              data-testid="tiposCliente.busqueda"
-              aria-label="Búsqueda"
+              elementAttr={{ 'data-testid': 'tiposCliente.busqueda', 'aria-label': 'Búsqueda' }}
             />
           </label>
           <label className="tipos-cliente-filter-label">
             <span className="tipos-cliente-filter-label-text">Estado</span>
-            <select
+            <SelectBox
+              dataSource={ESTADO_OPTIONS}
               value={filters.activo}
-              onChange={(e) => setFilters((f) => ({ ...f, activo: e.target.value as '' | 'true' | 'false' }))}
-              className="tipos-cliente-filter-select"
-              data-testid="tiposCliente.filtroActivo"
-              aria-label="Filtrar por activo"
-            >
-              <option value="">Todos</option>
-              <option value="true">Activo</option>
-              <option value="false">Inactivo</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, activo: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'tiposCliente.filtroActivo', 'aria-label': 'Filtrar por activo' }}
+            />
           </label>
           <label className="tipos-cliente-filter-label">
             <span className="tipos-cliente-filter-label-text">Inhabilitado</span>
-            <select
+            <SelectBox
+              dataSource={INHABILITADO_OPTIONS}
               value={filters.inhabilitado}
-              onChange={(e) => setFilters((f) => ({ ...f, inhabilitado: e.target.value as '' | 'true' | 'false' }))}
-              className="tipos-cliente-filter-select"
-              data-testid="tiposCliente.filtroInhabilitado"
-              aria-label="Filtrar por inhabilitado"
-            >
-              <option value="">Todos</option>
-              <option value="false">No</option>
-              <option value="true">Sí</option>
-            </select>
+              onValueChanged={(e) => setFilters((f) => ({ ...f, inhabilitado: (e.value ?? '') as '' | 'true' | 'false' }))}
+              displayExpr="text"
+              valueExpr="value"
+              elementAttr={{ 'data-testid': 'tiposCliente.filtroInhabilitado', 'aria-label': 'Filtrar por inhabilitado' }}
+            />
           </label>
-          <button
-            type="button"
-            className="tipos-cliente-filter-btn-apply"
+          <Button
+            text="Aplicar"
+            type="default"
             onClick={handleApplyFilters}
-            data-testid="tiposCliente.filters.apply"
-            aria-label="Aplicar filtros"
-          >
-            Aplicar
-          </button>
+            elementAttr={{ 'data-testid': 'tiposCliente.filters.apply', 'aria-label': 'Aplicar filtros' }}
+          />
         </div>
       </section>
 
@@ -235,51 +235,57 @@ export function TiposClientePage(): React.ReactElement {
             </p>
           ) : (
             <div className="tipos-cliente-table-wrapper">
-              <table className="tipos-cliente-table" data-testid="tiposCliente.tabla" aria-label="Listado de tipos de cliente">
-                <thead>
-                  <tr>
-                    <th scope="col">Código</th>
-                    <th scope="col">Descripción</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Inhabilitado</th>
-                    <th scope="col">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((t) => (
-                    <tr
-                      key={t.id}
-                      className={t.inhabilitado ? 'tipos-cliente-table-row-inhabilitado' : ''}
-                      data-testid={`tiposCliente.row.${t.id}`}
-                    >
-                      <td>{t.code}</td>
-                      <td>{t.descripcion}</td>
-                      <td>{t.activo ? 'Activo' : 'Inactivo'}</td>
-                      <td>{t.inhabilitado ? 'Sí' : 'No'}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className="tipos-cliente-page-btn-edit"
-                          onClick={() => navigate(`/tipos-cliente/${t.id}/editar`)}
-                          data-testid={`tiposCliente.editar.${t.id}`}
-                          aria-label={`Editar tipo ${t.code}`}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          className="tipos-cliente-page-btn-delete"
-                          onClick={() => handleDeleteClick(t)}
-                          data-testid={`tiposCliente.eliminar.${t.id}`}
-                          aria-label={`Eliminar tipo ${t.code}`}
-                        >
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataGrid
+                dataSource={data}
+                keyExpr="id"
+                showBorders={true}
+                rowAlternationEnabled={true}
+                onRowPrepared={(e) => {
+                  if (e.rowType === 'data' && e.data?.inhabilitado) {
+                    e.rowElement?.classList.add('tipos-cliente-table-row-inhabilitado');
+                  }
+                }}
+                elementAttr={{ 'data-testid': 'tiposCliente.tabla', 'aria-label': 'Listado de tipos de cliente' }}
+                noDataText=""
+              >
+                <Column dataField="code" caption="Código" width={100} />
+                <Column dataField="descripcion" caption="Descripción" width={200} />
+                <Column
+                  dataField="activo"
+                  caption="Estado"
+                  width={90}
+                  customizeText={({ value }) => (value ? 'Activo' : 'Inactivo')}
+                />
+                <Column
+                  dataField="inhabilitado"
+                  caption="Inhabilitado"
+                  width={90}
+                  customizeText={({ value }) => (value ? 'Sí' : 'No')}
+                />
+                <Column
+                  caption="Acciones"
+                  width={180}
+                  allowSorting={false}
+                  cellRender={({ data }: { data: TipoClienteListItem }) => (
+                    <div className="tipos-cliente-actions-cell">
+                      <Button
+                        text="Editar"
+                        type="normal"
+                        stylingMode="text"
+                        onClick={() => navigate(`/tipos-cliente/${data.id}/editar`)}
+                        elementAttr={{ 'data-testid': `tiposCliente.editar.${data.id}`, 'aria-label': `Editar tipo ${data.code}` }}
+                      />
+                      <Button
+                        text="Eliminar"
+                        type="normal"
+                        stylingMode="text"
+                        onClick={() => handleDeleteClick(data)}
+                        elementAttr={{ 'data-testid': `tiposCliente.eliminar.${data.id}`, 'aria-label': `Eliminar tipo ${data.code}` }}
+                      />
+                    </div>
+                  )}
+                />
+              </DataGrid>
             </div>
           )}
 
@@ -305,18 +311,20 @@ export function TiposClientePage(): React.ReactElement {
             </p>
             {deleteError && <p className="tipos-cliente-modal-error" role="alert">{deleteError}</p>}
             <div className="tipos-cliente-modal-actions">
-              <button type="button" className="tipos-cliente-btn-cancel" onClick={handleDeleteCancel} disabled={deleteLoading}>
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="tipos-cliente-btn-confirm-delete"
+              <Button
+                text="Cancelar"
+                type="normal"
+                onClick={handleDeleteCancel}
+                disabled={deleteLoading}
+                elementAttr={{ 'data-testid': 'tiposCliente.deleteCancel' }}
+              />
+              <Button
+                text={deleteLoading ? 'Eliminando...' : 'Eliminar'}
+                type="danger"
                 onClick={handleDeleteConfirm}
                 disabled={deleteLoading}
-                data-testid="tiposCliente.deleteConfirm"
-              >
-                {deleteLoading ? 'Eliminando...' : 'Eliminar'}
-              </button>
+                elementAttr={{ 'data-testid': 'tiposCliente.deleteConfirm' }}
+              />
             </div>
           </div>
         </div>

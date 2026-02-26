@@ -106,36 +106,14 @@
   color: #dc2626;
 }
 
-.login-button {
-  width: 100%;
-  padding: 0.875rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+.form-group-button {
   margin-top: 1.5rem;
 }
 
-.login-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.login-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.login-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.form-group-button .dx-button {
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .loading-spinner {

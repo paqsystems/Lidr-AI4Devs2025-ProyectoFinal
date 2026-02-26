@@ -1,13 +1,17 @@
 /**
  * Component: TaskFilters
  *
- * Filtros para la lista de tareas: rango de fechas, cliente, tipo de tarea, búsqueda, orden y (si supervisor) empleado.
+ * Filtros para la lista de tareas. Usa controles DevExtreme.
  *
  * @see TR-033(MH)-visualización-de-lista-de-tareas-propias.md
- * @see TR-033(MH)-visualización-de-lista-de-tareas-propias-update.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React from 'react';
+import DateBox from 'devextreme-react/date-box';
+import TextBox from 'devextreme-react/text-box';
+import SelectBox from 'devextreme-react/select-box';
+import Button from 'devextreme-react/button';
 import { ClientSelector } from './ClientSelector';
 import { TaskTypeSelector } from './TaskTypeSelector';
 import { EmployeeSelector } from './EmployeeSelector';
@@ -32,27 +36,17 @@ export interface TaskFiltersProps {
   disabled?: boolean;
 }
 
+const ORDEN_OPTIONS = [
+  { value: 'desc', text: 'Más reciente primero' },
+  { value: 'asc', text: 'Más antigua primero' },
+];
+
 export function TaskFilters({
   values,
   onChange,
   onApply,
   disabled = false,
 }: TaskFiltersProps): React.ReactElement {
-  const handleChange = (field: keyof TaskFiltersValues) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const v = e.target.value;
-    if (field === 'orden') {
-      onChange({ ...values, orden: v === 'asc' ? 'asc' : 'desc' });
-    } else if (field === 'busqueda') {
-      onChange({ ...values, busqueda: v });
-    } else if (field === 'fechaDesde') {
-      onChange({ ...values, fechaDesde: v });
-    } else if (field === 'fechaHasta') {
-      onChange({ ...values, fechaHasta: v });
-    }
-  };
-
   const userData = getUserData();
   const isSupervisor = userData?.esSupervisor ?? false;
 
@@ -61,22 +55,28 @@ export function TaskFilters({
       <div className="task-list-filters-row">
         <label className="task-list-filter-label">
           {t('tasks.list.filters.fechaDesde', 'Fecha desde')}
-          <input
+          <DateBox
             type="date"
-            value={values.fechaDesde}
-            onChange={handleChange('fechaDesde')}
+            value={values.fechaDesde ? new Date(values.fechaDesde + 'T12:00:00') : null}
+            onValueChanged={(e) => {
+              const d = e.value ?? null;
+              onChange({ ...values, fechaDesde: d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '' });
+            }}
             disabled={disabled}
-            aria-label={t('tasks.list.filters.fechaDesde', 'Fecha desde')}
+            elementAttr={{ 'aria-label': t('tasks.list.filters.fechaDesde', 'Fecha desde') }}
           />
         </label>
         <label className="task-list-filter-label">
           {t('tasks.list.filters.fechaHasta', 'Fecha hasta')}
-          <input
+          <DateBox
             type="date"
-            value={values.fechaHasta}
-            onChange={handleChange('fechaHasta')}
+            value={values.fechaHasta ? new Date(values.fechaHasta + 'T12:00:00') : null}
+            onValueChanged={(e) => {
+              const d = e.value ?? null;
+              onChange({ ...values, fechaHasta: d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '' });
+            }}
             disabled={disabled}
-            aria-label={t('tasks.list.filters.fechaHasta', 'Fecha hasta')}
+            elementAttr={{ 'aria-label': t('tasks.list.filters.fechaHasta', 'Fecha hasta') }}
           />
         </label>
         <div className="task-list-filter-label task-list-filter-cliente">
@@ -116,36 +116,33 @@ export function TaskFilters({
       <div className="task-list-filters-row">
         <label className="task-list-filter-label task-list-filter-busqueda">
           {t('tasks.list.filters.busqueda', 'Buscar en observación')}
-          <input
-            type="text"
+          <TextBox
             value={values.busqueda}
-            onChange={handleChange('busqueda')}
+            onValueChanged={(e) => onChange({ ...values, busqueda: e.value ?? '' })}
             placeholder={t('tasks.list.filters.busquedaPlaceholder', 'Texto...')}
             disabled={disabled}
-            aria-label={t('tasks.list.filters.busqueda', 'Buscar en observación')}
+            elementAttr={{ 'aria-label': t('tasks.list.filters.busqueda', 'Buscar en observación') }}
           />
         </label>
         <label className="task-list-filter-label">
           {t('tasks.list.filters.orden', 'Ordenar fecha')}
-          <select
+          <SelectBox
+            dataSource={ORDEN_OPTIONS}
             value={values.orden}
-            onChange={handleChange('orden')}
+            onValueChanged={(e) => onChange({ ...values, orden: (e.value ?? 'desc') as 'asc' | 'desc' })}
+            displayExpr="text"
+            valueExpr="value"
             disabled={disabled}
-            aria-label={t('tasks.list.filters.orden', 'Ordenar fecha')}
-          >
-            <option value="desc">{t('tasks.list.filters.ordenDesc', 'Más reciente primero')}</option>
-            <option value="asc">{t('tasks.list.filters.ordenAsc', 'Más antigua primero')}</option>
-          </select>
+            elementAttr={{ 'aria-label': t('tasks.list.filters.orden', 'Ordenar fecha') }}
+          />
         </label>
-        <button
-          type="button"
-          className="task-list-filter-apply"
+        <Button
+          text={t('tasks.list.filters.aplicar', 'Aplicar')}
+          type="default"
           onClick={onApply}
           disabled={disabled}
-          data-testid="task.list.filters.apply"
-        >
-          {t('tasks.list.filters.aplicar', 'Aplicar')}
-        </button>
+          elementAttr={{ 'data-testid': 'task.list.filters.apply' }}
+        />
       </div>
     </div>
   );

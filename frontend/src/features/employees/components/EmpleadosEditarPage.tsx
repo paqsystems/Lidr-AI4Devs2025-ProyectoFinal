@@ -10,12 +10,10 @@
 
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  getEmpleado,
-  updateEmpleado,
-  UpdateEmpleadoBody,
-  EmpleadoItem,
-} from '../services/empleado.service';
+import TextBox from 'devextreme-react/text-box';
+import CheckBox from 'devextreme-react/check-box';
+import Button from 'devextreme-react/button';
+import { getEmpleado, updateEmpleado, UpdateEmpleadoBody, EmpleadoItem } from '../services/empleado.service';
 import './EmpleadosNuevoPage.css';
 
 type FormState = 'initial' | 'loading' | 'loadError' | 'saving' | 'error' | 'success';
@@ -146,9 +144,7 @@ export function EmpleadosEditarPage(): React.ReactElement {
         <div className="empleados-nueva-error" role="alert">
           {errorMessage || 'Error al cargar empleado'}
         </div>
-        <button type="button" onClick={handleCancel} className="empleados-nueva-button empleados-nueva-button-secondary">
-          Volver al listado
-        </button>
+        <Button text="Volver al listado" type="normal" onClick={handleCancel} />
       </div>
     );
   }
@@ -178,196 +174,74 @@ export function EmpleadosEditarPage(): React.ReactElement {
         noValidate
       >
         <div className="empleados-nueva-field">
-          <label htmlFor="empleados-edit-code" className="empleados-nueva-label">
-            Código
-          </label>
-          <input
-            id="empleados-edit-code"
-            type="text"
-            value={empleado.code}
-            readOnly
-            disabled
-            className="empleados-nueva-input empleados-nueva-input-readonly"
-            data-testid="empleados.edit.code"
-            aria-readonly="true"
-          />
+          <label className="empleados-nueva-label">Código</label>
+          <TextBox value={empleado.code} readOnly disabled elementAttr={{ 'data-testid': 'empleados.edit.code' }} />
         </div>
 
         <div className="empleados-nueva-field">
-          <label htmlFor="empleados-edit-nombre" className="empleados-nueva-label">
-            Nombre <span className="empleados-nueva-required">*</span>
-          </label>
-          <input
-            id="empleados-edit-nombre"
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-            maxLength={255}
-            className="empleados-nueva-input"
-            data-testid="empleados.edit.nombre"
-            aria-required="true"
-            aria-invalid={!!fieldErrors.nombre}
-            aria-describedby={fieldErrors.nombre ? 'empleados-edit-nombre-error' : undefined}
-          />
-          {fieldErrors.nombre && (
-            <span id="empleados-edit-nombre-error" className="empleados-nueva-error" role="alert">
-              {fieldErrors.nombre}
-            </span>
-          )}
+          <label className="empleados-nueva-label">Nombre <span className="empleados-nueva-required">*</span></label>
+          <TextBox value={nombre} onValueChanged={(e) => setNombre(e.value ?? '')} maxLength={255} elementAttr={{ 'data-testid': 'empleados.edit.nombre' }} />
+          {fieldErrors.nombre && <span className="empleados-nueva-error" role="alert">{fieldErrors.nombre}</span>}
         </div>
 
         <div className="empleados-nueva-field">
-          <label htmlFor="empleados-edit-email" className="empleados-nueva-label">
-            Email
-          </label>
-          <input
-            id="empleados-edit-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            maxLength={255}
-            className="empleados-nueva-input"
-            data-testid="empleados.edit.email"
-            aria-invalid={!!fieldErrors.email}
-            aria-describedby={fieldErrors.email ? 'empleados-edit-email-error' : undefined}
-          />
-          {fieldErrors.email && (
-            <span id="empleados-edit-email-error" className="empleados-nueva-error" role="alert">
-              {fieldErrors.email}
-            </span>
-          )}
+          <label className="empleados-nueva-label">Email</label>
+          <TextBox value={email} onValueChanged={(e) => setEmail(e.value ?? '')} maxLength={255} mode="email" elementAttr={{ 'data-testid': 'empleados.edit.email' }} />
+          {fieldErrors.email && <span className="empleados-nueva-error" role="alert">{fieldErrors.email}</span>}
         </div>
 
         <div className="empleados-nueva-field">
-          <label className="empleados-nueva-checkbox-label">
-            <input
-              type="checkbox"
-              checked={showChangePassword}
-              onChange={(e) => {
-                setShowChangePassword(e.target.checked);
-                if (!e.target.checked) {
-                  setPassword('');
-                  setPasswordConfirm('');
-                  setFieldErrors((prev) => {
-                    const next = { ...prev };
-                    delete next.password;
-                    delete next.passwordConfirm;
-                    return next;
-                  });
-                }
-              }}
-              className="empleados-nueva-checkbox"
-              data-testid="empleados.edit.showChangePassword"
-            />
-            <span>Cambiar contraseña</span>
-          </label>
+          <CheckBox
+            text="Cambiar contraseña"
+            value={showChangePassword}
+            onValueChanged={(e) => {
+              const checked = e.value ?? false;
+              setShowChangePassword(checked);
+              if (!checked) {
+                setPassword('');
+                setPasswordConfirm('');
+                setFieldErrors((prev) => {
+                  const next = { ...prev };
+                  delete next.password;
+                  delete next.passwordConfirm;
+                  return next;
+                });
+              }
+            }}
+            elementAttr={{ 'data-testid': 'empleados.edit.showChangePassword' }}
+          />
         </div>
 
         {showChangePassword && (
           <>
             <div className="empleados-nueva-field">
-              <label htmlFor="empleados-edit-password" className="empleados-nueva-label">
-                Nueva contraseña
-              </label>
-              <input
-                id="empleados-edit-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={8}
-                className="empleados-nueva-input"
-                data-testid="empleados.edit.password"
-                aria-invalid={!!fieldErrors.password}
-                aria-describedby={fieldErrors.password ? 'empleados-edit-password-error' : undefined}
-              />
-              {fieldErrors.password && (
-                <span id="empleados-edit-password-error" className="empleados-nueva-error" role="alert">
-                  {fieldErrors.password}
-                </span>
-              )}
+              <label className="empleados-nueva-label">Nueva contraseña</label>
+              <TextBox value={password} onValueChanged={(e) => setPassword(e.value ?? '')} mode="password" elementAttr={{ 'data-testid': 'empleados.edit.password' }} />
+              {fieldErrors.password && <span className="empleados-nueva-error" role="alert">{fieldErrors.password}</span>}
             </div>
-
             <div className="empleados-nueva-field">
-              <label htmlFor="empleados-edit-passwordConfirm" className="empleados-nueva-label">
-                Confirmar contraseña
-              </label>
-              <input
-                id="empleados-edit-passwordConfirm"
-                type="password"
-                value={passwordConfirm}
-                onChange={(e) => setPasswordConfirm(e.target.value)}
-                minLength={8}
-                className="empleados-nueva-input"
-                data-testid="empleados.edit.passwordConfirm"
-                aria-invalid={!!fieldErrors.passwordConfirm}
-                aria-describedby={fieldErrors.passwordConfirm ? 'empleados-edit-passwordConfirm-error' : undefined}
-              />
-              {fieldErrors.passwordConfirm && (
-                <span id="empleados-edit-passwordConfirm-error" className="empleados-nueva-error" role="alert">
-                  {fieldErrors.passwordConfirm}
-                </span>
-              )}
+              <label className="empleados-nueva-label">Confirmar contraseña</label>
+              <TextBox value={passwordConfirm} onValueChanged={(e) => setPasswordConfirm(e.value ?? '')} mode="password" elementAttr={{ 'data-testid': 'empleados.edit.passwordConfirm' }} />
+              {fieldErrors.passwordConfirm && <span className="empleados-nueva-error" role="alert">{fieldErrors.passwordConfirm}</span>}
             </div>
           </>
         )}
 
         <div className="empleados-nueva-field">
-          <label className="empleados-nueva-checkbox-label">
-            <input
-              type="checkbox"
-              checked={supervisor}
-              onChange={(e) => setSupervisor(e.target.checked)}
-              className="empleados-nueva-checkbox"
-              data-testid="empleados.edit.supervisor"
-            />
-            <span>Supervisor</span>
-          </label>
+          <CheckBox text="Supervisor" value={supervisor} onValueChanged={(e) => setSupervisor(e.value ?? false)} elementAttr={{ 'data-testid': 'empleados.edit.supervisor' }} />
         </div>
 
         <div className="empleados-nueva-field">
-          <label className="empleados-nueva-checkbox-label">
-            <input
-              type="checkbox"
-              checked={activo}
-              onChange={(e) => setActivo(e.target.checked)}
-              className="empleados-nueva-checkbox"
-              data-testid="empleados.edit.activo"
-            />
-            <span>Activo</span>
-          </label>
+          <CheckBox text="Activo" value={activo} onValueChanged={(e) => setActivo(e.value ?? true)} elementAttr={{ 'data-testid': 'empleados.edit.activo' }} />
         </div>
 
         <div className="empleados-nueva-field">
-          <label className="empleados-nueva-checkbox-label">
-            <input
-              type="checkbox"
-              checked={inhabilitado}
-              onChange={(e) => setInhabilitado(e.target.checked)}
-              className="empleados-nueva-checkbox"
-              data-testid="empleados.edit.inhabilitado"
-            />
-            <span>Inhabilitado</span>
-          </label>
+          <CheckBox text="Inhabilitado" value={inhabilitado} onValueChanged={(e) => setInhabilitado(e.value ?? false)} elementAttr={{ 'data-testid': 'empleados.edit.inhabilitado' }} />
         </div>
 
         <div className="empleados-nueva-actions">
-          <button
-            type="submit"
-            disabled={formState === 'saving'}
-            className="empleados-nueva-button empleados-nueva-button-primary"
-            data-testid="empleados.edit.submit"
-          >
-            {formState === 'saving' ? 'Guardando...' : 'Guardar'}
-          </button>
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="empleados-nueva-button empleados-nueva-button-secondary"
-            data-testid="empleados.edit.cancel"
-          >
-            Cancelar
-          </button>
+          <Button text={formState === 'saving' ? 'Guardando...' : 'Guardar'} type="default" useSubmitBehavior={true} disabled={formState === 'saving'} elementAttr={{ 'data-testid': 'empleados.edit.submit' }} />
+          <Button text="Cancelar" type="normal" onClick={handleCancel} elementAttr={{ 'data-testid': 'empleados.edit.cancel' }} />
         </div>
       </form>
     </div>

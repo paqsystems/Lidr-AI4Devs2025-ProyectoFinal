@@ -40,6 +40,12 @@
   background-color: #1d4ed8;
 }
 
+.tipos-cliente-actions-cell {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
 .tipos-cliente-page-btn-edit {
   padding: 0.35rem 0.75rem;
   background-color: #059669;

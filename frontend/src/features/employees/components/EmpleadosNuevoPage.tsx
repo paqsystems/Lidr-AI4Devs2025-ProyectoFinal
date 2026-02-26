@@ -2,18 +2,17 @@
  * Component: EmpleadosNuevoPage
  *
  * Formulario de creación de empleado (solo supervisores). TR-019(MH).
- * Ruta: /empleados/nuevo. Campos: código, nombre, email, contraseña,
- * confirmar contraseña, supervisor, activo, inhabilitado.
+ * Usa TextBox, CheckBox y Button de DevExtreme.
  *
- * @see TR-019(MH)-creación-de-empleado.md
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  createEmpleado,
-  CreateEmpleadoBody,
-} from '../services/empleado.service';
+import TextBox from 'devextreme-react/text-box';
+import CheckBox from 'devextreme-react/check-box';
+import Button from 'devextreme-react/button';
+import { createEmpleado, CreateEmpleadoBody } from '../services/empleado.service';
 import './EmpleadosNuevoPage.css';
 
 type FormState = 'initial' | 'loading' | 'error' | 'success';
@@ -99,156 +98,46 @@ export function EmpleadosNuevoPage(): React.ReactElement {
         noValidate
       >
         <div className="empleados-nueva-field">
-          <label htmlFor="empleados-create-code" className="empleados-nueva-label">
-            Código <span className="empleados-nueva-required">*</span>
-          </label>
-          <input
-            id="empleados-create-code"
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            required
-            maxLength={50}
-            className="empleados-nueva-input"
-            data-testid="empleados.create.code"
-            aria-required="true"
-            aria-invalid={!!fieldErrors.code}
-            aria-describedby={fieldErrors.code ? 'empleados-create-code-error' : undefined}
-          />
-          {fieldErrors.code && (
-            <span id="empleados-create-code-error" className="empleados-nueva-error" role="alert">
-              {fieldErrors.code}
-            </span>
-          )}
+          <label className="empleados-nueva-label">Código <span className="empleados-nueva-required">*</span></label>
+          <TextBox value={code} onValueChanged={(e) => setCode(e.value ?? '')} maxLength={50} elementAttr={{ 'data-testid': 'empleados.create.code' }} />
+          {fieldErrors.code && <span className="empleados-nueva-error" role="alert">{fieldErrors.code}</span>}
         </div>
 
         <div className="empleados-nueva-field">
-          <label htmlFor="empleados-create-nombre" className="empleados-nueva-label">
-            Nombre <span className="empleados-nueva-required">*</span>
-          </label>
-          <input
-            id="empleados-create-nombre"
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-            maxLength={255}
-            className="empleados-nueva-input"
-            data-testid="empleados.create.nombre"
-            aria-required="true"
-            aria-invalid={!!fieldErrors.nombre}
-          />
-          {fieldErrors.nombre && (
-            <span className="empleados-nueva-error" role="alert">
-              {fieldErrors.nombre}
-            </span>
-          )}
+          <label className="empleados-nueva-label">Nombre <span className="empleados-nueva-required">*</span></label>
+          <TextBox value={nombre} onValueChanged={(e) => setNombre(e.value ?? '')} maxLength={255} elementAttr={{ 'data-testid': 'empleados.create.nombre' }} />
+          {fieldErrors.nombre && <span className="empleados-nueva-error" role="alert">{fieldErrors.nombre}</span>}
         </div>
 
         <div className="empleados-nueva-field">
-          <label htmlFor="empleados-create-email" className="empleados-nueva-label">
-            Email
-          </label>
-          <input
-            id="empleados-create-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="empleados-nueva-input"
-            data-testid="empleados.create.email"
-            aria-invalid={!!fieldErrors.email}
-          />
-          {fieldErrors.email && (
-            <span className="empleados-nueva-error" role="alert">
-              {fieldErrors.email}
-            </span>
-          )}
+          <label className="empleados-nueva-label">Email</label>
+          <TextBox value={email} onValueChanged={(e) => setEmail(e.value ?? '')} mode="email" elementAttr={{ 'data-testid': 'empleados.create.email' }} />
+          {fieldErrors.email && <span className="empleados-nueva-error" role="alert">{fieldErrors.email}</span>}
         </div>
 
         <div className="empleados-nueva-field">
-          <label htmlFor="empleados-create-password" className="empleados-nueva-label">
-            Contraseña <span className="empleados-nueva-required">*</span>
-          </label>
-          <input
-            id="empleados-create-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            minLength={8}
-            required
-            className="empleados-nueva-input"
-            data-testid="empleados.create.password"
-            aria-required="true"
-            aria-invalid={!!fieldErrors.password}
-          />
-          {fieldErrors.password && (
-            <span className="empleados-nueva-error" role="alert">
-              {fieldErrors.password}
-            </span>
-          )}
+          <label className="empleados-nueva-label">Contraseña <span className="empleados-nueva-required">*</span></label>
+          <TextBox value={password} onValueChanged={(e) => setPassword(e.value ?? '')} mode="password" elementAttr={{ 'data-testid': 'empleados.create.password' }} />
+          {fieldErrors.password && <span className="empleados-nueva-error" role="alert">{fieldErrors.password}</span>}
           <span className="empleados-nueva-hint">Mínimo 8 caracteres.</span>
         </div>
 
         <div className="empleados-nueva-field">
-          <label htmlFor="empleados-create-passwordConfirm" className="empleados-nueva-label">
-            Confirmar contraseña <span className="empleados-nueva-required">*</span>
-          </label>
-          <input
-            id="empleados-create-passwordConfirm"
-            type="password"
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            minLength={8}
-            required
-            className="empleados-nueva-input"
-            data-testid="empleados.create.passwordConfirm"
-            aria-required="true"
-            aria-invalid={!!fieldErrors.passwordConfirm}
-          />
-          {fieldErrors.passwordConfirm && (
-            <span className="empleados-nueva-error" role="alert">
-              {fieldErrors.passwordConfirm}
-            </span>
-          )}
+          <label className="empleados-nueva-label">Confirmar contraseña <span className="empleados-nueva-required">*</span></label>
+          <TextBox value={passwordConfirm} onValueChanged={(e) => setPasswordConfirm(e.value ?? '')} mode="password" elementAttr={{ 'data-testid': 'empleados.create.passwordConfirm' }} />
+          {fieldErrors.passwordConfirm && <span className="empleados-nueva-error" role="alert">{fieldErrors.passwordConfirm}</span>}
         </div>
 
         <div className="empleados-nueva-field empleados-nueva-checkbox-row">
-          <label className="empleados-nueva-label-inline">
-            <input
-              type="checkbox"
-              checked={supervisor}
-              onChange={(e) => setSupervisor(e.target.checked)}
-              className="empleados-nueva-checkbox"
-              data-testid="empleados.create.supervisor"
-            />
-            <span>Supervisor</span>
-          </label>
+          <CheckBox text="Supervisor" value={supervisor} onValueChanged={(e) => setSupervisor(e.value ?? false)} elementAttr={{ 'data-testid': 'empleados.create.supervisor' }} />
         </div>
 
         <div className="empleados-nueva-field empleados-nueva-checkbox-row">
-          <label className="empleados-nueva-label-inline">
-            <input
-              type="checkbox"
-              checked={activo}
-              onChange={(e) => setActivo(e.target.checked)}
-              className="empleados-nueva-checkbox"
-              data-testid="empleados.create.activo"
-            />
-            <span>Activo</span>
-          </label>
+          <CheckBox text="Activo" value={activo} onValueChanged={(e) => setActivo(e.value ?? true)} elementAttr={{ 'data-testid': 'empleados.create.activo' }} />
         </div>
 
         <div className="empleados-nueva-field empleados-nueva-checkbox-row">
-          <label className="empleados-nueva-label-inline">
-            <input
-              type="checkbox"
-              checked={inhabilitado}
-              onChange={(e) => setInhabilitado(e.target.checked)}
-              className="empleados-nueva-checkbox"
-              data-testid="empleados.create.inhabilitado"
-            />
-            <span>Inhabilitado</span>
-          </label>
+          <CheckBox text="Inhabilitado" value={inhabilitado} onValueChanged={(e) => setInhabilitado(e.value ?? false)} elementAttr={{ 'data-testid': 'empleados.create.inhabilitado' }} />
         </div>
 
         {errorMessage && (
@@ -264,24 +153,8 @@ export function EmpleadosNuevoPage(): React.ReactElement {
         )}
 
         <div className="empleados-nueva-actions">
-          <button
-            type="submit"
-            className="empleados-nueva-btn-submit"
-            disabled={formState === 'loading'}
-            data-testid="empleados.create.submit"
-            aria-busy={formState === 'loading'}
-          >
-            {formState === 'loading' ? 'Guardando...' : 'Guardar'}
-          </button>
-          <button
-            type="button"
-            className="empleados-nueva-btn-cancel"
-            onClick={handleCancel}
-            disabled={formState === 'loading'}
-            data-testid="empleados.create.cancel"
-          >
-            Cancelar
-          </button>
+          <Button text={formState === 'loading' ? 'Guardando...' : 'Guardar'} type="default" useSubmitBehavior={true} disabled={formState === 'loading'} elementAttr={{ 'data-testid': 'empleados.create.submit' }} />
+          <Button text="Cancelar" type="normal" onClick={handleCancel} disabled={formState === 'loading'} elementAttr={{ 'data-testid': 'empleados.create.cancel' }} />
         </div>
       </form>
     </div>

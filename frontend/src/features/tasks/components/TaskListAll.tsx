@@ -1,13 +1,15 @@
 /**
  * Component: TaskListAll
  *
- * Lista paginada de todas las tareas (solo supervisores). TR-034.
- * Reutiliza TaskFilters, TaskTotals, TaskPagination, DeleteTaskModal.
- * Incluye columna Empleado y usa getAllTasks (GET /api/v1/tasks/all).
+ * Lista paginada de todas las tareas (solo supervisores). Usa DataGrid de DevExtreme.
+ *
+ * @see TR-034
+ * @see TR-057(SH)-migración-de-controles-a-devextreme.md
  */
 
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import DataGrid, { Column, ColumnButton } from 'devextreme-react/data-grid';
 import { getAllTasks, deleteTask, TaskListItem, TaskListParams } from '../services/task.service';
 import { TaskFilters, type TaskFiltersValues } from './TaskFilters';
 import { TaskPagination } from './TaskPagination';
@@ -27,11 +29,7 @@ const DEFAULT_FILTERS: TaskFiltersValues = {
   orden: 'desc',
 };
 
-function buildParams(
-  page: number,
-  filters: TaskFiltersValues,
-  perPage: number
-): TaskListParams {
+function buildParams(page: number, filters: TaskFiltersValues, perPage: number): TaskListParams {
   const params: TaskListParams = {
     page,
     per_page: perPage,
@@ -117,9 +115,7 @@ export function TaskListAll(): React.ReactElement {
       setAppliedFilters(state.returnFilters);
       setPage(state.returnPage);
     }
-    if (!hasReturnState) {
-      prevLocationKey.current = location.key;
-    }
+    if (!hasReturnState) prevLocationKey.current = location.key;
   }, [location.pathname, location.key, location.state]);
 
   const handleApplyFilters = () => {
@@ -127,9 +123,7 @@ export function TaskListAll(): React.ReactElement {
     setPage(1);
   };
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  const handlePageChange = (newPage: number) => setPage(newPage);
 
   const returnState = {
     returnFilters: appliedFilters,
@@ -175,12 +169,7 @@ export function TaskListAll(): React.ReactElement {
         <h1 className="task-list-title">{t('tasks.list.all.title', 'Todas las Tareas')}</h1>
       </header>
 
-      <TaskFilters
-        values={filters}
-        onChange={setFilters}
-        onApply={handleApplyFilters}
-        disabled={loading}
-      />
+      <TaskFilters values={filters} onChange={setFilters} onApply={handleApplyFilters} disabled={loading} />
 
       {errorMessage && (
         <div className="task-list-error" data-testid="task.all.error" role="alert">
@@ -194,22 +183,17 @@ export function TaskListAll(): React.ReactElement {
         </div>
       )}
 
-      {taskToDelete && (
-        <DeleteTaskModal
-          task={taskToDelete}
-          loading={deleteLoading}
-          errorMessage={deleteError}
-          onConfirm={handleConfirmDelete}
-          onCancel={handleCancelDelete}
-        />
-      )}
+      <DeleteTaskModal
+        task={taskToDelete}
+        loading={deleteLoading}
+        errorMessage={deleteError}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
 
       {!errorMessage && (
         <>
-          <TaskTotals
-            cantidadTareas={totales.cantidad_tareas}
-            totalHoras={totales.total_horas}
-          />
+          <TaskTotals cantidadTareas={totales.cantidad_tareas} totalHoras={totales.total_horas} />
 
           {loading ? (
             <div className="task-list-loading" data-testid="task.all.loading">
@@ -220,71 +204,61 @@ export function TaskListAll(): React.ReactElement {
               {t('tasks.list.empty', 'No hay tareas que mostrar.')}
             </div>
           ) : (
-            <div className="task-list-table-wrapper">
-              <table className="task-list-table" data-testid="task.all.table" role="table">
-                <thead>
-                  <tr>
-                    <th scope="col">{t('tasks.list.col.fecha', 'Fecha')}</th>
-                    <th scope="col">{t('tasks.form.fields.empleado.label', 'Empleado')}</th>
-                    <th scope="col">{t('tasks.list.col.cliente', 'Cliente')}</th>
-                    <th scope="col">{t('tasks.list.col.tipoTarea', 'Tipo tarea')}</th>
-                    <th scope="col">{t('tasks.list.col.duracion', 'Duración')}</th>
-                    <th scope="col">{t('tasks.list.col.sinCargo', 'Sin cargo')}</th>
-                    <th scope="col">{t('tasks.list.col.presencial', 'Presencial')}</th>
-                    <th scope="col">{t('tasks.list.col.observacion', 'Observación')}</th>
-                    <th scope="col">{t('tasks.list.col.cerrado', 'Cerrado')}</th>
-                    <th scope="col">{t('tasks.list.col.acciones', 'Acciones')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((row) => (
-                    <tr
-                      key={row.id}
-                      data-testid={`task.all.row.${row.id}`}
-                      className={row.cerrado ? 'task-list-row-closed' : ''}
-                    >
-                      <td>{row.fecha}</td>
-                      <td>
-                        {row.empleado
-                          ? `${row.empleado.nombre} (${row.empleado.code})`
-                          : '—'}
-                      </td>
-                      <td>{row.cliente.nombre}</td>
-                      <td>{row.tipo_tarea.nombre}</td>
-                      <td>{row.duracion_horas}</td>
-                      <td>{row.sin_cargo ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No')}</td>
-                      <td>{row.presencial ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No')}</td>
-                      <td>{row.observacion}</td>
-                      <td>{row.cerrado ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No')}</td>
-                      <td>
-                        <div className="task-list-cell-actions">
-                          <button
-                            type="button"
-                            className="task-list-btn-action task-list-btn-edit"
-                            onClick={() => handleEdit(row.id)}
-                            disabled={row.cerrado}
-                            data-testid={`task.all.edit.${row.id}`}
-                            aria-label={t('tasks.list.editLabel', 'Editar tarea')}
-                          >
-                            {t('tasks.list.edit', 'Editar')}
-                          </button>
-                          <button
-                            type="button"
-                            className="task-list-btn-action task-list-btn-delete"
-                            onClick={() => handleDeleteClick(row)}
-                            disabled={row.cerrado}
-                            data-testid={`task.all.delete.${row.id}`}
-                            aria-label={t('tasks.list.deleteLabel', 'Eliminar tarea')}
-                          >
-                            {t('tasks.list.delete', 'Eliminar')}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <>
+              <DataGrid
+                dataSource={data}
+                keyExpr="id"
+                showBorders={true}
+                rowAlternationEnabled={true}
+                elementAttr={{ 'data-testid': 'task.all.table' }}
+                noDataText=""
+              >
+                <Column dataField="fecha" caption={t('tasks.list.col.fecha', 'Fecha')} width={100} />
+                <Column
+                  caption={t('tasks.form.fields.empleado.label', 'Empleado')}
+                  width={150}
+                  calculateCellValue={(rowData) =>
+                    rowData.empleado ? `${rowData.empleado.nombre} (${rowData.empleado.code})` : '—'
+                  }
+                />
+                <Column dataField="cliente.nombre" caption={t('tasks.list.col.cliente', 'Cliente')} width={150} />
+                <Column dataField="tipo_tarea.nombre" caption={t('tasks.list.col.tipoTarea', 'Tipo tarea')} width={120} />
+                <Column dataField="duracion_horas" caption={t('tasks.list.col.duracion', 'Duración')} width={80} />
+                <Column
+                  dataField="sin_cargo"
+                  caption={t('tasks.list.col.sinCargo', 'Sin cargo')}
+                  width={90}
+                  customizeText={(cellInfo) => (cellInfo.value ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No'))}
+                />
+                <Column
+                  dataField="presencial"
+                  caption={t('tasks.list.col.presencial', 'Presencial')}
+                  width={90}
+                  customizeText={(cellInfo) => (cellInfo.value ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No'))}
+                />
+                <Column dataField="observacion" caption={t('tasks.list.col.observacion', 'Observación')} minWidth={150} />
+                <Column
+                  dataField="cerrado"
+                  caption={t('tasks.list.col.cerrado', 'Cerrado')}
+                  width={80}
+                  customizeText={(cellInfo) => (cellInfo.value ? t('tasks.list.si', 'Sí') : t('tasks.list.no', 'No'))}
+                />
+                <Column type="buttons" width={150} caption={t('tasks.list.col.acciones', 'Acciones')}>
+                  <ColumnButton
+                    hint={t('tasks.list.edit', 'Editar')}
+                    icon="edit"
+                    onClick={(e) => !e.row?.data?.cerrado && handleEdit(e.row!.data.id)}
+                    disabled={(opts) => !!opts.row?.data?.cerrado}
+                  />
+                  <ColumnButton
+                    hint={t('tasks.list.delete', 'Eliminar')}
+                    icon="trash"
+                    onClick={(e) => e.row?.data && handleDeleteClick(e.row.data)}
+                    disabled={(opts) => !!opts.row?.data?.cerrado}
+                  />
+                </Column>
+              </DataGrid>
+            </>
           )}
 
           {!loading && data.length > 0 && (
@@ -295,6 +269,7 @@ export function TaskListAll(): React.ReactElement {
               perPage={pagination.per_page}
               onPageChange={handlePageChange}
               disabled={loading}
+              testIdPrefix="task.all"
             />
           )}
         </>
